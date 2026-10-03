@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDHC74QWC4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DDHC74QWC4');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Künye & Kurumsal Bilgiler | SPOR24.NET</title>
+    
+    <meta name="description" content="SPOR24.NET resmi yayın künyesi, imtiyaz sahibi, sorumlu yazı işleri müdürü, editöryal kadro ve yasal bildirimler.">
+    <link rel="icon" type="image/x-icon" href="/assets/favicon.ico">
+
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-base: #080C14;
+            --bg-surface: #0E1524;
+            --bg-card: #141C2E;
+            --bg-card-hover: #192338;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.16);
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-red: #E11D48;
+            --brand-red-subtle: rgba(225, 29, 72, 0.12);
+            --blue: #3B82F6;
+            --blue-subtle: rgba(59, 130, 246, 0.12);
+            --emerald: #10B981;
+            --emerald-subtle: rgba(16, 185, 129, 0.12);
+            --amber: #F59E0B;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        /* Top Header */
+        .header-bar {
+            background-color: rgba(14, 21, 36, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 14px 24px;
+        }
+
+        .header-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo-badge {
+            background: linear-gradient(135deg, #E11D48 0%, #9F1239 100%);
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .header-links {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .btn-nav {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-nav:hover {
+            color: var(--text-primary);
+            border-color: var(--border-highlight);
+            background-color: var(--bg-card);
+        }
+
+        /* Container */
+        .kunye-container {
+            max-width: 1200px;
+            margin: 36px auto 0;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        /* Hero Banner */
+        .hero-banner {
+            background: linear-gradient(180deg, rgba(225, 29, 72, 0.08) 0%, rgba(14, 21, 36, 0.6) 100%);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 36px 32px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 280px;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--brand-red), transparent);
+        }
+
+        .hero-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--brand-red-subtle);
+            border: 1px solid rgba(225, 29, 72, 0.25);
+            color: #FDA4AF;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            padding: 4px 12px;
+            border-radius: 999px;
+            margin-bottom: 14px;
+        }
+
+        .hero-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .hero-desc {
+            font-size: 14px;
+            color: var(--text-secondary);
+            max-width: 720px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        /* Grid Layout */
+        .grid-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .card-box {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 24px;
+            transition: all 0.2s ease;
+        }
+
+        .card-box:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-2px);
+        }
+
+        .card-header-line {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .card-icon-wrap {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .data-row {
+            margin-bottom: 14px;
+        }
+
+        .data-row:last-child {
+            margin-bottom: 0;
+        }
+
+        .data-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+
+        .data-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .data-value a {
+            color: var(--text-primary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .data-value a:hover {
+            color: var(--brand-red);
+        }
+
+        /* Editorial Staff Table */
+        .staff-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 26px;
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .staff-member-box {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: all 0.15s ease;
+        }
+
+        .staff-member-box:hover {
+            border-color: var(--border-highlight);
+            background-color: var(--bg-card-hover);
+        }
+
+        .staff-avatar-placeholder {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        .staff-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.2;
+            margin-bottom: 3px;
+        }
+
+        .staff-role {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--brand-red);
+            line-height: 1.2;
+        }
+
+        /* Legal Notice Bar */
+        .legal-box {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 24px 28px;
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .legal-icon {
+            font-size: 24px;
+            color: var(--amber);
+            margin-top: 2px;
+        }
+
+        .legal-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.65;
+        }
+
+        .legal-text strong {
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.15s ease;
+        }
+
+        .footer-link:hover {
+            color: var(--brand-red);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Bar -->
+    <header class="header-bar">
+        <div class="header-inner">
+            <a href="/" class="brand-group">
+                <div class="brand-logo-badge">SPOR24</div>
+                <div>
+                    <div class="brand-title">SPOR24.NET</div>
+                    <div class="brand-subtitle">Türkiye'nin Spor Haber Portalı</div>
+                </div>
+            </a>
+
+            <div class="header-links">
+                <a href="/istatistik/" class="btn-nav">
+                    <i class="fa fa-chart-line text-danger"></i> İstatistikler
+                </a>
+                <a href="/" class="btn-nav">
+                    <i class="fa fa-arrow-left"></i> Portala Dön
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="kunye-container">
+
+        <!-- Hero Title Banner -->
+        <section class="hero-banner">
+            <div class="hero-pill">
+                <i class="fa fa-scale-balanced"></i> Resmi Basın & Yayın Künyesi
+            </div>
+            <h1 class="hero-title">YAYIN VE YÖNETİM KÜNYESİ</h1>
+            <p class="hero-desc">
+                5187 Sayılı Basın Kanunu ve 5651 Sayılı İnternet Ortamında Yapılan Yayınların Düzenlenmesi Hakkında Kanun kapsamında tescil edilmiş resmi künye ve irtibat bilgileri aşağıda sunulmuştur.
+            </p>
+        </section>
+
+        <!-- Leadership & Commercial Info Grid -->
+        <section class="grid-cards">
+            
+            <!-- Card 1: Executive Leadership -->
+            <div class="card-box">
+                <div class="card-header-line">
+                    <div class="card-icon-wrap" style="background:var(--brand-red-subtle); color:var(--brand-red);">
+                        <i class="fa fa-award"></i>
+                    </div>
+                    <h3 class="card-title">Yayın & İmtiyaz Sahipliği</h3>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">İmtiyaz Sahibi (Yayın Sahibi)</div>
+                    <div class="data-value">{{ kunye.imtiyaz_sahibi|default:"Gazi Gücü Spor Kulübü" }}</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Tüzel Kişi Temsilcisi</div>
+                    <div class="data-value">{{ kunye.tuzel_kisi_temsilcisi|default:"Kenan ANT" }}</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Sorumlu Yazı İşleri Müdürü</div>
+                    <div class="data-value" style="color:#FDA4AF;">{{ kunye.sorumlu_yazi_isleri_muduru|default:"Kenan ANT" }}</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Ticari Unvan</div>
+                    <div class="data-value">{{ kunye.ticari_unvan|default:"Ant Tv Medya / Spor24.net" }}</div>
+                </div>
+            </div>
+
+            <!-- Card 2: Contact & Headquarters -->
+            <div class="card-box">
+                <div class="card-header-line">
+                    <div class="card-icon-wrap" style="background:var(--blue-subtle); color:var(--blue);">
+                        <i class="fa fa-location-dot"></i>
+                    </div>
+                    <h3 class="card-title">İletişim & Yönetim Merkezi</h3>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Yönetim Yeri / Adres</div>
+                    <div class="data-value">
+                        {{ kunye.adres|default:"Karargah tepe Mah. Kütükçü Ali bey Cad. Tekir Sokak No: 11 / D: 1 Keçiören / Ankara" }}
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Doğrudan Telefon & WhatsApp Hattı</div>
+                    <div class="data-value">
+                        <a href="tel:{{ kunye.telefon|default:'+905425329090' }}">
+                            <i class="fa fa-phone me-1 text-muted"></i> {{ kunye.telefon|default:"+90 542 532 90 90" }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Kurumsal E-Posta</div>
+                    <div class="data-value">
+                        <a href="mailto:{{ kunye.eposta|default:'info@spor24.net' }}">
+                            <i class="fa fa-envelope me-1 text-muted"></i> {{ kunye.eposta|default:"info@spor24.net" }}
+                        </a>
+                    </div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Yayın Türü</div>
+                    <div class="data-value">Yaygın Süreli Yayın (İnternet Medyası)</div>
+                </div>
+            </div>
+
+            <!-- Card 3: Technical & Infrastructure -->
+            <div class="card-box">
+                <div class="card-header-line">
+                    <div class="card-icon-wrap" style="background:var(--emerald-subtle); color:var(--emerald);">
+                        <i class="fa fa-server"></i>
+                    </div>
+                    <h3 class="card-title">Teknoloji & Altyapı</h3>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Yer Sağlayıcı (Hosting Provider)</div>
+                    <div class="data-value">{{ kunye.yer_saglayici|default:"Oracle Inc." }}</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Yazılım, Altyapı & Tasarım</div>
+                    <div class="data-value">{{ kunye.web_tasarim_bilgi|default:"Ant Tv Medya & Antigravity Core" }}</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">İçerik Yönetim Motoru</div>
+                    <div class="data-value">Spor24 Master Portal Engine V3</div>
+                </div>
+
+                <div class="data-row">
+                    <div class="data-label">Yayın Dili & Bölgesi</div>
+                    <div class="data-value">Türkçe (Türkiye Geneli & Uluslararası)</div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Editorial Team Section -->
+        <section class="staff-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;">
+                <div>
+                    <h2 style="font-size:20px; font-weight:800; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
+                        <i class="fa fa-users-gear" style="color:var(--brand-red);"></i> Yazı İşleri & Editöryal Kadro
+                    </h2>
+                    <p style="font-size:13px; color:var(--text-muted); margin-top:4px;">
+                        Spor24.net bünyesinde içerik, haber, koordinasyon ve prodüksiyonu yöneten profesyonel ekibimiz.
+                    </p>
+                </div>
+                <span style="font-size:12px; font-weight:700; color:var(--text-secondary); background:rgba(255,255,255,0.06); padding:4px 12px; border-radius:6px;">
+                    Aktif Kadro
+                </span>
+            </div>
+
+            <div class="staff-grid">
+                {% if staff %}
+                    {% for member in staff %}
+                        <div class="staff-member-box">
+                            <div class="staff-avatar-placeholder">
+                                <i class="fa fa-user-tie"></i>
+                            </div>
+                            <div>
+                                <div class="staff-name">{{ member.name }}</div>
+                                <div class="staff-role">{{ member.role }}</div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <!-- Default Editorial Staff from Database -->
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Mehmet BOZDAĞ</div>
+                            <div class="staff-role">Genel Koordinatör</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Muhammet Kemal GÜLŞEN</div>
+                            <div class="staff-role">Spor Müdürü</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Cengiz TUNCEL</div>
+                            <div class="staff-role">Yazar / Reklam Müdürü</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Turgay OKUMUŞ</div>
+                            <div class="staff-role">Spiker / Seslendirme</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Oğuz GÜRBÜZ</div>
+                            <div class="staff-role">Grafiker / Mizampaj</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Oğuzhan GENÇ</div>
+                            <div class="staff-role">Yazar / Editör</div>
+                        </div>
+                    </div>
+                    <div class="staff-member-box">
+                        <div class="staff-avatar-placeholder"><i class="fa fa-user-tie"></i></div>
+                        <div>
+                            <div class="staff-name">Şehmuz KIZILARSLAN</div>
+                            <div class="staff-role">Foto Muhabir / Muhabir</div>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </section>
+
+        <!-- Legal Disclaimer & Rights -->
+        <section class="legal-box">
+            <div class="legal-icon">
+                <i class="fa fa-shield-halved"></i>
+            </div>
+            <div class="legal-text">
+                <strong>Yasal Haklar, Telif ve Basın İlkeleri Bildirimi:</strong><br>
+                SPOR24.NET internet sitesinde yayınlanan her türlü haber, köşe yazısı, röportaj, fotoğraf, görsel ve multimedya içeriği 5846 Sayılı Fikir ve Sanat Eserleri Kanunu ile koruma altındadır. Kaynak gösterilmeksizin veya yazılı onay alınmaksızın kısmen dahi olsa iktibas edilemez, kopyalanamaz ve çoğaltılamaz. Resmi federasyon bültenleri (TFF, TVF, TKF vb.) ilgili kurumların telif hakları çerçevesinde kamuoyu bilgilendirme amacıyla yer almaktadır. Spor24.net basın ahlak ve ilkelerine bağlı kalmayı taahhüt eder.
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer-note">
+            <span>© 2026 SPOR24.NET</span>
+            <span>•</span>
+            <span>Tüm Hakları Saklıdır</span>
+            <span>•</span>
+            <a href="/" class="footer-link">Ana Sayfa</a>
+            <span>•</span>
+            <a href="/istatistik/" class="footer-link">Ajans İstatistikleri</a>
+            <span>•</span>
+            <a href="/gizlilik-politikasi/" class="footer-link">Gizlilik Standartları</a>
+        </footer>
+
+    </main>
+
+    <!-- Global Tracker Script -->
+    <script src="/static/v3/js/spor24-tracker.js"></script>
+</body>
+</html>

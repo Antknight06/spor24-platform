@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Haberlerim - ANT Haber</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            min-height: 100vh;
+            padding-top: 20px;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            transition: transform 0.3s;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .user-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            border: none;
+        }
+        .btn-success {
+            background: linear-gradient(135deg, #20c997 0%, #1aa179 100%);
+            border: none;
+        }
+        .news-meta {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        .news-summary {
+            color: #495057;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-3 col-lg-2 sidebar">
+                <div class="text-center mb-4">
+                    <h4>ANT Haber</h4>
+                    <div>
+                        <span class="user-badge">YETKİLİ</span>
+                    </div>
+                    <small>{{ user.get_username }}</small>
+                </div>
+                
+                <nav class="nav flex-column">
+                    <a class="nav-link" href="{% url 'haberler:yetkili_dashboard' %}">
+                        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                    </a>
+                    <a class="nav-link active" href="{% url 'haberler:haberlerim' %}">
+                        <i class="fas fa-newspaper me-2"></i> Haberlerim
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:yeni_haber' %}">
+                        <i class="fas fa-plus-circle me-2"></i> Yeni Haber Ekle
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:kose_yazilarim' %}">
+                        <i class="fas fa-file-alt me-2"></i> Köşe Yazılarım
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:yeni_kose_yazisi' %}">
+                        <i class="fas fa-plus-circle me-2"></i> Yeni Köşe Yazısı Ekle
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:yorum_yonetimi' %}">
+                        <i class="fas fa-comments me-2"></i> Yorum Yönetimi
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:istatistikler' %}">
+                        <i class="fas fa-chart-bar me-2"></i> İstatistikler
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:galeri' %}">
+                        <i class="fas fa-image me-2"></i> Galeri
+                    </a>
+                    <a class="nav-link" href="{% url 'haberler:custom_logout' %}">
+                        <i class="fas fa-sign-out-alt me-2"></i> Çıkış Yap
+                    </a>
+                </nav>
+            </div>
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Haberlerim</h2>
+                    <a href="{% url 'haberler:yeni_haber' %}" class="btn btn-primary">
+                        <i class="fas fa-plus-circle me-1"></i> Yeni Haber Ekle
+                    </a>
+                </div>
+                
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if haberler %}
+                    <div class="row">
+                        {% for haber in haberler %}
+                        <div class="col-md-6 col-lg-4 mb-4">
+                            <div class="card h-100">
+                                <div class="card-body d-flex flex-column">
+                                    <h5 class="card-title">{{ haber.baslik }}</h5>
+                                    <div class="news-meta mb-2">
+                                        <i class="fas fa-folder me-1"></i> {{ haber.kategori.ad }}
+                                        <br>
+                                        <i class="fas fa-calendar me-1"></i> {{ haber.olusturma_tarihi|date:"d M Y" }}
+                                        <br>
+                                        <i class="fas fa-eye me-1"></i> {{ haber.goruntulenme_sayisi }} görüntülenme
+                                    </div>
+                                    <p class="news-summary flex-grow-1">{{ haber.ozet|truncatewords:20 }}</p>
+                                    <div class="mt-auto">
+                                        <a href="{% url 'haberler:haber_duzenle' haber_id=haber.id %}" class="btn btn-success btn-sm">
+                                            <i class="fas fa-edit me-1"></i> Düzenle
+                                        </a>
+                                        <a href="{% url 'haberler:haber_detay' slug=haber.slug %}" class="btn btn-outline-primary btn-sm" target="_blank">
+                                            <i class="fas fa-eye me-1"></i> Görüntüle
+                                        </a>
+                                        <a href="{% url 'haberler:haber_favori_goruntule' haber_id=haber.id %}" class="btn btn-outline-info btn-sm">
+                                            <i class="fas fa-bookmark me-1"></i> Favoriler
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                            <h5>Henüz haber eklememişsiniz</h5>
+                            <p class="text-muted">İlk haberinizi eklemek için aşağıdaki butona tıklayın.</p>
+                            <a href="{% url 'haberler:yeni_haber' %}" class="btn btn-primary">
+                                <i class="fas fa-plus-circle me-1"></i> Yeni Haber Ekle
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

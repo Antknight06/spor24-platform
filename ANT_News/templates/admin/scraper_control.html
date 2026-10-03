@@ -1,0 +1,1435 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Tab customizations */
+    .nav-tabs-premium {
+        border-bottom: 2px solid #2e3440 !important;
+        margin-bottom: 24px;
+        gap: 8px;
+    }
+    .nav-tabs-premium .nav-link {
+        color: #7982a9 !important;
+        border: 1px solid transparent !important;
+        border-radius: 8px 8px 0 0 !important;
+        font-weight: 600;
+        font-size: 14.5px;
+        padding: 10px 20px;
+        transition: all 0.2s ease;
+        background: transparent !important;
+    }
+    .nav-tabs-premium .nav-link:hover {
+        color: #fff !important;
+        background-color: rgba(255, 255, 255, 0.05) !important;
+        border-color: #2e3440 #2e3440 transparent !important;
+    }
+    .nav-tabs-premium .nav-link.active {
+        color: #fff !important;
+        background-color: #1e222b !important;
+        border-color: #2e3440 #2e3440 #1e222b !important;
+        border-bottom-width: 2px !important;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+    }
+
+    /* Premium Styling Override */
+    .card-dashboard {
+        border-radius: 12px !important;
+        border: 1px solid #2e3440 !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+        background-color: #1e222b !important;
+        margin-bottom: 24px;
+        overflow: hidden;
+    }
+    .card-dashboard-header {
+        background-color: #161920 !important;
+        border-bottom: 1px solid #2e3440 !important;
+        padding: 16px 20px !important;
+    }
+    .card-dashboard-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    /* Pulse Heartbeat for Scraper State */
+    .pulse-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .pulse-indicator.idle {
+        background-color: #28a745;
+        box-shadow: 0 0 8px #28a745;
+    }
+    .pulse-indicator.running {
+        background-color: #fd7e14;
+        box-shadow: 0 0 0 0 rgba(253, 126, 20, 0.7);
+        animation: pulse-orange 1.5s infinite;
+    }
+    @keyframes pulse-orange {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(253, 126, 20, 0.7);
+        }
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 8px rgba(253, 126, 20, 0);
+        }
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(253, 126, 20, 0);
+        }
+    }
+
+    /* Terminal Console Window styling */
+    .terminal-window {
+        background-color: #0f111a !important;
+        border-radius: 8px;
+        border: 1px solid #262930;
+        padding: 12px 16px;
+        box-shadow: inset 0 4px 15px rgba(0,0,0,0.5);
+    }
+    .terminal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #20232a;
+        padding-bottom: 8px;
+        margin-bottom: 12px;
+    }
+    .terminal-dots {
+        display: flex;
+        gap: 6px;
+    }
+    .terminal-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+    }
+    .terminal-dot.red { background-color: #ff5f56; }
+    .terminal-dot.yellow { background-color: #ffbd2e; }
+    .terminal-dot.green { background-color: #27c93f; }
+    .terminal-title {
+        font-family: monospace;
+        font-size: 11px;
+        color: #7982a9;
+    }
+    .terminal-body {
+        max-height: 280px;
+        overflow-y: auto;
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 12.5px;
+        color: #c3e88d;
+        white-space: pre-wrap;
+        line-height: 1.4;
+        scroll-behavior: smooth;
+    }
+
+    /* Table styling for dark theme */
+    .dark-table {
+        background-color: #1e222b;
+        color: #fff;
+    }
+    .dark-table th {
+        background-color: #161920;
+        border-color: #2e3440 !important;
+        color: #7982a9;
+        font-weight: 500;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .dark-table td {
+        border-color: #2e3440 !important;
+        font-size: 13.5px;
+        vertical-align: middle !important;
+    }
+    .dark-table tbody tr:hover {
+        background-color: #242935 !important;
+    }
+
+    /* Beautiful Toggle Switches */
+    .custom-switch .custom-control-label::before {
+        background-color: #2b303c;
+        border-color: #434c5e;
+        height: 1.35rem;
+        width: 2.4rem;
+        border-radius: 1rem;
+        cursor: pointer;
+    }
+    .custom-switch .custom-control-label::after {
+        background-color: #d8dee9;
+        width: calc(1.35rem - 4px);
+        height: calc(1.35rem - 4px);
+        border-radius: 50%;
+        cursor: pointer;
+    }
+    .custom-switch .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #28a745 !important;
+        border-color: #218838 !important;
+    }
+    .custom-switch .custom-control-input:checked ~ .custom-control-label::after {
+        transform: translateX(1.05rem);
+    }
+    
+    /* Scrollbar customization */
+    .terminal-body::-webkit-scrollbar {
+        width: 6px;
+    }
+    .terminal-body::-webkit-scrollbar-track {
+        background: #0f111a;
+    }
+    .terminal-body::-webkit-scrollbar-thumb {
+        background: #2a2f3f;
+        border-radius: 4px;
+    }
+    .terminal-body::-webkit-scrollbar-thumb:hover {
+        background: #434c5e;
+    }
+    
+    /* Action Buttons styling */
+    .btn-premium {
+        border-radius: 6px;
+        padding: 8px 16px;
+        font-weight: 500;
+        font-size: 13.5px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s ease;
+    }
+    .btn-premium-primary {
+        background: linear-gradient(135deg, #3f5efb 0%, #fc466b 100%);
+        border: none;
+        color: #fff;
+        box-shadow: 0 4px 15px rgba(63, 94, 251, 0.3);
+    }
+    .btn-premium-primary:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(63, 94, 251, 0.4);
+        color: #fff;
+    }
+    .btn-premium-secondary {
+        background-color: #3b4252;
+        border: 1px solid #4c566a;
+        color: #e5e9f0;
+    }
+    .btn-premium-secondary:hover {
+        background-color: #434c5e;
+        color: #fff;
+    }
+    .form-premium-input {
+        background-color: #12141c !important;
+        border: 1px solid #2e3440 !important;
+        color: #fff !important;
+        border-radius: 6px !important;
+        padding: 10px 14px !important;
+        font-family: monospace;
+        font-size: 13.5px;
+    }
+    .form-premium-input:focus {
+        border-color: #5e81ac !important;
+        box-shadow: 0 0 8px rgba(94, 129, 172, 0.4) !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs nav-tabs-premium" id="botManagerTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="scrapers-tab" data-toggle="tab" href="#scrapers-content" role="tab" aria-controls="scrapers-content" aria-selected="true">
+                <i class="fas fa-robot mr-1"></i> Haber Tarama Botları
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="pending-tab" data-toggle="tab" href="#pending-content" role="tab" aria-controls="pending-content" aria-selected="false">
+                <i class="fas fa-hourglass-start mr-1"></i> Bekleyen Haberler 
+                {% if total_pending_count > 0 %}
+                    <span class="badge badge-danger ml-1" id="pending-total-badge">{{ total_pending_count }}</span>
+                {% else %}
+                    <span class="badge badge-secondary ml-1" id="pending-total-badge" style="display:none;">0</span>
+                {% endif %}
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="instagram-tab" data-toggle="tab" href="#instagram-content" role="tab" aria-controls="instagram-content" aria-selected="false">
+                <i class="fab fa-instagram mr-1"></i> Instagram DM Temizleyici
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="botManagerTabsContent">
+        
+        <!-- TAB 1: NEWS SCRAPERS -->
+        <div class="tab-pane fade show active" id="scrapers-content" role="tabpanel" aria-labelledby="scrapers-tab">
+            <div class="row">
+                <!-- Sol Panel: Scrapers list and Controls -->
+                <div class="col-lg-6 col-12">
+                    
+                    <!-- Scraper Status Box -->
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header">
+                            <h3 class="card-dashboard-title">
+                                🤖 Bot Durumu & Kontroller
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex align-items-center justify-content-between mb-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <span id="status-indicator" class="pulse-indicator {% if is_running %}running{% else %}idle{% endif %}"></span>
+                                    <div>
+                                        <h4 id="status-badge" class="m-0 font-weight-bold" style="font-size: 15px; color: {% if is_running %}#fd7e14{% else %}#28a745{% endif %};">
+                                            {% if is_running %}ÇALIŞIYOR{% else %}BEKLEMEDE{% endif %}
+                                        </h4>
+                                        <span id="status-message" class="text-muted" style="font-size: 12px;">{{ status_message }}</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button id="btn-start" class="btn btn-premium btn-premium-primary" {% if is_running %}disabled{% endif %}>
+                                        <i class="fas fa-play"></i> Taramayı Şimdi Başlat
+                                    </button>
+                                    <button id="btn-clear-log" class="btn btn-premium btn-premium-secondary">
+                                        <i class="fas fa-trash-alt"></i> Logları Temizle
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Instagram Session ID Quick Input -->
+                            <div class="instagram-session-quick-box p-3 mb-3" 
+                                 style="border-radius: 8px; 
+                                        {% if instagram_session_status == 'expired' %}
+                                            background: rgba(220, 53, 69, 0.08); border: 1px solid rgba(220, 53, 69, 0.3);
+                                        {% elif instagram_session_status == 'missing' %}
+                                            background: rgba(255, 193, 7, 0.06); border: 1px solid rgba(255, 193, 7, 0.25);
+                                        {% else %}
+                                            background: rgba(40, 167, 69, 0.06); border: 1px solid rgba(40, 167, 69, 0.25);
+                                        {% endif %}">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="fab fa-instagram" style="color: #e1306c; font-size: 18px;"></i>
+                                        <span class="font-weight-bold" style="color: #fff; font-size: 13px;">Instagram Oturum Bilgisi (Session ID)</span>
+                                    </div>
+                                    <span id="quick-session-status-badge" 
+                                          class="badge {% if instagram_session_status == 'expired' %}badge-danger{% elif instagram_session_status == 'missing' %}badge-warning{% else %}badge-success{% endif %}">
+                                        {% if instagram_session_status == 'expired' %}
+                                            Oturum Geçersiz / Süresi Dolmuş ⚠️
+                                        {% elif instagram_session_status == 'missing' %}
+                                            Session ID Yok ⚠️
+                                        {% else %}
+                                            Aktif / Bağlı ✅
+                                        {% endif %}
+                                    </span>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" id="quick-instagram-session-id" class="form-control bg-dark border-secondary text-light" style="border-radius: 4px 0 0 4px;" placeholder="Instagram Session ID girin..." value="{{ last_session_id }}">
+                                    <div class="input-group-append">
+                                        <button class="btn btn-premium-primary" type="button" id="btn-save-quick-session" style="background: #e1306c !important; border-color: #e1306c !important; font-size: 11.5px; padding: 4px 12px; color: #fff; border-radius: 0 4px 4px 0;">
+                                            <i class="fas fa-save mr-1"></i> Kaydet
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-muted mt-2 d-block" style="font-size: 11px; line-height: 1.3;">
+                                    {% if instagram_session_status == 'expired' %}
+                                        <span class="text-danger font-weight-bold">DİKKAT: Son instagram taramalarında 403 Erişim Hatası alındı. Lütfen Session ID'nizi güncelleyin, aksi halde Instagram verileri taranamaz!</span>
+                                    {% else %}
+                                        Instagram Playwright tarayıcısının çalışması ve gerçek gönderileri çekebilmesi için güncel oturum ID'si gereklidir.
+                                    {% endif %}
+                                </small>
+                            </div>
+
+                            <!-- Terminal Console window -->
+                            <div class="terminal-window">
+                                <div class="terminal-header">
+                                    <div class="terminal-dots">
+                                        <span class="terminal-dot red"></span>
+                                        <span class="terminal-dot yellow"></span>
+                                        <span class="terminal-dot green"></span>
+                                    </div>
+                                    <span class="terminal-title">otomatik_tarama.log (Aktif Akış)</span>
+                                    <div class="custom-control custom-checkbox custom-control-inline">
+                                        <input type="checkbox" class="custom-control-input" id="check-auto-refresh" checked>
+                                        <label class="custom-control-label text-muted" for="check-auto-refresh" style="font-size: 11px; cursor: pointer;">Otomatik Yenile</label>
+                                    </div>
+                                </div>
+                                <div id="terminal-console" class="terminal-body">{{ logs }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Federations Scraper List -->
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header">
+                            <h3 class="card-dashboard-title">
+                                🌐 Haber Kaynakları (Federasyon Siteleri)
+                            </h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table dark-table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 50%;">Federasyon Kaynağı</th>
+                                            <th style="width: 25%;" class="text-center">Son Tarama</th>
+                                            <th style="width: 25%;" class="text-center">
+                                                <div class="custom-control custom-switch d-inline-block" title="Tümünü Aktif / Pasif Yap">
+                                                    <input type="checkbox" class="custom-control-input" id="switch-site-all" {% if all_sites_active %}checked{% endif %}>
+                                                    <label class="custom-control-label" for="switch-site-all">
+                                                        <span class="badge {% if all_sites_active %}badge-success{% else %}badge-secondary{% endif %}" id="badge-site-all">
+                                                            Durum (Tümü)
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for site in websites %}
+                                        <tr>
+                                            <td>
+                                                <div class="font-weight-bold">{{ site.ad }}</div>
+                                                <a href="{{ site.haberler_url }}" target="_blank" class="text-muted" style="font-size: 11.5px; word-break: break-all;">
+                                                    {{ site.haberler_url }} <i class="fas fa-external-link-alt" style="font-size: 9px;"></i>
+                                                </a>
+                                            </td>
+                                            <td class="text-center text-muted" style="font-size: 12px;">
+                                                {% if site.son_tarama %}
+                                                    {{ site.son_tarama|date:"d.m.Y H:i" }}
+                                                {% else %}
+                                                    <span class="text-muted">Hiç taranmadı</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" class="custom-control-input toggle-site-switch" id="switch-site-{{ site.id }}" data-site-id="{{ site.id }}" {% if site.aktif %}checked{% endif %}>
+                                                    <label class="custom-control-label" for="switch-site-{{ site.id }}">
+                                                        <span class="badge {% if site.aktif %}badge-success{% else %}badge-secondary{% endif %}" id="badge-site-{{ site.id }}">
+                                                            {% if site.aktif %}Aktif{% else %}Pasif{% endif %}
+                                                        </span>
+                                                    </label>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="3" class="text-center text-muted py-4">Kayıtlı federasyon sitesi bulunamadı.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Sağ Panel: Recent Scraper Logs -->
+                <div class="col-lg-6 col-12">
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header">
+                            <h3 class="card-dashboard-title">
+                                📋 Son Tarama Geçmişi (Tarama Logları)
+                            </h3>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive" style="max-height: 700px; overflow-y: auto;">
+                                <table class="table dark-table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 25%;">Tarih / Saat</th>
+                                            <th style="width: 25%;">Federasyon</th>
+                                            <th style="width: 15%;" class="text-center">Durum</th>
+                                            <th style="width: 15%;" class="text-center">Haber</th>
+                                            <th style="width: 20%;">Detay</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for log in recent_logs %}
+                                        <tr>
+                                            <td style="font-size: 12px;" class="text-muted">
+                                                {{ log.tarama_zamani|date:"d.m.Y H:i:s" }}
+                                            </td>
+                                            <td class="font-weight-bold">
+                                                {{ log.federasyon_website.ad }}
+                                            </td>
+                                            <td class="text-center">
+                                                {% if log.durum == 'basarili' %}
+                                                    <span class="badge badge-success"><i class="fas fa-check-circle"></i> Başarılı</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger"><i class="fas fa-exclamation-triangle"></i> Hata</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center font-weight-bold" style="font-size: 14px;">
+                                                {% if log.eklenen_sayi > 0 %}
+                                                    <span class="text-success">+{{ log.eklenen_sayi }}</span>
+                                                {% else %}
+                                                    <span class="text-muted">0</span>
+                                                {% endif %}
+                                            </td>
+                                            <td style="font-size: 11.5px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ log.mesaj }}">
+                                                {{ log.mesaj|default:"-" }}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center text-muted py-4">Kayıtlı tarama geçmişi bulunamadı.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: PENDING APPROVAL NEWS -->
+        <div class="tab-pane fade" id="pending-content" role="tabpanel" aria-labelledby="pending-tab">
+            <div class="row">
+                
+                <!-- Web Sitesi Haberleri -->
+                <div class="col-12">
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-dashboard-title">
+                                ⏳ Bekleyen Web Sitesi Haberleri (<span id="count-pending-web">{{ pending_website_count }}</span>)
+                            </h3>
+                            <small class="text-muted">Federasyon sitelerinden taranıp henüz onaylanmayan haberler</small>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table dark-table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 20%;">Federasyon / Tarih</th>
+                                            <th style="width: 50%;">Haber Başlığı & Özet</th>
+                                            <th style="width: 15%;" class="text-center">Kaynak</th>
+                                            <th style="width: 15%;" class="text-center">Aksiyonlar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pending-website-tbody">
+                                        {% for news in pending_website_news %}
+                                        <tr id="news-row-{{ news.id }}">
+                                            <td>
+                                                <div class="font-weight-bold text-info">{{ news.federasyon_website.ad }}</div>
+                                                <small class="text-muted">{{ news.olusturma_tarihi|date:"d.m.Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="font-weight-bold text-white" style="font-size:14px; margin-bottom:4px;">{{ news.baslik }}</div>
+                                                <div class="text-muted" style="font-size:12.5px; line-height: 1.4;">{{ news.ozet|truncatechars:150 }}</div>
+                                            </td>
+                                            <td class="text-center">
+                                                {% if news.kaynak_url %}
+                                                <a href="{{ news.kaynak_url }}" target="_blank" class="btn btn-xs btn-outline-info">
+                                                    <i class="fas fa-external-link-alt"></i> Kaynak
+                                                </a>
+                                                {% else %}
+                                                -
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-xs btn-success btn-approve-news" data-news-id="{{ news.id }}" title="Yayınla">
+                                                    <i class="fas fa-check"></i> Yayınla
+                                                </button>
+                                                <button class="btn btn-xs btn-danger btn-delete-news ml-1" data-news-id="{{ news.id }}" title="Sil">
+                                                    <i class="fas fa-trash-alt"></i> Sil
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Bekleyen web sitesi haberi bulunmuyor.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sosyal Medya Haberleri -->
+                <div class="col-12 mt-4">
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header d-flex justify-content-between align-items-center">
+                            <h3 class="card-dashboard-title">
+                                ⏳ Bekleyen Sosyal Medya Haberleri (<span id="count-pending-social">{{ pending_social_count }}</span>)
+                            </h3>
+                            <small class="text-muted">Instagram/X sayfalarından taranıp henüz onaylanmayan haberler</small>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table dark-table m-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 20%;">Federasyon / Platform</th>
+                                            <th style="width: 50%;">Paylaşım İçeriği</th>
+                                            <th style="width: 15%;" class="text-center">Görsel</th>
+                                            <th style="width: 15%;" class="text-center">Aksiyonlar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="pending-social-tbody">
+                                        {% for snews in pending_social_news %}
+                                        <tr id="snews-row-{{ snews.id }}">
+                                            <td>
+                                                <div class="font-weight-bold text-warning">{{ snews.federasyon_website.ad }}</div>
+                                                <small class="badge badge-dark text-muted">{{ snews.get_platform_display }}</small><br>
+                                                <small class="text-muted">{{ snews.paylasim_tarihi|date:"d.m.Y H:i" }}</small>
+                                            </td>
+                                            <td>
+                                                <div class="font-weight-bold text-white" style="font-size:14px; margin-bottom:4px;">{{ snews.baslik }}</div>
+                                                <div class="text-muted" style="font-size:12.5px; line-height: 1.4;">{{ snews.icerik|truncatechars:180 }}</div>
+                                                {% if snews.kaynak_url %}
+                                                <div class="mt-1">
+                                                    <a href="{{ snews.kaynak_url }}" target="_blank" style="font-size:11px;" class="text-info">
+                                                        Orijinal Gönderi <i class="fas fa-external-link-alt"></i>
+                                                    </a>
+                                                </div>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                {% if snews.resim %}
+                                                <a href="{{ snews.resim.url }}" target="_blank">
+                                                    <img src="{{ snews.resim.url }}" style="max-height: 50px; border-radius: 4px; border: 1px solid #3b4252;" alt="Görsel">
+                                                </a>
+                                                {% elif snews.kaynak_resim_url %}
+                                                <a href="{{ snews.kaynak_resim_url }}" target="_blank">
+                                                    <img src="{{ snews.kaynak_resim_url }}" style="max-height: 50px; border-radius: 4px; border: 1px solid #3b4252;" alt="Görsel">
+                                                </a>
+                                                {% else %}
+                                                <span class="text-muted" style="font-size:11px;">Görsel Yok</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-xs btn-success btn-approve-snews" data-snews-id="{{ snews.id }}" title="Onayla & Yayınla">
+                                                    <i class="fas fa-check"></i> Onayla
+                                                </button>
+                                                <button class="btn btn-xs btn-danger btn-reject-snews ml-1" data-snews-id="{{ snews.id }}" title="Reddet">
+                                                    <i class="fas fa-times"></i> Reddet
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="4" class="text-center text-muted py-4">Bekleyen sosyal medya haberi bulunmuyor.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- TAB 3: INSTAGRAM DM CLEANER -->
+        <div class="tab-pane fade" id="instagram-content" role="tabpanel" aria-labelledby="instagram-tab">
+     
+            <div class="row">
+                
+                <!-- Instagram Settings & Control -->
+                <div class="col-lg-5 col-12">
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header">
+                            <h3 class="card-dashboard-title">
+                                ⚙️ Instagram Temizlik Ayarları & Başlatma
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Status Info -->
+                            <div class="d-flex align-items-center gap-3 p-3 mb-4 rounded" style="background-color: #161920; border: 1px solid #2e3440;">
+                                <span id="insta-status-indicator" class="pulse-indicator {% if instagram_running %}running{% else %}idle{% endif %}"></span>
+                                <div>
+                                    <h4 id="insta-status-badge" class="m-0 font-weight-bold" style="font-size: 14.5px; color: {% if instagram_running %}#fd7e14{% else %}#28a745{% endif %};">
+                                        {% if instagram_running %}TEMİZLİK DEVAM EDİYOR{% else %}BEKLEMEDE{% endif %}
+                                    </h4>
+                                    <span id="insta-status-message" class="text-muted" style="font-size: 12px;">{{ instagram_status }}</span>
+                                </div>
+                            </div>
+
+                            <form id="form-instagram-unsend" method="post">
+                                {% csrf_token %}
+                                <div class="form-group mb-4">
+                                    <label for="insta-session-id" class="text-white" style="font-size: 13.5px; font-weight: 500;">Instagram Session ID:</label>
+                                    <input type="text" id="insta-session-id" class="form-control form-premium-input" placeholder="Session ID girin..." value="{{ last_session_id }}">
+                                    <small class="form-text text-muted" style="font-size: 11px; margin-top: 6px;">
+                                        ⚠️ Güvenlik için, bu Session ID doğrudan tarayıcınızın çerezlerinden (Cookies) okunur. İşlem tamamlandığında Instagram'dan çıkış yapmanız tavsiye edilir.
+                                    </small>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                    <button type="submit" id="btn-insta-start" class="btn btn-premium btn-premium-primary w-100 justify-content-center py-2" {% if instagram_running %}disabled{% endif %}>
+                                        <i class="fas fa-broom mr-1"></i> Gönderileri Geri Çek & Sohbetleri Gizle
+                                    </button>
+                                    <button type="button" id="btn-insta-clear-log" class="btn btn-premium btn-premium-secondary">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instagram Live Logs Console -->
+                <div class="col-lg-7 col-12">
+                    <div class="card card-dashboard">
+                        <div class="card-dashboard-header">
+                            <h3 class="card-dashboard-title">
+                                🖥️ Canlı Akış Günlüğü (instagram_unsend.log)
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <!-- Terminal Window -->
+                            <div class="terminal-window" style="background-color: #0d0e15 !important;">
+                                <div class="terminal-header">
+                                    <div class="terminal-dots">
+                                        <span class="terminal-dot red"></span>
+                                        <span class="terminal-dot yellow"></span>
+                                        <span class="terminal-dot green"></span>
+                                    </div>
+                                    <span class="terminal-title">instagram_unsend.log</span>
+                                    <div class="custom-control custom-checkbox custom-control-inline">
+                                        <input type="checkbox" class="custom-control-input" id="check-insta-auto-refresh" checked>
+                                        <label class="custom-control-label text-muted" for="check-insta-auto-refresh" style="font-size: 11px; cursor: pointer;">Otomatik Yenile</label>
+                                    </div>
+                                </div>
+                                <div id="insta-terminal-console" class="terminal-body" style="max-height: 400px; color: #88c0d0;">{{ instagram_logs }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Safely assign jQuery to prevent ReferenceError in Django admin
+    const $ = window.jQuery || window.django?.jQuery || window.$;
+    
+    // --- COMMON UTILITIES ---
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    // Vanilla JS Tab Switcher
+    const tabLinks = document.querySelectorAll('#botManagerTabs .nav-link');
+    tabLinks.forEach(tab => {
+        tab.addEventListener('click', function(e) {
+            e.preventDefault();
+            // Deactivate all tabs
+            tabLinks.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+                const targetId = t.getAttribute('href');
+                const targetPane = document.querySelector(targetId);
+                if (targetPane) {
+                    targetPane.classList.remove('show', 'active');
+                }
+            });
+            // Activate clicked tab
+            this.classList.add('active');
+            this.setAttribute('aria-selected', 'true');
+            const targetId = this.getAttribute('href');
+            const targetPane = document.querySelector(targetId);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+            // Save active tab in sessionStorage
+            sessionStorage.setItem('activeTab', targetId);
+        });
+    });
+
+    // Restore active tab from sessionStorage on load
+    const activeTab = sessionStorage.getItem('activeTab');
+    if (activeTab) {
+        const tabToActivate = document.querySelector(`#botManagerTabs a[href="${activeTab}"]`);
+        if (tabToActivate) {
+            // Deactivate all first
+            tabLinks.forEach(t => {
+                t.classList.remove('active');
+                t.setAttribute('aria-selected', 'false');
+                const targetId = t.getAttribute('href');
+                const targetPane = document.querySelector(targetId);
+                if (targetPane) {
+                    targetPane.classList.remove('show', 'active');
+                }
+            });
+            // Activate saved one
+            tabToActivate.classList.add('active');
+            tabToActivate.setAttribute('aria-selected', 'true');
+            const targetPane = document.querySelector(activeTab);
+            if (targetPane) {
+                targetPane.classList.add('show', 'active');
+            }
+        }
+    }
+
+
+    // ==========================================
+    // --- TAB 1: NEWS SCRAPERS SCRIPTING ---
+    // ==========================================
+    const btnStart = document.getElementById('btn-start');
+    const btnClearLog = document.getElementById('btn-clear-log');
+    const checkAutoRefresh = document.getElementById('check-auto-refresh');
+    const terminalConsole = document.getElementById('terminal-console');
+    const statusIndicator = document.getElementById('status-indicator');
+    const statusBadge = document.getElementById('status-badge');
+    const statusMessage = document.getElementById('status-message');
+    
+    // Auto Scroll Terminal to bottom initially
+    if (terminalConsole) terminalConsole.scrollTop = terminalConsole.scrollHeight;
+
+    // Toggle All Sites Switch AJAX handler
+    const switchSiteAll = document.getElementById('switch-site-all');
+    const badgeSiteAll = document.getElementById('badge-site-all');
+    if (switchSiteAll) {
+        switchSiteAll.addEventListener('change', function() {
+            const isChecked = this.checked;
+            
+            const formData = new FormData();
+            formData.append('action', 'toggle_all_sites');
+            formData.append('aktif', isChecked ? 'true' : 'false');
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Update all individual switches & badges
+                    document.querySelectorAll('.toggle-site-switch').forEach(sw => {
+                        sw.checked = isChecked;
+                        const siteId = sw.dataset.siteId;
+                        const badge = document.getElementById(`badge-site-${siteId}`);
+                        if (badge) {
+                            if (isChecked) {
+                                badge.className = 'badge badge-success';
+                                badge.textContent = 'Aktif';
+                            } else {
+                                badge.className = 'badge badge-secondary';
+                                badge.textContent = 'Pasif';
+                            }
+                        }
+                    });
+                    
+                    // Update header badge
+                    if (isChecked) {
+                        badgeSiteAll.className = 'badge badge-success';
+                    } else {
+                        badgeSiteAll.className = 'badge badge-secondary';
+                    }
+                } else {
+                    alert('Hata: ' + data.message);
+                    this.checked = !isChecked;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                this.checked = !isChecked;
+            });
+        });
+    }
+
+    // Toggle Site Switch AJAX handler
+    document.querySelectorAll('.toggle-site-switch').forEach(toggle => {
+        toggle.addEventListener('change', function() {
+            const siteId = this.dataset.siteId;
+            const badge = document.getElementById(`badge-site-${siteId}`);
+            
+            const formData = new FormData();
+            formData.append('action', 'toggle_site');
+            formData.append('site_id', siteId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (data.aktif) {
+                        badge.className = 'badge badge-success';
+                        badge.textContent = 'Aktif';
+                    } else {
+                        badge.className = 'badge badge-secondary';
+                        badge.textContent = 'Pasif';
+                    }
+                    
+                    // Check if all sites are active to update master switch
+                    const allSwitches = Array.from(document.querySelectorAll('.toggle-site-switch'));
+                    const anyPassive = allSwitches.some(sw => !sw.checked);
+                    if (switchSiteAll) {
+                        switchSiteAll.checked = !anyPassive;
+                        if (!anyPassive) {
+                            badgeSiteAll.className = 'badge badge-success';
+                        } else {
+                            badgeSiteAll.className = 'badge badge-secondary';
+                        }
+                    }
+                } else {
+                    alert('Hata: ' + data.message);
+                    this.checked = !this.checked;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                this.checked = !this.checked;
+            });
+        });
+    });
+
+    // Start Scraper Button AJAX handler
+    if (btnStart) {
+        btnStart.addEventListener('click', function() {
+            btnStart.disabled = true;
+            const sessionId = document.getElementById('quick-instagram-session-id')?.value?.trim?.() || '';
+            const formData = new FormData();
+            formData.append('action', 'start_scraper');
+            formData.append('session_id', sessionId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    statusIndicator.className = 'pulse-indicator running';
+                    statusBadge.textContent = 'ÇALIŞIYOR';
+                    statusBadge.style.color = '#fd7e14';
+                    statusMessage.textContent = 'Tarama işlemi başlatıldı...';
+                } else {
+                    alert('Hata: ' + data.message);
+                    btnStart.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                btnStart.disabled = false;
+            });
+        });
+    }
+
+    // Save Quick Instagram Session ID handler
+    const btnSaveQuickSession = document.getElementById('btn-save-quick-session');
+    const inputQuickSessionId = document.getElementById('quick-instagram-session-id');
+    const quickSessionStatusBadge = document.getElementById('quick-session-status-badge');
+    const instaSessionIdMain = document.getElementById('insta-session-id');
+    
+    if (btnSaveQuickSession) {
+        btnSaveQuickSession.addEventListener('click', function() {
+            const sessionId = inputQuickSessionId.value.trim();
+            if (!sessionId) {
+                alert('Lütfen geçerli bir Session ID girin.');
+                return;
+            }
+            
+            btnSaveQuickSession.disabled = true;
+            const formData = new FormData();
+            formData.append('action', 'save_instagram_session');
+            formData.append('session_id', sessionId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(data.message);
+                    if (instaSessionIdMain) {
+                        instaSessionIdMain.value = sessionId;
+                    }
+                    if (quickSessionStatusBadge) {
+                        quickSessionStatusBadge.className = 'badge badge-success';
+                        quickSessionStatusBadge.textContent = 'Aktif / Bağlı ✅';
+                    }
+                    const quickBox = document.querySelector('.instagram-session-quick-box');
+                    if (quickBox) {
+                        quickBox.style.background = 'rgba(40, 167, 69, 0.06)';
+                        quickBox.style.border = '1px solid rgba(40, 167, 69, 0.25)';
+                        const smallText = quickBox.querySelector('small');
+                        if (smallText) {
+                            smallText.className = 'text-muted mt-2 d-block';
+                            smallText.innerHTML = 'Instagram Playwright tarayıcısının çalışması ve gerçek gönderileri çekebilmesi için güncel oturum ID\'si gereklidir.';
+                        }
+                    }
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+                btnSaveQuickSession.disabled = false;
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                btnSaveQuickSession.disabled = false;
+            });
+        });
+    }
+
+    // Clear Logs Button AJAX handler
+    if (btnClearLog) {
+        btnClearLog.addEventListener('click', function() {
+            if (!confirm('Log dosyasını tamamen temizlemek istediğinize emin misiniz?')) return;
+            const formData = new FormData();
+            formData.append('action', 'clear_logs');
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    terminalConsole.textContent = 'Log dosyası temizlendi.';
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+            });
+        });
+    }
+
+    // Auto Refresh Status & Terminal log loop
+    function updateStatusLoop() {
+        if (!checkAutoRefresh || !checkAutoRefresh.checked) return;
+        
+        const formData = new FormData();
+        formData.append('action', 'get_status');
+        
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            const wasAtBottom = terminalConsole.scrollTop + terminalConsole.clientHeight >= terminalConsole.scrollHeight - 30;
+            terminalConsole.textContent = data.logs;
+            if (wasAtBottom) {
+                terminalConsole.scrollTop = terminalConsole.scrollHeight;
+            }
+            
+            if (data.is_running) {
+                statusIndicator.className = 'pulse-indicator running';
+                statusBadge.textContent = 'ÇALIŞIYOR';
+                statusBadge.style.color = '#fd7e14';
+                btnStart.disabled = true;
+            } else {
+                statusIndicator.className = 'pulse-indicator idle';
+                statusBadge.textContent = 'BEKLEMEDE';
+                statusBadge.style.color = '#28a745';
+                btnStart.disabled = false;
+            }
+            statusMessage.textContent = data.status_message;
+        })
+        .catch(err => console.error('Durum güncelleme hatası:', err));
+    }
+
+
+    // ==========================================
+    // --- TAB 2: INSTAGRAM CLEANER SCRIPTING ---
+    // ==========================================
+    const formInstagram = document.getElementById('form-instagram-unsend');
+    const inputSessionId = document.getElementById('insta-session-id');
+    const btnInstaStart = document.getElementById('btn-insta-start');
+    const btnInstaClearLog = document.getElementById('btn-insta-clear-log');
+    const checkInstaAutoRefresh = document.getElementById('check-insta-auto-refresh');
+    const instaTerminalConsole = document.getElementById('insta-terminal-console');
+    const instaStatusIndicator = document.getElementById('insta-status-indicator');
+    const instaStatusBadge = document.getElementById('insta-status-badge');
+    const instaStatusMessage = document.getElementById('insta-status-message');
+
+    if (instaTerminalConsole) instaTerminalConsole.scrollTop = instaTerminalConsole.scrollHeight;
+
+    // Start Instagram DM Cleanup AJAX
+    if (formInstagram) {
+        formInstagram.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const sessionId = inputSessionId.value.strip ? inputSessionId.value.strip() : inputSessionId.value.trim();
+            if (!sessionId) {
+                alert('Lütfen geçerli bir Session ID girin.');
+                return;
+            }
+
+            btnInstaStart.disabled = true;
+            
+            const formData = new FormData();
+            formData.append('action', 'start_instagram_unsend');
+            formData.append('session_id', sessionId);
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    instaStatusIndicator.className = 'pulse-indicator running';
+                    instaStatusBadge.textContent = 'TEMİZLİK DEVAM EDİYOR';
+                    instaStatusBadge.style.color = '#fd7e14';
+                    instaStatusMessage.textContent = 'İşlem arka planda başlatıldı...';
+                } else {
+                    alert('Hata: ' + data.message);
+                    btnInstaStart.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                btnInstaStart.disabled = false;
+            });
+        });
+    }
+
+    // Clear Instagram Logs AJAX
+    if (btnInstaClearLog) {
+        btnInstaClearLog.addEventListener('click', function() {
+            if (!confirm('Instagram loglarını temizlemek istediğinize emin misiniz?')) return;
+
+            const formData = new FormData();
+            formData.append('action', 'clear_instagram_logs');
+
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    instaTerminalConsole.textContent = 'Instagram günlükleri temizlendi.';
+                } else {
+                    alert('Hata: ' + data.message);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+            });
+        });
+    }
+
+    // Auto Refresh Status & Terminal log loop for Instagram
+    function updateInstagramStatusLoop() {
+        if (!checkInstaAutoRefresh || !checkInstaAutoRefresh.checked) return;
+
+        const formData = new FormData();
+        formData.append('action', 'get_instagram_status');
+
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            const wasAtBottom = instaTerminalConsole.scrollTop + instaTerminalConsole.clientHeight >= instaTerminalConsole.scrollHeight - 30;
+            instaTerminalConsole.textContent = data.logs;
+            if (wasAtBottom) {
+                instaTerminalConsole.scrollTop = instaTerminalConsole.scrollHeight;
+            }
+
+            if (data.is_running) {
+                instaStatusIndicator.className = 'pulse-indicator running';
+                instaStatusBadge.textContent = 'TEMİZLİK DEVAM EDİYOR';
+                instaStatusBadge.style.color = '#fd7e14';
+                btnInstaStart.disabled = true;
+            } else {
+                instaStatusIndicator.className = 'pulse-indicator idle';
+                instaStatusBadge.textContent = 'BEKLEMEDE';
+                instaStatusBadge.style.color = '#28a745';
+                btnInstaStart.disabled = false;
+            }
+            instaStatusMessage.textContent = data.status_message;
+        })
+        .catch(err => console.error('Instagram durum güncelleme hatası:', err));
+    }
+
+    // --- PENDING NEWS ACTIONS AJAX ---
+    function updatePendingBadges(type, change) {
+        const totalBadge = document.getElementById('pending-total-badge');
+        if (totalBadge) {
+            let total = parseInt(totalBadge.textContent) || 0;
+            total = Math.max(0, total + change);
+            totalBadge.textContent = total;
+            if (total > 0) {
+                totalBadge.style.display = 'inline-block';
+            } else {
+                totalBadge.style.display = 'none';
+            }
+        }
+        
+        if (type === 'website') {
+            const webCountSpan = document.getElementById('count-pending-web');
+            if (webCountSpan) {
+                let count = parseInt(webCountSpan.textContent) || 0;
+                webCountSpan.textContent = Math.max(0, count + change);
+            }
+        } else if (type === 'social') {
+            const socialCountSpan = document.getElementById('count-pending-social');
+            if (socialCountSpan) {
+                let count = parseInt(socialCountSpan.textContent) || 0;
+                socialCountSpan.textContent = Math.max(0, count + change);
+            }
+        }
+    }
+
+    // Approve Website News
+    document.querySelectorAll('.btn-approve-news').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const rowButtons = this.closest('td').querySelectorAll('button');
+            rowButtons.forEach(b => b.disabled = true);
+
+            const newsId = this.dataset.newsId;
+            const row = document.getElementById(`news-row-${newsId}`);
+            
+            const formData = new FormData();
+            formData.append('action', 'approve_website_news');
+            formData.append('news_id', newsId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (row) {
+                        row.style.transition = 'opacity 0.5s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('pending-website-tbody');
+                            if (tbody && tbody.children.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Bekleyen web sitesi haberi bulunmuyor.</td></tr>';
+                            }
+                        }, 500);
+                    }
+                    updatePendingBadges('website', -1);
+                } else {
+                    alert('Hata: ' + data.message);
+                    rowButtons.forEach(b => b.disabled = false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                rowButtons.forEach(b => b.disabled = false);
+            });
+        });
+    });
+
+    // Delete Website News
+    document.querySelectorAll('.btn-delete-news').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (!confirm('Bu haberi kalıcı olarak silmek istediğinize emin misiniz?')) return;
+            const rowButtons = this.closest('td').querySelectorAll('button');
+            rowButtons.forEach(b => b.disabled = true);
+
+            const newsId = this.dataset.newsId;
+            const row = document.getElementById(`news-row-${newsId}`);
+            
+            const formData = new FormData();
+            formData.append('action', 'delete_website_news');
+            formData.append('news_id', newsId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (row) {
+                        row.style.transition = 'opacity 0.5s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('pending-website-tbody');
+                            if (tbody && tbody.children.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Bekleyen web sitesi haberi bulunmuyor.</td></tr>';
+                            }
+                        }, 500);
+                    }
+                    updatePendingBadges('website', -1);
+                } else {
+                    alert('Hata: ' + data.message);
+                    rowButtons.forEach(b => b.disabled = false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                rowButtons.forEach(b => b.disabled = false);
+            });
+        });
+    });
+
+    // Approve Social News
+    document.querySelectorAll('.btn-approve-snews').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const rowButtons = this.closest('td').querySelectorAll('button');
+            rowButtons.forEach(b => b.disabled = true);
+
+            const snewsId = this.dataset.snewsId;
+            const row = document.getElementById(`snews-row-${snewsId}`);
+            
+            const formData = new FormData();
+            formData.append('action', 'approve_social_news');
+            formData.append('news_id', snewsId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (row) {
+                        row.style.transition = 'opacity 0.5s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('pending-social-tbody');
+                            if (tbody && tbody.children.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Bekleyen sosyal medya haberi bulunmuyor.</td></tr>';
+                            }
+                        }, 500);
+                    }
+                    updatePendingBadges('social', -1);
+                } else {
+                    alert('Hata: ' + data.message);
+                    rowButtons.forEach(b => b.disabled = false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                rowButtons.forEach(b => b.disabled = false);
+            });
+        });
+    });
+
+    // Reject Social News
+    document.querySelectorAll('.btn-reject-snews').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const rowButtons = this.closest('td').querySelectorAll('button');
+            rowButtons.forEach(b => b.disabled = true);
+
+            const snewsId = this.dataset.snewsId;
+            const row = document.getElementById(`snews-row-${snewsId}`);
+            
+            const formData = new FormData();
+            formData.append('action', 'reject_social_news');
+            formData.append('news_id', snewsId);
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken
+                },
+                body: formData
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    if (row) {
+                        row.style.transition = 'opacity 0.5s';
+                        row.style.opacity = '0';
+                        setTimeout(() => {
+                            row.remove();
+                            const tbody = document.getElementById('pending-social-tbody');
+                            if (tbody && tbody.children.length === 0) {
+                                tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-4">Bekleyen sosyal medya haberi bulunmuyor.</td></tr>';
+                            }
+                        }, 500);
+                    }
+                    updatePendingBadges('social', -1);
+                } else {
+                    alert('Hata: ' + data.message);
+                    rowButtons.forEach(b => b.disabled = false);
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Ağ hatası oluştu.');
+                rowButtons.forEach(b => b.disabled = false);
+            });
+        });
+    });
+
+    // Setup periodic refresh loops
+    setInterval(updateStatusLoop, 3000);
+    setInterval(updateInstagramStatusLoop, 3000);
+});
+</script>
+{% endblock %}

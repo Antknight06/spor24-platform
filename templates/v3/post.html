@@ -1,0 +1,1083 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Clean Console & Harmless Browser Engine WebGPU Noise Suppressor -->
+    <script>
+      (function() {
+        try {
+          if (typeof Navigator !== 'undefined' && 'gpu' in Navigator.prototype) {
+            Object.defineProperty(Navigator.prototype, 'gpu', {
+              get: function() { return undefined; },
+              configurable: true
+            });
+          }
+        } catch(e) {}
+        const _warn = console.warn;
+        console.warn = function(...args) {
+          const msg = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+          if (msg.includes('powerPreference') || msg.includes('requestAdapter') || msg.includes('crbug.com/369219127')) {
+            return;
+          }
+          _warn.apply(console, args);
+        };
+      })();
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDHC74QWC4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DDHC74QWC4');
+    </script>
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <title>{% if haber %}{{ haber.baslik }} | SPOR24.NET{% else %}Haber Detayı | SPOR24.NET{% endif %}</title>
+    {% if haber %}
+    <link rel="canonical" href="https://spor24.net/post.html?id={{ haber.id }}" />
+    <meta name="description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
+
+    <!-- Open Graph / Facebook / WhatsApp / Telegram / LinkedIn -->
+    <meta property="og:site_name" content="SPOR24.NET" />
+    <meta property="og:type" content="article" />
+    <meta property="og:title" content="{{ haber.baslik }}" />
+    <meta property="og:description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
+    <meta property="og:url" content="https://spor24.net/post.html?id={{ haber.id }}" />
+    <meta property="og:image" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
+    <meta property="og:image:secure_url" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="675" />
+    <meta property="og:image:alt" content="{{ haber.baslik }}" />
+    <meta property="og:locale" content="tr_TR" />
+
+    <!-- Twitter / X Cards -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@spor24net" />
+    <meta name="twitter:creator" content="@spor24net" />
+    <meta name="twitter:title" content="{{ haber.baslik }}" />
+    <meta name="twitter:description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
+    <meta name="twitter:image" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
+    <meta name="twitter:url" content="https://spor24.net/post.html?id={{ haber.id }}" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "https://spor24.net/post.html?id={{ haber.id }}"
+      },
+      "headline": "{{ haber.baslik|escapejs }}",
+      "description": "{{ haber.ozet|default:haber.baslik|striptags|escapejs }}",
+      "image": ["{% if haber.resim %}https://spor24.net{{ haber.resim.url }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}"],
+      "datePublished": "{{ haber.olusturma_tarihi|date:'c' }}",
+      "dateModified": "{{ haber.guncelleme_tarihi|date:'c' }}",
+      "articleSection": "{{ haber.kategori.ad|default:'Spor'|escapejs }}",
+      "inLanguage": "tr",
+      "author": [{
+          "@type": "Person",
+          "name": "{{ haber.yazar.get_full_name|default:haber.yazar.username|escapejs }}",
+          "url": "https://spor24.net"
+      }],
+      "publisher": {
+          "@type": "Organization",
+          "name": "SPOR24.NET",
+          "url": "https://spor24.net",
+          "logo": {
+              "@type": "ImageObject",
+              "url": "https://spor24.net/static/img/spor24_watermark.png"
+          }
+      }
+    }
+    </script>
+    {% endif %}
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo_5.png' %}" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Montserrat:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <link href="{% static 'v3/css/styles.css' %}?v=3.2.0" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            font-size: 2rem;
+        }
+
+        .font-black {
+            font-weight: 900;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        .text-danger {
+            color: #c8102e !important;
+        }
+
+        .bg-danger {
+            background-color: #c8102e !important;
+        }
+
+        /* --- POST PAGE CUSTOM STYLES --- */
+        #detail-title {
+            font-family: 'Outfit', sans-serif;
+        }
+
+        #detail-image-wrapper {
+            height: 500px;
+        }
+
+        /* --- LUXURY EDITORIAL TYPOGRAPHY (MICROSOFT WORD & MEDIUM READABILITY) --- */
+        #detail-content {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            font-size: 1.15rem;
+            line-height: 1.9;
+            color: #1e293b;
+            letter-spacing: -0.011em;
+            word-spacing: 0.02em;
+        }
+
+        #detail-content p {
+            margin-bottom: 1.55rem;
+            line-height: 1.9;
+            color: #334155;
+            font-size: 1.15rem;
+        }
+
+        #detail-content h2 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #0284c7;
+            margin-top: 2.4rem;
+            margin-bottom: 1rem;
+            line-height: 1.35;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #detail-content h3 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 600;
+            color: #0f172a;
+            margin-top: 1.85rem;
+            margin-bottom: 0.85rem;
+            line-height: 1.4;
+        }
+
+        #detail-content ul, #detail-content ol {
+            padding-left: 2rem;
+            margin-bottom: 1.55rem;
+            color: #334155;
+        }
+
+        #detail-content li {
+            margin-bottom: 0.65rem;
+            line-height: 1.8;
+            font-size: 1.125rem;
+        }
+
+        #detail-content strong, #detail-content b {
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        #detail-content blockquote {
+            position: relative;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            border-left: 5px solid #0284c7;
+            padding: 1.35rem 1.75rem;
+            margin: 2.2rem 0;
+            border-radius: 0 1rem 1rem 0;
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #0369a1;
+            box-shadow: 0 2px 10px rgba(2, 132, 199, 0.08);
+        }
+
+        #detail-content blockquote p {
+            margin-bottom: 0 !important;
+            color: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        #detail-content em, #detail-content i {
+            color: #475569;
+        }
+
+        /* --- SOCIAL SHARING STYLES --- */
+        .btn-share {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            font-size: 0.84rem;
+            font-weight: 700;
+            padding: 8px 16px;
+            border-radius: 50px;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border: none;
+            transition: all 0.22s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.14);
+            white-space: nowrap;
+        }
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+            color: #ffffff !important;
+        }
+        .btn-share i {
+            font-size: 1rem;
+        }
+        .btn-whatsapp { background-color: #25D366; }
+        .btn-whatsapp:hover { background-color: #1eb757; }
+        .btn-facebook { background-color: #1877F2; }
+        .btn-facebook:hover { background-color: #0b65e3; }
+        .btn-x { background-color: #000000; border: 1px solid rgba(255,255,255,0.25); }
+        .btn-x:hover { background-color: #1a1a1a; }
+        .btn-telegram { background-color: #229ED9; }
+        .btn-telegram:hover { background-color: #1a8ec4; }
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        .btn-instagram:hover {
+            filter: brightness(1.12);
+        }
+        .btn-copy { background-color: #475569; }
+        .btn-copy:hover { background-color: #334155; }
+
+        @media (max-width: 576px) {
+            .btn-share {
+                padding: 7px 12px;
+                font-size: 0.78rem;
+            }
+            .btn-share span {
+                display: inline;
+            }
+        }
+
+        .hover-red:hover {
+            color: #c8102e !important;
+        }
+
+        /* --- SEARCH MODAL OVERLAY --- */
+        .search-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 80px;
+            animation: fadeInModal 0.2s ease;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .search-modal-box {
+            width: 90%;
+            max-width: 680px;
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 12px;
+        }
+        .search-modal-header input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .search-modal-header input::placeholder {
+            color: #64748B;
+        }
+        .search-close-btn {
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.15s ease;
+        }
+        .search-close-btn:hover {
+            color: #FDA4AF;
+        }
+        .search-results-list {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none !important;
+            color: #E2E8F0;
+            transition: background 0.15s ease;
+        }
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+        }
+        .search-result-img {
+            width: 58px;
+            height: 44px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #1e293b;
+            flex-shrink: 0;
+        }
+        .search-result-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .search-result-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+        }
+        .search-result-meta {
+            font-size: 0.78rem;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-search-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .nav-search-btn:hover {
+            background: #c8102e;
+            border-color: #c8102e;
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand text-uppercase d-flex align-items-center gap-2" href="/">
+                <img src="{% static 'img/logo_5.png' %}" alt="SPOR24" style="height: 38px; width: auto;" onerror="this.onerror=null;this.src='/static/img/logo_5.png';">
+                <span>SPOR<span class="text-danger">24.NET</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation"><i class="fas fa-bars text-white" style="font-size: 1.25rem;"></i></button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-uppercase italic font-black align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/">ANASAYFA</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-danger" href="#" id="navbarDropdownBranches"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            🏆 BRANŞLAR ({{ aktif_federasyon_sayisi|default:"44" }})
+                        </a>
+                        <ul class="dropdown-menu bg-dark border-0 shadow-lg" style="max-height: 400px; overflow-y: auto;" aria-labelledby="navbarDropdownBranches"
+                            id="nav-branches">
+                            <!-- JS fills this -->
+                            <li><a class="dropdown-item text-white" href="#">Yükleniyor...</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/#spor24-live-tv-section">VİDEO</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/yazarlar/">YAZARLAR</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/kunye/">KÜNYE</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/istatistik/" title="Canlı Medya İstatistikleri">
+                            İSTATİSTİK
+                        </a>
+                    </li>
+
+                    {% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-warning font-black" href="#" id="adminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-user-shield me-1"></i>ADMIN
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-0 shadow-lg" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item text-danger font-bold" href="/admin/" target="_blank">⚙️ Django Admin</a></li>
+                            <li><a class="dropdown-item text-warning font-bold" href="/yetkili-giris/">✍️ Yetkili Paneli</a></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/istatistik/">📊 İstatistik Merkezi</a></li>
+                            <li><hr class="dropdown-divider bg-secondary"></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/cikis/">🚪 Çıkış Yap</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white hover-red" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            GİRİŞ
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-0 shadow-lg"
+                            aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item text-warning font-bold" href="/yetkili-giris/">✍️ Yetkili Paneli</a></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/haberler/login/?user_type=abone">🔔 Abonelik / Bildirimler</a></li>
+                            <li>
+                                <hr class="dropdown-divider bg-secondary">
+                            </li>
+                            <li><a class="dropdown-item text-danger font-bold" href="/admin/" target="_blank">⚙️ Admin Girişi</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Search Modal Trigger Button -->
+                    <li class="nav-item ms-lg-2">
+                        <button class="nav-search-btn" onclick="openSearchModal()" title="Haber Ara">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Live Search Modal Overlay -->
+    <div id="search-modal" class="search-modal-overlay" style="display: none;" onclick="handleOverlayClick(event)">
+        <div class="search-modal-box">
+            <div class="search-modal-header">
+                <i class="fas fa-search text-danger" style="font-size: 1.2rem;"></i>
+                <input type="text" id="live-search-input" placeholder="Haber, federasyon veya sporcu ara..." autofocus autocomplete="off" oninput="handleLiveSearch(this.value)">
+                <button class="search-close-btn" onclick="closeSearchModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="search-results-box" class="search-results-list">
+                <div class="search-hint text-muted p-4 text-center" style="font-size:0.9rem;">
+                    <i class="fas fa-magnifying-glass me-2"></i>Aramak istediğiniz anahtar kelimeyi yazın...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-lg-8">
+                <article>
+                    <header class="mb-4 text-left">
+                        <div class="badge bg-danger rounded-pill mb-2 px-3 py-2" id="detail-category">KATEGORİ</div>
+                        <h1 class="font-black italic text-uppercase mb-2 display-5" id="detail-title">HABER BAŞLIĞI
+                            YÜKLENİYOR...</h1>
+                        <div class="text-muted fst-italic mb-3" id="detail-date">Yayınlanma: Ocak 25, 2026</div>
+
+                        <!-- TOP SOCIAL SHARE BAR -->
+                        <div class="d-flex flex-wrap align-items-center gap-2 py-2 border-top border-bottom border-light-subtle my-3">
+                            <span class="text-uppercase font-black text-muted me-1" style="font-size: 0.78rem; letter-spacing: 0.5px;">
+                                <i class="fas fa-share-nodes text-danger me-1"></i> Paylaş:
+                            </span>
+                            <a id="share-wa-top" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net/post.html?id={{ haber.id }}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp'ta Paylaş">
+                                <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
+                            </a>
+                            {% if user.is_authenticated and user.is_staff %}
+                            <button type="button" class="btn btn-share font-bold shadow-sm" onclick="openChannelShareModal()" style="background: linear-gradient(135deg, #128C7E 0%, #075E54 100%); color: #fff;" title="WhatsApp Kanalında Dev Afiş Olarak Paylaş">
+                                <i class="fas fa-bullhorn"></i> <span>Kanal İçin Paylaş</span>
+                            </button>
+                            {% endif %}
+                            <a id="share-fb-top" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook'ta Paylaş">
+                                <i class="fab fa-facebook-f"></i> <span>Facebook</span>
+                            </a>
+                            <a id="share-x-top" href="https://twitter.com/intent/tweet?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X'te Paylaş">
+                                <i class="fa-brands fa-x-twitter"></i> <span>X</span>
+                            </a>
+                            <a id="share-tg-top" href="https://t.me/share/url?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram'da Paylaş">
+                                <i class="fab fa-telegram-plane"></i> <span>Telegram</span>
+                            </a>
+                            <button type="button" class="btn btn-share btn-instagram" onclick="shareToInstagram()" title="Instagram'da Paylaş">
+                                <i class="fab fa-instagram"></i> <span>Instagram</span>
+                            </button>
+                            <button type="button" class="btn btn-share btn-copy" onclick="copyNewsLink()" title="Bağlantıyı Kopyala">
+                                <i class="fas fa-link"></i> <span>Kopyala</span>
+                            </button>
+                        </div>
+                    </header>
+                    <figure class="mb-4 overflow-hidden" style="border-radius: 2rem;">
+                        <div class="smart-image-wrapper" id="detail-image-wrapper">
+                            <img class="smart-image-bg" id="detail-image-bg" src="{% if haber and haber.resim %}{{ haber.resim.url }}{% elif haber and haber.gorsel_url %}{{ haber.gorsel_url }}{% endif %}" alt="" onerror="this.onerror=null;this.src='/static/img/spor24_watermark.png';" />
+                            <img class="smart-image-main" id="detail-image-main" src="{% if haber and haber.resim %}{{ haber.resim.url }}{% elif haber and haber.gorsel_url %}{{ haber.gorsel_url }}{% endif %}" alt="{% if haber %}{{ haber.baslik }}{% else %}...{% endif %}" onerror="this.onerror=null;this.src='/static/img/spor24_watermark.png';" />
+                        </div>
+                    </figure>
+                    <section class="mb-5" id="detail-content">
+                        {% if haber %}{{ haber.icerik|safe }}{% else %}<p>İçerik yükleniyor...</p>{% endif %}
+                    </section>
+
+                    <!-- BOTTOM SOCIAL SHARE BOX -->
+                    <div class="card p-3 p-md-4 my-4 border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%); border-left: 5px solid #c8102e !important;">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="bg-danger text-white rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 44px; height: 44px; min-width: 44px; font-size: 1.15rem;">
+                                    <i class="fas fa-bullhorn"></i>
+                                </div>
+                                <div>
+                                    <h6 class="font-black italic mb-0 text-dark" style="letter-spacing: 0.5px;">HABERİ PAYLAŞ, SPORA DESTEK OL!</h6>
+                                    <small class="text-muted">Sosyal medya hesaplarınızda veya arkadaş gruplarınızda anında paylaşın</small>
+                                </div>
+                            </div>
+                            <div class="d-flex flex-wrap gap-2">
+                                <a id="share-wa-bottom" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net/post.html?id={{ haber.id }}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp">
+                                    <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
+                                </a>
+                                {% if user.is_authenticated and user.is_staff %}
+                                <button type="button" class="btn btn-share font-bold shadow-sm" onclick="openChannelShareModal()" style="background: linear-gradient(135deg, #128C7E 0%, #075E54 100%); color: #fff;" title="WhatsApp Kanalında Dev Afiş Olarak Paylaş">
+                                    <i class="fas fa-bullhorn"></i> <span>Kanal İçin Paylaş</span>
+                                </button>
+                                {% endif %}
+                                <a id="share-fb-bottom" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook">
+                                    <i class="fab fa-facebook-f"></i> <span>Facebook</span>
+                                </a>
+                                <a id="share-x-bottom" href="https://twitter.com/intent/tweet?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X">
+                                    <i class="fa-brands fa-x-twitter"></i> <span>X</span>
+                                </a>
+                                <a id="share-tg-bottom" href="https://t.me/share/url?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram">
+                                    <i class="fab fa-telegram-plane"></i> <span>Telegram</span>
+                                </a>
+                                <button type="button" class="btn btn-share btn-instagram" onclick="shareToInstagram()" title="Instagram">
+                                    <i class="fab fa-instagram"></i> <span>Instagram</span>
+                                </button>
+                                <button type="button" class="btn btn-share btn-copy" onclick="copyNewsLink()" title="Kopyala">
+                                    <i class="fas fa-link"></i> <span>Kopyala</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </article>
+            </div>
+            <!-- Side widgets-->
+            <div class="col-lg-4">
+                <div class="card mb-4 border-0 shadow-sm p-4" style="border-radius: 2rem;">
+                    <h4 class="font-black italic border-bottom border-danger pb-2 text-uppercase">GÜNCEL HABERLER</h4>
+                    <div id="sidebar-news" class="mt-3">
+                        <!-- Sidebar news will load here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="py-5 bg-dark mt-5">
+        <div class="container">
+            <p class="m-0 text-center text-white font-bold italic">© 2026 TÜM HAKLARI SAKLIDIR | <span
+                    class="text-danger">S P O R 2 4 H A B E R</span></p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap core JS-->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Global variables for active news item
+        let currentNewsTitle = "{% if haber %}{{ haber.baslik|escapejs }}{% endif %}";
+        let currentNewsUrl = window.location.href;
+
+        function copyNewsLink(url) {
+            const targetUrl = url || currentNewsUrl || window.location.href;
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(targetUrl).then(() => {
+                    showToast("Bağlantı kopyalandı! WhatsApp Kanalınıza veya sohbetinize yapıştırabilirsiniz.");
+                }).catch(() => fallbackCopy(targetUrl));
+            } else {
+                fallbackCopy(targetUrl);
+            }
+        }
+
+        function fallbackCopy(text) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            try {
+                document.execCommand('copy');
+                showToast("Haber bağlantısı panoya kopyalandı!");
+            } catch (e) {
+                prompt("Bağlantıyı kopyalayabilirsiniz:", text);
+            }
+            document.body.removeChild(ta);
+        }
+
+        function shareToInstagram(title, url) {
+            const shareUrl = url || currentNewsUrl || window.location.href;
+            const shareTitle = title || currentNewsTitle || document.title;
+            if (navigator.share) {
+                navigator.share({
+                    title: shareTitle,
+                    text: shareTitle + " | SPOR24.NET",
+                    url: shareUrl
+                }).catch(err => {
+                    if (err.name !== 'AbortError') {
+                        copyNewsLink(shareUrl);
+                    }
+                });
+            } else {
+                copyNewsLink(shareUrl);
+                showToast("Bağlantı kopyalandı! Instagram hikayenizde veya mesaj olarak paylaşabilirsiniz.");
+            }
+        }
+
+        function showToast(message) {
+            let toast = document.getElementById('spor24-toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'spor24-toast';
+                toast.style.position = 'fixed';
+                toast.style.bottom = '30px';
+                toast.style.left = '50%';
+                toast.style.transform = 'translateX(-50%)';
+                toast.style.backgroundColor = '#111827';
+                toast.style.color = '#ffffff';
+                toast.style.padding = '12px 24px';
+                toast.style.borderRadius = '50px';
+                toast.style.boxShadow = '0 10px 30px rgba(0,0,0,0.35)';
+                toast.style.zIndex = '99999';
+                toast.style.fontSize = '0.92rem';
+                toast.style.fontWeight = '700';
+                toast.style.display = 'flex';
+                toast.style.alignItems = 'center';
+                toast.style.gap = '10px';
+                toast.style.transition = 'all 0.3s ease';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = `<i class="fas fa-check-circle text-danger" style="font-size: 1.15rem;"></i> <span>${message}</span>`;
+            toast.style.opacity = '1';
+            toast.style.visibility = 'visible';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.visibility = 'hidden';
+            }, 3500);
+        }
+
+                        function openChannelShareModal() {
+            const modalEl = document.getElementById('whatsappChannelModal');
+            if (modalEl && window.bootstrap) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            } else {
+                executeChannelShare('kenan');
+            }
+        }
+
+        async function executeChannelShare(targetKey) {
+            const modalEl = document.getElementById('whatsappChannelModal');
+            if (modalEl && window.bootstrap) {
+                const modal = bootstrap.Modal.getInstance(modalEl);
+                if (modal) modal.hide();
+            }
+            
+            const haberId = new URLSearchParams(window.location.search).get('id') || ({% if haber %}{{ haber.id }}{% else %}null{% endif %});
+            if (!haberId) {
+                showToast("⚠️ Haber ID bulunamadı.");
+                return;
+            }
+            
+            const targetNames = {
+                'kenan': 'Kenan ANT (Şahsi)',
+                'ant_tv': 'Ant Tv Kanalı',
+                'spor_medya': 'Spor Medya Merkezi Kanalı'
+            };
+            const targetName = targetNames[targetKey] || 'WhatsApp';
+            
+            showToast(`⏳ ${targetName} hedefine aktarılıyor...`);
+            
+            try {
+                const resp = await fetch(`/api/whatsapp/channel-share/${haberId}/?target=${targetKey}`);
+                const data = await resp.json();
+                if (data.success) {
+                    showToast(`✅ Haber dev afişi, özeti ve linkiyle ${data.target_name || targetName} hedefine başarıyla gönderildi!`);
+                } else {
+                    showToast("⚠️ Gönderim hatası: " + (data.error || "Bilinmeyen hata"));
+                }
+            } catch(e) {
+                showToast("⚠️ Bağlantı hatası oluştu.");
+            }
+        }
+
+        function shareToWhatsApp(e) {
+            if (e) e.preventDefault();
+            const title = currentNewsTitle || document.title;
+            const url = currentNewsUrl || window.location.href;
+            const text = `${title}\n\n${url}`;
+            const encText = encodeURIComponent(text);
+            const nativeUri = `whatsapp://send?text=${encText}`;
+            const webUri = `https://web.whatsapp.com/send?text=${encText}`;
+            
+            const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+            if (isMobile) {
+                window.location.href = nativeUri;
+                return;
+            }
+            
+            // Windows 11 Desktop app launch
+            window.location.href = nativeUri;
+        }
+
+        function updateShareLinks(title, url) {
+            currentNewsTitle = title;
+            currentNewsUrl = url;
+            const encTitle = encodeURIComponent(title);
+            const encUrl = encodeURIComponent(url);
+
+            const waUrl = `whatsapp://send?text=${encTitle}%0A%0A${encUrl}`;
+            const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encUrl}`;
+            const xUrl = `https://twitter.com/intent/tweet?url=${encUrl}&text=${encTitle}%20%7C%20%40spor24net`;
+            const tgUrl = `https://t.me/share/url?url=${encUrl}&text=${encTitle}`;
+
+            ['top', 'bottom'].forEach(pos => {
+                const elWa = document.getElementById(`share-wa-${pos}`);
+                const elFb = document.getElementById(`share-fb-${pos}`);
+                const elX = document.getElementById(`share-x-${pos}`);
+                const elTg = document.getElementById(`share-tg-${pos}`);
+                if (elWa) elWa.href = waUrl;
+                if (elFb) elFb.href = fbUrl;
+                if (elX) elX.href = xUrl;
+                if (elTg) elTg.href = tgUrl;
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const newsId = urlParams.get('id') || "{% if haber %}{{ haber.id }}{% endif %}";
+            const api_url = '/api/news/';
+
+            if (!newsId) {
+                window.location.href = '/';
+                return;
+            }
+
+            // Sync initial share links with canonical URL
+            const canonicalUrl = `https://spor24.net/post.html?id=${newsId}`;
+            if (currentNewsTitle) {
+                updateShareLinks(currentNewsTitle, canonicalUrl);
+            }
+
+            // Load Detail via API
+            fetch(`${api_url}${newsId}/`)
+                .then(r => {
+                    if (!r.ok) throw new Error(`Server returned ${r.status}`);
+                    return r.json();
+                })
+                .then(item => {
+                    const pageTitle = item.title || item.baslik || 'Haber';
+                    document.title = pageTitle + ' | SPOR24.NET';
+                    document.getElementById('detail-title').innerText = pageTitle;
+                    document.getElementById('detail-category').innerText = item.category_name || (item.kategori ? item.kategori.ad : 'GÜNCEL');
+                    document.getElementById('detail-date').innerText = 'Kaynak: ' + (item.source_name || 'Spor24') + ' | ' + new Date(item.created_at || Date.now()).toLocaleDateString('tr-TR');
+                    const img_src = item.image || item.resim || '/static/img/spor24_watermark.png';
+                    document.getElementById('detail-image-bg').src = img_src;
+                    const mainImg = document.getElementById('detail-image-main');
+                    mainImg.src = img_src;
+
+                    // Update live share URLs
+                    updateShareLinks(pageTitle, canonicalUrl);
+
+                    // Akıllı Görsel Yerleşimi (Dünya Standardı Aspect-Ratio ve Kafa Kesilmesini Önleme)
+                    const applySmartImageLayout = () => {
+                        const wrapper = document.getElementById('detail-image-wrapper');
+                        const imgW = mainImg.naturalWidth;
+                        const imgH = mainImg.naturalHeight;
+                        if (!imgW || !imgH) return;
+
+                        // Dikey (portrait/9:16) veya yatay (landscape) algılama
+                        const isPortrait = imgH > (imgW * 1.05);
+
+                        if (isPortrait) {
+                            if (wrapper) wrapper.classList.add('is-portrait');
+                            mainImg.classList.add('is-portrait');
+                            mainImg.style.objectFit = "contain";
+                            mainImg.style.objectPosition = "center center";
+                            mainImg.style.width = "auto";
+                            mainImg.style.height = "100%";
+                            mainImg.style.transform = "none";
+                        } else {
+                            if (wrapper) wrapper.classList.remove('is-portrait');
+                            mainImg.classList.remove('is-portrait');
+                            mainImg.style.objectFit = "cover";
+                            mainImg.style.objectPosition = "center 20%"; // Kafanın/yüzün kesilmesini önler
+                            mainImg.style.width = "100%";
+                            mainImg.style.height = "100%";
+                            mainImg.style.transform = "none";
+                        }
+                    };
+
+                    mainImg.onload = applySmartImageLayout;
+                    if (mainImg.complete) {
+                        applySmartImageLayout();
+                    }
+
+                    document.getElementById('detail-content').innerHTML = item.content || '<p>Bu haberin içeriği bulunmamaktadır.</p>';
+                })
+                .catch(err => {
+                    console.warn(`News Detail Load Error (ID ${newsId}): ${err.message}`);
+                    document.getElementById('detail-title').innerText = 'Haber Bulunamadı veya Yayından Kaldırıldı';
+                    document.getElementById('detail-category').style.display = 'none';
+                    document.getElementById('detail-date').style.display = 'none';
+                    const imgWrap = document.getElementById('detail-image-wrapper');
+                    if (imgWrap) imgWrap.style.display = 'none';
+                    document.getElementById('detail-content').innerHTML = `<div class="alert alert-warning py-4 px-4 my-4" style="border-radius: 1rem;"><h5 class="fw-bold mb-2">⚠️ Bu Haber Yayından Kaldırılmıştır</h5><p class="mb-0">Ulaşmaya çalıştığınız içerik sistemimizden kaldırılmış veya güncellenmiştir. En güncel spor haberlerini incelemek için <a href="/" class="alert-link text-decoration-underline fw-bold">Ana Sayfa</a>'ya dönebilirsiniz.</p></div>`;
+                });
+
+            // Load Sidebar
+            fetch(api_url)
+                .then(r => r.json())
+                .then(data => {
+                    const news = data.results || data;
+                    let sideHtml = '';
+                    news.slice(0, 5).forEach(item => {
+                        sideHtml += `
+                            <div class="mb-3 pb-2 border-bottom">
+                                <a href="/post.html?id=${item.id}" class="text-dark text-decoration-none small font-bold d-block">${item.title}</a>
+                                <span class="text-danger smaller text-uppercase">${item.category_name}</span>
+                            </div>
+                        `;
+                    });
+                    document.getElementById('sidebar-news').innerHTML = sideHtml;
+                });
+        });
+
+        // --- Live Search Modal Controller ---
+        let searchDebounceTimer = null;
+
+        function openSearchModal() {
+            const modal = document.getElementById('search-modal');
+            const input = document.getElementById('live-search-input');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => input && input.focus(), 50);
+            }
+        }
+
+        function closeSearchModal() {
+            const modal = document.getElementById('search-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function handleOverlayClick(event) {
+            if (event.target && event.target.id === 'search-modal') {
+                closeSearchModal();
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSearchModal();
+        });
+
+        async function handleLiveSearch(query) {
+            clearTimeout(searchDebounceTimer);
+            const box = document.getElementById('search-results-box');
+            const q = query.trim();
+
+            if (!q) {
+                box.innerHTML = '<div class="search-hint text-muted p-4 text-center" style="font-size:0.9rem;"><i class="fas fa-magnifying-glass me-2"></i>Aramak istediğiniz anahtar kelimeyi yazın...</div>';
+                return;
+            }
+
+            if (q.length < 2) {
+                box.innerHTML = '<div class="search-hint text-muted p-3 text-center" style="font-size:0.85rem;">En az 2 karakter giriniz...</div>';
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(async () => {
+                box.innerHTML = '<div class="p-4 text-center text-muted"><i class="fas fa-spinner fa-spin me-2"></i> Aranıyor...</div>';
+                try {
+                    const res = await fetch(`/api/news/?search=${encodeURIComponent(q)}&page_size=8`);
+                    const data = await res.json();
+                    const results = data.results || [];
+
+                    if (results.length === 0) {
+                        box.innerHTML = `<div class="p-4 text-center text-muted" style="font-size:0.9rem;">"${q}" ile eşleşen haber bulunamadı.</div>`;
+                        return;
+                    }
+
+                    box.innerHTML = results.map(item => {
+                        const imgSrc = item.image || item.resim || item.image_url || '/static/img/logo_5.png';
+                        const postUrl = `/post.html?id=${item.id}`;
+                        const cat = item.category_name || 'GENEL';
+                        const dStr = item.created_at ? new Date(item.created_at).toLocaleDateString('tr-TR', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
+                        return `
+                        <a href="${postUrl}" class="search-result-item">
+                            <img src="${imgSrc}" alt="${item.title}" class="search-result-img" onerror="this.onerror=null;this.src='/static/img/logo_5.png';">
+                            <div class="search-result-info">
+                                <div class="search-result-title">${item.title}</div>
+                                <div class="search-result-meta">
+                                    <span class="badge bg-danger text-white" style="font-size:10px;">${cat}</span>
+                                    <span>${dStr}</span>
+                                </div>
+                            </div>
+                        </a>
+                        `;
+                    }).join('');
+                } catch (err) {
+                    box.innerHTML = '<div class="p-3 text-center text-danger">Arama yapılırken bir hata oluştu.</div>';
+                }
+            }, 250);
+        }
+    </script>
+    
+    <!-- WHATSAPP KANAL SEÇİM MODALI (ADMİNE ÖZEL) -->
+    <div class="modal fade" id="whatsappChannelModal" tabindex="-1" aria-labelledby="whatsappChannelModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header text-white" style="background: linear-gradient(135deg, #075E54 0%, #128C7E 100%);">
+                    <h5 class="modal-title font-black d-flex align-items-center gap-2" id="whatsappChannelModalLabel">
+                        <i class="fab fa-whatsapp fs-4"></i> WhatsApp Paylaşım Merkezi
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body p-4 bg-light">
+                    <p class="text-muted small mb-3">Bu haberi orijinal HD afişi, başlığı, federasyon özeti ve linkiyle nereye göndermek istiyorsunuz?</p>
+                    
+                    <div class="d-flex flex-column gap-3">
+                        <!-- 1. Kenan ANT (Şahsi) -->
+                        <div class="p-3 bg-white rounded-3 shadow-sm border d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-dark text-white d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                                    <i class="fas fa-user-shield"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-dark">1- Kenan ANT</div>
+                                    <div class="text-muted small">Şahsi Hesabım (Test Gönderimi)</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-dark btn-sm px-3 font-bold rounded-pill" onclick="executeChannelShare('kenan')">
+                                <i class="fas fa-paper-plane me-1"></i> Gönder
+                            </button>
+                        </div>
+
+                        <!-- 2. Ant Tv Kanalı -->
+                        <div class="p-3 bg-white rounded-3 shadow-sm border d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle bg-danger text-white d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.15rem;">
+                                    <i class="fas fa-tv"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-dark">2- Ant Tv</div>
+                                    <div class="text-muted small">Resmi WhatsApp Kanalı</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm px-3 font-bold rounded-pill" onclick="executeChannelShare('ant_tv')">
+                                <i class="fas fa-bullhorn me-1"></i> Kanala Bas
+                            </button>
+                        </div>
+
+                        <!-- 3. Spor Medya Merkezi Kanalı -->
+                        <div class="p-3 bg-white rounded-3 shadow-sm border d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="rounded-circle text-white d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; font-size: 1.15rem; background: #25D366;">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <div>
+                                    <div class="font-bold text-dark">3- Spor Medya Merkezi</div>
+                                    <div class="text-muted small">Federasyonlar Haber Kanalı</div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm px-3 font-bold rounded-pill" style="background-color: #128C7E; border-color: #128C7E;" onclick="executeChannelShare('spor_medya')">
+                                <i class="fas fa-bullhorn me-1"></i> Kanala Bas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer bg-white border-0 py-2">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Kapat</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Spor24 Autonomous Tracker -->
+    <script src="/static/v3/js/spor24-tracker.js"></script>
+
+    <!-- Smart Paragraph Beautifier for Legacy Single-Paragraph Articles -->
+    <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const contentBox = document.getElementById("detail-content");
+        if (!contentBox) return;
+        
+        // If content has only 1 paragraph and it is long (>400 chars) with no h2/h3
+        const ps = contentBox.querySelectorAll("p");
+        const hasHeadings = contentBox.querySelectorAll("h2, h3, ul").length > 0;
+        
+        if (ps.length <= 1 && !hasHeadings && contentBox.innerText.length > 400) {
+            let rawText = contentBox.innerHTML;
+            // Split by sentence endings followed by capital letter if block is huge
+            let sentences = rawText.split(/(?<=[.!?])\s+(?=[A-ZÇĞİÖŞÜ])/);
+            if (sentences.length >= 4) {
+                let newHtml = "";
+                let chunk = [];
+                sentences.forEach((s, idx) => {
+                    chunk.push(s);
+                    // Create paragraph every 2-3 sentences or when medal/athlete list starts
+                    if (chunk.length >= 3 || idx === sentences.length - 1) {
+                        newHtml += "<p>" + chunk.join(" ") + "</p>";
+                        chunk = [];
+                    }
+                });
+                contentBox.innerHTML = newHtml;
+            }
+        }
+    });
+    </script>
+</body>
+
+</html>

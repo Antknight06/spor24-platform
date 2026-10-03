@@ -1,0 +1,382 @@
+{% extends 'newsbit/base.html' %}
+{% load date_filters static %}
+
+{% block title %}{{ kategori.ad }} - Spor24{% endblock %}
+
+{% block extra_head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    .category-header {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        color: white;
+        padding: 3rem 0;
+        margin-bottom: 2.5rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+        border-radius: 0 0 16px 16px;
+    }
+    
+    .category-header h1 {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin-bottom: 0.5rem;
+    }
+    
+    .section-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #fff;
+        border-left: 4px solid #fbbf24;
+        padding-left: 12px;
+        margin-bottom: 2rem;
+        margin-top: 1rem;
+    }
+    
+    .news-card {
+        background-color: #111827;
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.25);
+        transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        margin-bottom: 2rem;
+        overflow: hidden;
+        height: 100%;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .news-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+        border-color: rgba(251,191,36,0.3);
+    }
+    
+    .news-card-img-wrapper {
+        position: relative;
+        overflow: hidden;
+        height: 200px;
+        width: 100%;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        background-color: #0b0f19;
+    }
+    
+    .news-card .card-body {
+        padding: 1.25rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+    
+    .news-meta {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        margin-bottom: 0.75rem;
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    
+    .category-tag {
+        background-color: rgba(251, 191, 36, 0.1);
+        color: #fbbf24;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+    }
+    
+    .news-title {
+        font-weight: 700;
+        color: #fff !important;
+        text-decoration: none;
+        font-size: 1.15rem;
+        line-height: 1.4;
+        display: block;
+        margin-top: 0.25rem;
+        margin-bottom: 0.5rem;
+        transition: color 0.2s;
+    }
+    
+    .news-title:hover {
+        color: #fbbf24 !important;
+    }
+    
+    .news-summary {
+        font-size: 0.9rem;
+        color: #9ca3af !important;
+        line-height: 1.5;
+        margin-bottom: 1.25rem;
+    }
+    
+    .card-kose-yazisi {
+        background-color: #1f2937;
+        border-color: rgba(255, 193, 7, 0.2) !important;
+    }
+    
+    .card-kose-yazisi:hover {
+        border-color: rgba(255, 193, 7, 0.5) !important;
+    }
+    
+    .badge-kose-yazisi {
+        background-color: rgba(255, 193, 7, 0.1) !important;
+        color: #ffc107 !important;
+    }
+    
+    .federasyon-linki .btn {
+        transition: all 0.3s;
+    }
+    
+    .federasyon-linki .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,123,255,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Category Header -->
+<section class="category-header">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center text-md-left">
+                <h1><i class="fas fa-hand-rock me-2 text-warning"></i>{{ kategori.ad }}</h1>
+                <p class="lead text-light opacity-80">{{ kategori.aciklama }}</p>
+                {% if kategori.federasyon_website and kategori.federasyon_website.ana_url %}
+                <div class="federasyon-linki mt-4">
+                    <a href="{{ kategori.federasyon_website.ana_url }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-primary btn-sm px-4 py-2 text-white"
+                       style="background-color: #007bff; border-color: #007bff; border-radius: 20px; font-weight: 600;">
+                        <i class="fas fa-external-link-alt mr-2"></i> {{ kategori.ad }} Federasyonu Resmi Sitesi
+                    </a>
+
+                    {% if kategori.slug == 'karate' or kategori.ad == 'Karate' %}
+                        <a href="{% url 'haberler:karate_formlari' %}"
+                           class="btn btn-secondary btn-sm ms-2 px-4 py-2 text-white"
+                           style="background-color: #4b5563; border-color: #4b5563; border-radius: 20px; font-weight: 600;">
+                            <i class="fas fa-file-alt mr-2"></i>Formlar
+                        </a>
+                    {% endif %}
+                </div>
+            {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if kategori.ad == 'Karate' %}
+<div class="container mb-4">
+    <div class="row g-3">
+        <div class="col-md-6">
+            <a href="{% url 'haberler:karate_antrenorler' %}?mod=harita" class="card text-center text-decoration-none h-100 border-0 shadow-sm" style="background-color: #1f2937; border-radius: 12px; transition: transform 0.2s;">
+                <div class="card-body py-4 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-map-marked-alt fa-3x mb-3 text-warning"></i>
+                    <h4 class="card-title text-white">Antrenör Haritası</h4>
+                    <p class="card-text small text-muted">İllere göre görsel antrenör dağılımı.</p>
+                </div>
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a href="{% url 'haberler:karate_antrenorler' %}?mod=liste" class="card text-center text-decoration-none h-100 border-0 shadow-sm" style="background-color: #1f2937; border-radius: 12px; transition: transform 0.2s;">
+                <div class="card-body py-4 d-flex flex-column justify-content-center align-items-center">
+                    <i class="fas fa-list-ul fa-3x mb-3 text-warning"></i>
+                    <h4 class="card-title text-white">Antrenör Listesi</h4>
+                    <p class="card-text small text-muted">Tüm antrenörlerin detaylı isim listesi.</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Main Content -->
+<div class="container">
+    <div class="row">
+        <!-- Opinion Articles Section - Left Column -->
+        <div class="col-lg-6">
+            <h2 class="section-title">
+                <i class="fas fa-pen-fancy mr-2 text-warning"></i>{{ kategori.ad }} Köşe Yazıları
+            </h2>
+            {% if kose_yazilari %}
+                {% for kose_yazisi in kose_yazilari %}
+                <div class="mb-4">
+                    <div class="card news-card card-kose-yazisi">
+                        <div class="card-body">
+                            <div class="news-meta">
+                                <span class="badge badge-warning text-dark font-weight-bold px-2 py-1 badge-kose-yazisi">
+                                    <i class="fas fa-pen-fancy mr-1"></i>Köşe Yazısı
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-clock mr-1"></i>{{ kose_yazisi.olusturma_tarihi|smart_date }}
+                                </span>
+                                <span class="text-muted">
+                                    <i class="fas fa-eye mr-1"></i>{{ kose_yazisi.goruntulenme_sayisi }}
+                                </span>
+                            </div>
+                            <h5><a href="{% url 'haberler:haber_detay' kose_yazisi.slug %}" class="news-title">{{ kose_yazisi.baslik }}</a></h5>
+                            <p class="news-summary">{{ kose_yazisi.ozet|truncatewords:15 }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top border-secondary">
+                                <small class="text-muted">
+                                    <i class="fas fa-user mr-1"></i>{{ kose_yazisi.yazar.get_full_name|default:kose_yazisi.yazar.username }}
+                                </small>
+                                <a href="{% url 'haberler:haber_detay' kose_yazisi.slug %}" class="btn btn-sm btn-warning font-weight-bold text-dark px-3" style="border-radius: 15px;">
+                                    Oku <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="alert alert-info bg-dark border-secondary text-light text-center py-4" style="border-radius: 12px;">
+                    <h5><i class="fas fa-info-circle mr-2 text-warning"></i>Henüz Köşe Yazısı Bulunamadı</h5>
+                    <p class="mb-0 text-muted">{{ kategori.ad }} kategorisinde henüz köşe yazısı bulunmamaktadır.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Regular News Section - Right Column -->
+        <div class="col-lg-6">
+            <h2 class="section-title">
+                <i class="fas fa-newspaper mr-2 text-warning"></i>{{ kategori.ad }} Haberleri
+            </h2>
+            {% if page_obj %}
+                {% for haber in page_obj %}
+                <div class="mb-4">
+                    {% if haber.slug %}
+                    <div class="card news-card" data-href="{% url 'haberler:haber_detay' haber.slug %}">
+                    {% else %}
+                    <div class="card news-card">
+                    {% endif %}
+                        {% if haber.resim %}
+                            {% if haber.is_pdf %}
+                                <div class="card-img-top bg-dark d-flex flex-column align-items-center justify-content-center text-danger" style="height: 200px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                    <i class="fas fa-file-pdf fa-3x mb-2"></i>
+                                    <span class="small font-weight-bold text-white">PDF BELGESİ</span>
+                                </div>
+                            {% else %}
+                                <div class="news-card-img-wrapper">
+                                    <!-- Arka Katman (Bulanık Görsel) -->
+                                    <div class="news-img-blur-bg" style="background-image: url('{{ haber.resim.url }}');"></div>
+                                    <!-- Ön Katman (Net ve Sığdırılmış Görsel) -->
+                                    <img src="{{ haber.resim.url }}" class="news-img-fit img-fluid" alt="{{ haber.baslik }}">
+                                </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                            <i class="fas fa-hand-rock text-white fa-2x"></i>
+                        </div>
+                        {% endif %}
+                        <div class="card-body">
+                            <div class="news-meta">
+                                <span class="category-tag">{{ haber.kategori.ad }}</span>
+                                <span>
+                                    <i class="fas fa-clock mr-1"></i>{{ haber.olusturma_tarihi|smart_date }}
+                                </span>
+                                <span>
+                                    <i class="fas fa-eye mr-1"></i>{{ haber.goruntulenme_sayisi }}
+                                </span>
+                                {% if haber.is_pdf %}
+                                    <span class="badge badge-danger"><i class="fas fa-file-pdf mr-1"></i> PDF</span>
+                                {% endif %}
+                            </div>
+                            <h5><a href="{% url 'haberler:haber_detay' haber.slug %}" class="news-title">{{ haber.baslik }}</a></h5>
+                            <p class="news-summary">{{ haber.ozet|truncatewords:12 }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2 border-top border-secondary">
+                                <small class="text-muted">{{ haber.yazar.get_full_name|default:haber.yazar.username }}</small>
+                                {% if haber.kaynak_url %}
+                                <a href="{{ haber.kaynak_url }}" target="_blank" class="btn btn-sm btn-outline-warning" style="border-radius: 50%; width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; padding: 0;">
+                                    <i class="fas fa-external-link-alt" style="font-size: 11px;"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if page_obj.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if page_obj.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.previous_page_number }}">Önceki</a>
+                            </li>
+                        {% endif %}
+                        
+                        {% for num in page_obj.paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <li class="page-item active">
+                                    <span class="page-link bg-warning text-dark border-warning" style="font-weight: 700;">{{ num }}</span>
+                                </li>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <li class="page-item">
+                                    <a class="page-link bg-dark text-white border-secondary" href="?page={{ num }}">{{ num }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                        
+                        {% if page_obj.has_next %}
+                            <li class="page-item">
+                                <a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.next_page_number }}">Sonraki</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-info bg-dark border-secondary text-light text-center py-4" style="border-radius: 12px;">
+                    <h4><i class="fas fa-info-circle mr-2 text-warning"></i>Henüz Haber Bulunamadı</h4>
+                    <p class="text-muted">Bu kategori altında yayınlanmış haber bulunmamaktadır.</p>
+                    <a href="/" class="btn btn-warning text-dark font-weight-bold mt-2" style="border-radius: 20px;">Ana Sayfaya Dön</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Clickable news cards
+        const newsCards = document.querySelectorAll('[data-href]');
+        newsCards.forEach(function(card) {
+            card.addEventListener('click', function(e) {
+                if (e.target.closest('.btn') || e.target.closest('a') || e.target.closest('.category-tag')) {
+                    return;
+                }
+                const href = this.getAttribute('data-href');
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+        
+        // Intelligent image display adjustment
+        const newsImages = document.querySelectorAll('.news-card img');
+        newsImages.forEach(function(img) {
+            img.addEventListener('load', function() {
+                const isCategoryDesign = this.src.includes('category_') || this.src.includes('/media/haberler/category');
+                if (isCategoryDesign) {
+                    this.style.objectFit = 'cover';
+                } else {
+                    const aspectRatio = this.naturalWidth / this.naturalHeight;
+                    if (aspectRatio > 2.5) {
+                        this.style.objectFit = 'cover';
+                    } else {
+                        this.style.objectFit = 'contain';
+                        this.style.backgroundColor = '#111827';
+                    }
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,255 @@
+/* Custom Admin Styling for Jazzmin */
+
+/* Reset & Modern Font & Global 3% Scale Reduction */
+html {
+    font-size: 97% !important; /* Tarayıcı varsayılanı olan 16px'i %97'ye (yaklaşık 15.5px / 11.6pt) indirerek tüm rem ölçülerini %3 küçültür. */
+}
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Select2 Width Fix (Extremely common visual bug in Jazzmin/AdminLTE where select2 squishes) */
+.select2-container {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+.select2-container .select2-selection--single {
+    height: 38px !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 4px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important;
+    padding-left: 12px !important;
+}
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}
+
+/* Custom "Havuzu Güncelle" Button styling */
+.addlink[href*="collect-news/"] {
+    background-color: #28a745 !important;
+    color: white !important;
+    border-radius: 20px !important;
+    padding: 8px 16px !important;
+    font-size: 13px !important;
+    transition: all 0.2s ease-in-out !important;
+    border: none !important;
+    box-shadow: 0 2px 4px rgba(40, 167, 69, 0.2) !important;
+}
+.addlink[href*="collect-news/"]:hover {
+    background-color: #218838 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3) !important;
+}
+
+/* Improve Admin Table Layout */
+.table th, .table td {
+    vertical-align: middle !important;
+    padding: 12px 16px !important;
+}
+.table thead th {
+    background-color: #f8f9fa !important;
+    border-bottom: 2px solid #dee2e6 !important;
+    font-weight: 600 !important;
+}
+
+/* Modernize Forms */
+.form-group label {
+    font-weight: 500 !important;
+    color: #495057 !important;
+    margin-bottom: 6px !important;
+}
+.form-control {
+    border-radius: 4px !important;
+    border: 1px solid #ced4da !important;
+    padding: 8px 12px !important;
+}
+.form-control:focus {
+    border-color: #80bdff !important;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25) !important;
+}
+
+/* Tabular Inline Fixes */
+.inline-group .tabular td.original {
+    padding: 0 !important;
+}
+.inline-related h3 {
+    background: #f1f3f5 !important;
+    color: #495057 !important;
+    padding: 10px 15px !important;
+    font-size: 14px !important;
+    border-radius: 4px 4px 0 0 !important;
+}
+
+/* Sidebar Tweaks */
+.brand-link {
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+}
+.nav-sidebar .nav-link p {
+    font-size: 14px !important;
+}
+
+/* Modern Filter Bar Container */
+#change-list-filters {
+    background-color: #ffffff !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    padding: 16px 20px !important;
+    margin-bottom: 24px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Horizontal Form Layout */
+#changelist-search {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    gap: 12px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Form groups containing select elements */
+#changelist-search .form-group {
+    margin: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    flex: 0 1 auto !important;
+    min-width: 160px !important;
+}
+
+/* Style the selects & select2 containers inside the filter bar */
+#changelist-search .form-control.search-filter,
+#changelist-search .select2-container,
+#changelist-search .select2-container--default .select2-selection--single {
+    width: 160px !important;
+    max-width: 160px !important;
+    height: 38px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    background-color: #ffffff !important;
+    font-size: 13px !important;
+    color: #334155 !important;
+    font-weight: 500 !important;
+}
+
+#changelist-search .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px !important;
+    padding-left: 12px !important;
+    padding-right: 20px !important;
+}
+
+#changelist-search .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px !important;
+}
+
+/* Style the search bar input */
+#changelist-search #searchbar {
+    height: 38px !important;
+    min-width: 220px !important;
+    max-width: 300px !important;
+    border-radius: 8px !important;
+    border: 1px solid #cbd5e1 !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+    background-color: #f8fafc !important;
+    transition: all 0.2s ease !important;
+}
+
+#changelist-search #searchbar:focus {
+    background-color: #ffffff !important;
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15) !important;
+    outline: none !important;
+}
+
+/* Style the search group button and info text */
+#changelist-search #search_group {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin: 0 !important;
+}
+
+#changelist-search button[type="submit"] {
+    height: 38px !important;
+    padding: 0 20px !important;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    border: none !important;
+    font-weight: 600 !important;
+    font-size: 13px !important;
+    box-shadow: 0 2px 4px rgba(37, 99, 235, 0.2) !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+#changelist-search button[type="submit"]:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%) !important;
+    box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+#changelist-search #search_group span {
+    font-size: 12px !important;
+    color: #64748b !important;
+    font-weight: 500 !important;
+    margin-left: 10px !important;
+}
+
+#changelist-search #search_group span a {
+    color: #3b82f6 !important;
+    text-decoration: none !important;
+    font-weight: 600 !important;
+}
+
+#changelist-search #search_group span a:hover {
+    text-decoration: underline !important;
+}
+
+
+/* Jazzmin v3 / AdminLTE 4 Sidebar Text Visibility Fix */
+#jazzy-sidebar,
+#jazzy-sidebar .brand-link,
+#jazzy-sidebar .brand-text,
+#jazzy-sidebar .user-panel .info a,
+#jazzy-sidebar .nav-sidebar .nav-link,
+#jazzy-sidebar .nav-sidebar .nav-link p,
+#jazzy-sidebar .nav-sidebar .nav-header {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+#jazzy-sidebar .nav-sidebar .nav-link:hover {
+    color: #ffffff !important;
+    background-color: rgba(255, 255, 255, 0.15) !important;
+}
+
+#jazzy-sidebar .nav-sidebar .nav-link i,
+#jazzy-sidebar .user-panel i {
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+/* Ensure sidebar background is solid dark gray */
+.app-sidebar {
+    background-color: #1e282c !important;
+}
+
+/* Completely hide UI Customizer theme sidebar to prevent body/sidebar layout distortion */
+.ui-customiser,
+aside.control-sidebar,
+.control-sidebar-bg {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+/* Ensure content-wrapper spans full width without right sidebar padding */
+.content-wrapper,
+.main-sidebar {
+    margin-right: 0 !important;
+}

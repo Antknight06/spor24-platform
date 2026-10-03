@@ -1,0 +1,482 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block title %}SPOR24 Haber Stüdyosu | {{ bekleyen.baslik|truncatechars:40 }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    :root {
+        --spor-blue: #0284c7;
+        --spor-dark: #0f172a;
+        --spor-green: #16a34a;
+        --spor-amber: #d97706;
+        --spor-red: #dc2626;
+        --bg-slate: #f8fafc;
+        --border-color: #e2e8f0;
+    }
+    .studio-wrapper {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        margin: 15px 0 40px 0;
+        color: #1e293b;
+    }
+    .studio-header {
+        background: #ffffff;
+        border-radius: 12px;
+        padding: 18px 24px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        border: 1px solid var(--border-color);
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    .studio-title-box h1 {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 0 0 6px 0;
+        color: var(--spor-dark);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    .studio-meta {
+        font-size: 13px;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        flex-wrap: wrap;
+    }
+    .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .badge-score-high { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+    .badge-score-mid { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+    .badge-score-low { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+    .badge-source { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    
+    .studio-actions-top {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+    .btn-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none !important;
+        border: none;
+        transition: all 0.2s ease;
+    }
+    .btn-publish {
+        background: #16a34a;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3);
+    }
+    .btn-publish:hover { background: #15803d; transform: translateY(-1px); }
+    .btn-ai {
+        background: #0284c7;
+        color: #ffffff !important;
+        box-shadow: 0 2px 6px rgba(2, 132, 199, 0.3);
+    }
+    .btn-ai:hover { background: #0369a1; transform: translateY(-1px); }
+    .btn-save {
+        background: #475569;
+        color: #ffffff !important;
+    }
+    .btn-save:hover { background: #334155; }
+    .btn-reject {
+        background: #fee2e2;
+        color: #b91c1c !important;
+        border: 1px solid #fca5a5;
+    }
+    .btn-reject:hover { background: #fecaca; }
+
+    .split-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.35fr;
+        gap: 24px;
+        align-items: start;
+    }
+    @media (max-width: 1024px) {
+        .split-grid { grid-template-columns: 1fr; }
+    }
+    .column-panel {
+        background: #ffffff;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+        overflow: hidden;
+    }
+    .column-header {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #f8fafc;
+    }
+    .column-header h2 {
+        font-size: 15px;
+        font-weight: 700;
+        margin: 0;
+        color: #334155;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .column-body {
+        padding: 20px;
+    }
+    .field-group {
+        margin-bottom: 18px;
+    }
+    .field-label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #64748b;
+        margin-bottom: 6px;
+    }
+    .field-input, .field-textarea, .field-select {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        font-size: 14px;
+        color: #0f172a;
+        background: #fff;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+    .field-input:focus, .field-textarea:focus, .field-select:focus {
+        border-color: var(--spor-blue);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+    }
+    .field-textarea {
+        font-family: inherit;
+        resize: vertical;
+        line-height: 1.5;
+    }
+    .raw-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        padding: 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        color: #334155;
+        max-height: 480px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+    }
+    .raw-image-box {
+        margin-bottom: 18px;
+        border-radius: 8px;
+        overflow: hidden;
+        border: 1px solid #e2e8f0;
+        background: #000;
+        text-align: center;
+    }
+    .raw-image-box img {
+        max-width: 100%;
+        max-height: 320px;
+        object-fit: cover;
+        display: block;
+        margin: 0 auto;
+    }
+    .ai-analysis-card {
+        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-bottom: 20px;
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+    }
+    .ai-analysis-card .icon { font-size: 24px; }
+    .ai-analysis-card .text {
+        font-size: 13px;
+        line-height: 1.5;
+        color: #166534;
+    }
+    .ai-analysis-card .score-highlight {
+        font-weight: 700;
+        color: #15803d;
+    }
+
+    .tab-bar {
+        display: flex;
+        gap: 8px;
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+    }
+    .tab-btn {
+        background: none;
+        border: none;
+        padding: 6px 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        cursor: pointer;
+        border-radius: 6px;
+    }
+    .tab-btn.active {
+        background: #eff6ff;
+        color: var(--spor-blue);
+    }
+    .preview-container {
+        display: none;
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+        padding: 20px;
+        max-height: 480px;
+        overflow-y: auto;
+        font-size: 15px;
+        line-height: 1.7;
+    }
+    .preview-container h2 {
+        font-size: 18px;
+        color: #0284c7;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-weight: 700;
+    }
+    .preview-container h3 {
+        font-size: 16px;
+        color: #1e293b;
+        margin-top: 14px;
+        font-weight: 600;
+    }
+    .preview-container blockquote {
+        background: #f0f9ff;
+        border-left: 4px solid #0284c7;
+        padding: 12px 18px;
+        margin: 16px 0;
+        border-radius: 0 8px 8px 0;
+        font-size: 13.5px;
+        color: #0369a1;
+    }
+    .preview-container ul {
+        padding-left: 20px;
+        margin-bottom: 16px;
+    }
+    .preview-container li {
+        margin-bottom: 6px;
+    }
+</style>
+<script>
+    function switchTab(tab) {
+        const editor = document.getElementById('content-editor');
+        const preview = document.getElementById('content-preview');
+        const btnEdit = document.getElementById('tab-btn-edit');
+        const btnPrev = document.getElementById('tab-btn-prev');
+        
+        if (tab === 'preview') {
+            preview.innerHTML = editor.value;
+            editor.style.display = 'none';
+            preview.style.display = 'block';
+            btnEdit.classList.remove('active');
+            btnPrev.classList.add('active');
+        } else {
+            preview.style.display = 'none';
+            editor.style.display = 'block';
+            btnPrev.classList.remove('active');
+            btnEdit.classList.add('active');
+        }
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="studio-wrapper">
+    <!-- Header -->
+    <div class="studio-header">
+        <div class="studio-title-box">
+            <h1>🎙️ SPOR24 Haber Stüdyosu <span style="font-size:14px; font-weight:normal; color:#64748b;">(Kayıt #{{ bekleyen.id }})</span></h1>
+            <div class="studio-meta">
+                {% if bekleyen.onaylandi %}
+                    <span class="badge" style="background:#dcfce7; color:#15803d; border:1px solid #86efac; font-weight:700; font-size:13px; padding:6px 14px;">
+                        ✅ ONAYLANDI / YAYINDA
+                    </span>
+                {% elif bekleyen.reddedildi %}
+                    <span class="badge" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:700; font-size:13px; padding:6px 14px;">
+                        ❌ REDDEDİLDİ
+                    </span>
+                {% else %}
+                    <span class="badge" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a; font-weight:700; font-size:13px; padding:6px 14px;">
+                        ⏳ Onay Bekliyor
+                    </span>
+                {% endif %}
+                <span class="badge badge-source">🏛️ {{ bekleyen.federasyon_website.ad }}</span>
+                {% if bekleyen.haber_degeri_skoru >= 75 %}
+                    <span class="badge badge-score-high">🔥 Haber Değeri: {{ bekleyen.haber_degeri_skoru }} / 100</span>
+                {% elif bekleyen.haber_degeri_skoru >= 50 %}
+                    <span class="badge badge-score-mid">⚡ Haber Değeri: {{ bekleyen.haber_degeri_skoru }} / 100</span>
+                {% elif bekleyen.haber_degeri_skoru > 0 %}
+                    <span class="badge badge-score-low">💤 Haber Değeri: {{ bekleyen.haber_degeri_skoru }} / 100</span>
+                {% else %}
+                    <span class="badge badge-score-low">⏳ Henüz Puanlanmadı</span>
+                {% endif %}
+                <span>📅 Çekilme: {{ bekleyen.olusturma_tarihi|date:"d.m.Y H:i" }}</span>
+                <a href="{{ bekleyen.kaynak_url }}" target="_blank" style="color:var(--spor-blue); text-decoration:none; display:inline-flex; align-items:center; gap:4px;">
+                    🔗 Orijinal Sayfayı Aç ↗
+                </a>
+            </div>
+        </div>
+
+        <div class="studio-actions-top">
+            {% if bekleyen.onaylandi %}
+            <a href="/post.html?id={{ bekleyen.id }}" target="_blank" class="btn-action" style="background:#16a34a; color:#fff; text-decoration:none; padding:8px 14px; border-radius:8px; font-weight:700; display:inline-flex; align-items:center; gap:5px; box-shadow:0 2px 4px rgba(22,163,74,0.3);">
+                🌐 Yayındaki Haberi Gör ↗
+            </a>
+            {% endif %}
+            <a href="{% url 'admin:haberler_bekleyenhaber_changelist' %}" class="btn-action btn-save">⬅️ Listeye Dön</a>
+            <a href="{% url 'admin:haberler_bekleyenhaber_ai_calistir' bekleyen.id %}?ton=standart" class="btn-action btn-ai">
+                ⚡ AI ile Yeniden Yaz
+            </a>
+            <button type="submit" form="studio-form" name="action" value="save" class="btn-action btn-save">
+                💾 Taslağı Kaydet
+            </button>
+            <button type="submit" form="studio-form" name="action" value="publish" class="btn-action btn-publish">
+                🚀 Canlı Yayına Al
+            </button>
+        </div>
+    </div>
+
+    <!-- AI Analysis Card -->
+    {% if bekleyen.ai_analiz %}
+    <div class="ai-analysis-card">
+        <div class="icon">💡</div>
+        <div class="text">
+            <strong>Yapay Zeka Değerlendirmesi:</strong> 
+            {{ bekleyen.ai_analiz }}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Split Screen Grid -->
+    <div class="split-grid">
+        <!-- SOL KOLON: Ham Federasyon Verisi -->
+        <div class="column-panel">
+            <div class="column-header">
+                <h2>📋 Orijinal Federasyon Bülteni (Ham Kaynak)</h2>
+                <span style="font-size:12px; color:#64748b;">Değiştirilemez Kaynak</span>
+            </div>
+            <div class="column-body">
+                {% if bekleyen.kaynak_resim_url %}
+                <div class="field-group">
+                    <label class="field-label">Orijinal Görsel</label>
+                    <div class="raw-image-box">
+                        <img src="{{ bekleyen.kaynak_resim_url }}" alt="Ham Haber Görseli">
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="field-group">
+                    <label class="field-label">Ham Başlık</label>
+                    <div class="raw-box" style="font-weight:600; max-height:100px;">{{ bekleyen.baslik }}</div>
+                </div>
+
+                <div class="field-group">
+                    <label class="field-label">Ham İçerik & Liste</label>
+                    <div class="raw-box">{{ bekleyen.icerik }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SAĞ KOLON: SPOR24 Stüdyo & AI Özgün Düzenleme -->
+        <div class="column-panel">
+            <div class="column-header">
+                <h2>✨ SPOR24 Özgün Haber Masası</h2>
+                <span style="font-size:12px; color:#15803d; font-weight:600;">
+                    {% if bekleyen.ai_durum == 'hazir' %}✅ AI Taslağı Hazır{% else %}⏳ İşlem Bekliyor{% endif %}
+                </span>
+            </div>
+            <div class="column-body">
+                <form id="studio-form" method="post" action="{% url 'admin:haberler_bekleyenhaber_studyo_kaydet' bekleyen.id %}">
+                    {% csrf_token %}
+
+                    <div class="field-group">
+                        <label class="field-label" for="ozgun_baslik">Özgün Başlık (Vurucu, SEO Uyumlu)</label>
+                        <input type="text" id="ozgun_baslik" name="ozgun_baslik" class="field-input" 
+                               value="{{ bekleyen.ozgun_baslik|default:bekleyen.baslik }}" required>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="ozgun_ozet">Özgün Spot / Özet (5N1K - Ters Piramit)</label>
+                        <textarea id="ozgun_ozet" name="ozgun_ozet" rows="3" class="field-textarea" required>{{ bekleyen.ozgun_ozet|default:bekleyen.ozet }}</textarea>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label" for="kategori_id">Haber Kategorisi</label>
+                        <select id="kategori_id" name="kategori_id" class="field-select">
+                            {% for kat in kategoriler %}
+                                <option value="{{ kat.id }}" {% if bekleyen.kategori_id == kat.id %}selected{% endif %}>
+                                    {{ kat.ad }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="field-group">
+                        <label class="field-label">Zengin İçerik & Canlı Önizleme</label>
+                        <div class="tab-bar">
+                            <button type="button" id="tab-btn-edit" class="tab-btn active" onclick="switchTab('edit')">✏️ HTML Düzenle</button>
+                            <button type="button" id="tab-btn-prev" class="tab-btn" onclick="switchTab('preview')">👁️ Canlı Okuyucu Önizleme</button>
+                        </div>
+                        <textarea id="content-editor" name="ozgun_icerik" rows="14" class="field-textarea" style="font-family:monospace; font-size:13px;" required>{{ bekleyen.ozgun_icerik|default:bekleyen.icerik }}</textarea>
+                        <div id="content-preview" class="preview-container"></div>
+                    </div>
+
+                    <div style="background:#f8fafc; padding:14px 20px; border-radius:10px; border:1px solid #cbd5e1; margin-top:25px; display:flex; align-items:center; gap:25px; flex-wrap:wrap;">
+                        <label style="display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#0f172a; cursor:pointer;">
+                            <input type="checkbox" name="manset_haberi" value="1" {% if bekleyen.manset_haberi or bekleyen.haber_degeri_skoru >= 80 %}checked{% endif %} style="width:18px; height:18px; accent-color:#16a34a;">
+                            ⭐ Manşette Göster (Slider 1. Slayt)
+                        </label>
+                        <label style="display:inline-flex; align-items:center; gap:8px; font-weight:700; color:#b91c1c; cursor:pointer;">
+                            <input type="checkbox" name="manset_sabitlendi" value="1" style="width:18px; height:18px; accent-color:#dc2626;">
+                            📌 Manşette Sabitle (En Başta Çivile)
+                        </label>
+                        <span style="font-size:12px; color:#64748b; margin-left:auto;">
+                            AI Haber Değeri: <strong style="color:{% if bekleyen.haber_degeri_skoru >= 80 %}#16a34a{% else %}#b45309{% endif %};">{{ bekleyen.haber_degeri_skoru|default:"0" }}/100</strong> (80 ve üzeri otomatik manşet işaretlenir)
+                        </span>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
+                        <button type="submit" name="action" value="save" class="btn-action btn-save">
+                            💾 Taslağı Kaydet
+                        </button>
+                        <button type="submit" name="action" value="publish" class="btn-action btn-publish" style="font-size:14px; padding:12px 24px;">
+                            🚀 Özgün Haliyle Canlı Yayına Al
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

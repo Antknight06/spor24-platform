@@ -1,0 +1,621 @@
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import User
+from django.core.validators import URLValidator
+from django.utils.text import slugify
+from ckeditor.fields import RichTextField
+
+class FederasyonWebsite(models.Model):
+    ad = models.CharField(max_length=100)
+    ana_url = models.URLField(validators=[URLValidator()])
+    haberler_url = models.URLField(validators=[URLValidator()])
+    aktif = models.BooleanField(default=True)
+    son_tarama = models.DateTimeField(null=True, blank=True)
+    son_yeni_haber_zamani = models.DateTimeField(null=True, blank=True, help_text="En son yeni haberin bulunduğu zaman")
+    
+    # CSS selectors for scraping
+    haber_listesi_selector = models.CharField(max_length=200, help_text="CSS selector for news list")
+    haber_baslik_selector = models.CharField(max_length=200, help_text="CSS selector for news title")
+    haber_link_selector = models.CharField(max_length=200, help_text="CSS selector for news link")
+    haber_tarih_selector = models.CharField(max_length=200, blank=True, help_text="CSS selector for news date")
+    haber_ozet_selector = models.CharField(max_length=200, blank=True, help_text="CSS selector for news summary")
+    
+    olusturma_tarihi = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = "Federasyon Websiteleri"
+    
+    def __str__(self):
+        return self.ad
+
+class Kategori(models.Model):
+    ad = models.CharField(max_length=100)
+    slug = models.SlugField(max_length=60, unique=True)
+    aciklama = models.TextField(blank=True)
+    federasyon_website = models.ForeignKey(FederasyonWebsite, on_delete=models.SET_NULL, null=True, blank=True)
+    olusturma_tarihi = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        verbose_name_plural = "Kategoriler"
+        ordering = ['ad']
+    
+    def __str__(self):
+        return self.ad
+
+class Haber(models.Model):
+    baslik = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=60, unique=True)
+    ozet = models.TextField(max_length=500)
+    icerik = models.TextField()
+    resim = models.ImageField(upload_to='haberler/', blank=True, null=True)
+    kategori = models.ForeignKey(Kategori, on_delete=models.CASCADE, related_name='haberler')
+    yazar = models.ForeignKey(User, on_delete=models.CASCADE)
+    
+    # Scraping related fields
+    kaynak_url = models.URLField(blank=True, null=True, help_text="Original source URL")
+    federasyon_website = models.ForeignKey(FederasyonWebsite, on_delete=models.SET_NULL, null=True, blank=True)
+    otomatik_eklendi = models.BooleanField(default=False, help_text="Was this news added automatically?")
+    
+    olusturma_tarihi = models.DateTimeField(default=timezone.now)
+    haber_tarihi = models.DateTimeField(null=True, blank=True, help_text="Original news publication date")
+    guncelleme_tarihi = models.DateTimeField(auto_now=True)
+    yayinlandi = models.BooleanField(default=True)
+    anasayfa_haberi = models.BooleanField(default=False)
+    manset_haberi = models.BooleanField(default=False)
+    kose_yazisi = models.BooleanField(default=False, help_text="Köşe yazısı mı?")
+    goruntulenme_sayisi = models.PositiveIntegerField(default=0, help_text="Haberin görüntülenme sayısı")
+    
+    class Meta:
+        ordering = ['-olusturma_tarihi']
+        verbose_name_plural = "Haberler"
+        constraints = [
+            models.UniqueConstraint(
+                fields=['kaynak_url'], 
+                condition=models.Q(kaynak_url__isnull=False),
+                name='unique_source_url'
+            )
+        ]
+    
+    def __str__(self):
+        return self.baslik
+
+class BekleyenYetkiliHaberi(models.Model):
+    """Model for news items submitted by authorized users (yetkili) waiting for admin approval"""
+    baslik = models.CharField(max_length=200)
+    ozet = models.TextField(max_length=500)
+    icerik = models.TextField()
+    kategori = models.ForeignKey(Kategori, on_delete=models.CASCADE)
+    yazar = models.ForeignKey(User, on_delete=models.CASCADE, help_text="Yetkili kullanıcı")
+    kose_yazisi = models.BooleanField(default=False, help_text="Köşe yazısı mı?")
+    resim = models.ImageField(upload_to='bekleyen_haberler/', blank=True, null=True)
+    olusturma_tarihi = models.DateTimeField(default=timezone.now)
+    onaylandi = models.BooleanField(default=False)
+    reddedildi = models.BooleanField(default=False)
+    onay_tarihi = models.DateTimeField(null=True, blank=True)
+    red_tarihi = models.DateTimeField(null=True, blank=True)
+    onaylayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='onaylanan_yetkili_haberleri')
+    red_nedeni = models.TextField(blank=True, null=True, help_text="Reddedilme nedeni")
+    
+    class Meta:
+        ordering = ['-olusturma_tarihi']
+        verbose_name_plural = "Bekleyen Yetkili Haberleri"
+    
+    def __str__(self):
+        status = 'Onaylandı' if self.onaylandi else 'Beklemede' if not self.reddedildi else 'Reddedildi'
+        type_str = 'Köşe Yazısı' if self.kose_yazisi else 'Haber'
+        return f"{self.baslik} ({type_str} - {status})"
+    
+    def approve(self, admin_user):
+        """Approve yetkili news and create a Haber object"""
+        from django.utils.text import slugify
+        
+        if self.onaylandi or self.reddedildi:
+            raise ValueError("Bu haber zaten onaylanmış veya reddedilmiş")
+        
+        # Generate unique slug from title
+        base_slug = slugify(self.baslik)
+        if not base_slug:
+            base_slug = "haber"
+        
+        slug = base_slug
+        counter = 1
+        while Haber.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        # Create the actual news item
+        haber = Haber.objects.create(
+            baslik=self.baslik,
+            slug=slug,
+            ozet=self.ozet,
+            icerik=self.icerik,
+            kategori=self.kategori,
+            yazar=self.yazar,
+            kose_yazisi=self.kose_yazisi,
+            otomatik_eklendi=False,  # This is manually created by yetkili
+            yayinlandi=True,
+            olusturma_tarihi=self.olusturma_tarihi
+        )
+        
+        # Copy image if exists
+        if self.resim:
+            haber.resim = self.resim
+            haber.save()
+        
+        # If no image was provided, create custom-designed category image (following user preferences)
+        if not self.resim:
+            try:
+                # Use the enhanced comprehensive design system (respects user's design preferences)
+                from apply_comprehensive_designs import create_comprehensive_category_default_image
+                create_comprehensive_category_default_image(haber)
+                print(f"🎨 Enhanced category image created for: {haber.kategori.ad}")
+            except Exception as custom_img_error:
+                print(f"⚠️ Error creating custom image: {custom_img_error}")
+        
+        # Update pending news status
+        self.onaylandi = True
+        self.reddedildi = False
+        self.onay_tarihi = timezone.now()
+        self.onaylayan = admin_user
+        self.save()
+        
+        return haber
+    
+    def reject(self, admin_user, reason=""):
+        """Reject the pending yetkili news item"""
+        if self.onaylandi or self.reddedildi:
+            raise ValueError("Bu haber zaten onaylanmış veya reddedilmiş")
+        
+        self.onaylandi = False
+        self.reddedildi = True
+        self.red_tarihi = timezone.now()
+        self.onaylayan = admin_user
+        self.red_nedeni = reason
+        self.save()
+
+
+class BekleyenHaber(models.Model):
+    """Model for news items waiting for admin approval"""
+    baslik = models.CharField(max_length=200)
+    ozet = models.TextField(max_length=500)
+    icerik = models.TextField()
+    kaynak_url = models.URLField(help_text="Original source URL")
+    federasyon_website = models.ForeignKey(FederasyonWebsite, on_delete=models.CASCADE)
+    olusturma_tarihi = models.DateTimeField(default=timezone.now)
+    haber_tarihi = models.DateTimeField(null=True, blank=True, help_text="Original news publication date")
+    onaylandi = models.BooleanField(default=False)
+    reddedildi = models.BooleanField(default=False)
+    onay_tarihi = models.DateTimeField(null=True, blank=True)
+    red_tarihi = models.DateTimeField(null=True, blank=True)
+    onaylayan = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='onaylanan_haberler')
+    
+    class Meta:
+        ordering = ['-olusturma_tarihi']
+        verbose_name_plural = "Bekleyen Haberler"
+    
+    def __str__(self):
+        return f"{self.baslik} ({'Onaylandı' if self.onaylandi else 'Beklemede' if not self.reddedildi else 'Reddedildi'})"
+    
+    def approve(self, admin_user):
+        """Approve pending news and create a Haber object"""
+        from django.utils.text import slugify
+        
+        if self.onaylandi or self.reddedildi:
+            raise ValueError("Bu haber zaten onaylanmış veya reddedilmiş")
+        
+        # Generate unique slug from title
+        base_slug = slugify(self.baslik)
+        if not base_slug:  # Handle case where title might not produce a valid slug
+            base_slug = "haber"
+        
+        slug = base_slug
+        counter = 1
+        while Haber.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+        
+        # Get or create appropriate category for this federation
+        kategori = None
+        
+        # First, check if federation already has an existing category
+        if self.federasyon_website and self.federasyon_website.kategori_set.exists():
+            kategori = self.federasyon_website.kategori_set.first()
+        
+        # If no existing category, create one for this federation
+        if not kategori:
+            kategori, created = Kategori.objects.get_or_create(
+                slug=slugify(self.federasyon_website.ad),
+                defaults={
+                    'ad': self.federasyon_website.ad,
+                    'aciklama': f'{self.federasyon_website.ad} haberleri',
+                    'federasyon_website': self.federasyon_website
+                }
+            )
+        
+        # Get or create bot user for news creation
+        bot_user, created = User.objects.get_or_create(
+            username='newsbot',
+            defaults={
+                'email': 'newsbot@antnews.com',
+                'first_name': 'News',
+                'last_name': 'Bot',
+                'is_active': True
+            }
+        )
+        
+        # Create the actual news item
+        haber = Haber.objects.create(
+            baslik=self.baslik,
+            slug=slug,
+            ozet=self.ozet,
+            icerik=self.icerik,
+            kategori=kategori,
+            yazar=bot_user,
+            kaynak_url=self.kaynak_url,
+            federasyon_website=self.federasyon_website,
+            otomatik_eklendi=True,
+            yayinlandi=True,
+            olusturma_tarihi=self.haber_tarihi or self.olusturma_tarihi  # Use original publication date if available
+        )
+        
+        # Try to download and attach image
+        image_attached = False
+        try:
+            from haberler.services.news_scraper import NewsScrapingService
+            scraper = NewsScrapingService()
+            
+            # First, try to get images from the news URL
+            image_urls = scraper.get_news_images(self.kaynak_url)
+            if image_urls:
+                # Try first image
+                image_file = scraper.download_and_process_image(
+                    image_urls[0], self.baslik
+                )
+                if image_file:
+                    haber.resim.save(image_file.name, image_file, save=True)
+                    image_attached = True
+                    print(f"✅ Original image attached from: {image_urls[0]}")
+        except Exception as img_error:
+            print(f"⚠️ Error fetching original image: {img_error}")
+        
+        # If no image was attached, create custom-designed category image
+        if not image_attached:
+            try:
+                # Use the enhanced comprehensive design system
+                from apply_comprehensive_designs import create_comprehensive_category_default_image
+                create_comprehensive_category_default_image(haber)
+                print(f"🎨 Enhanced category image created for: {haber.kategori.ad}")
+            except Exception as custom_img_error:
+                print(f"⚠️ Error creating custom image: {custom_img_error}")
+                # Fallback to the basic method if enhanced fails
+                try:
+                    self._create_category_default_image(haber)
+                    print(f"🎨 Basic category image created for: {haber.kategori.ad}")
+                except Exception as fallback_error:
+                    print(f"⚠️ Fallback image creation also failed: {fallback_error}")
+        
+        # Update pending news status
+        self.onaylandi = True
+        self.reddedildi = False
+        self.onay_tarihi = timezone.now()
+        self.onaylayan = admin_user
+        self.save()
+        
+        return haber
+    
+    def _create_category_default_image(self, haber):
+        """Create a custom-designed image for the category if no original image found"""
+        from PIL import Image, ImageDraw, ImageFont
+        from django.core.files.base import ContentFile
+        from django.utils.text import slugify
+        import io
+        import hashlib
+        import textwrap
+        
+        # Category color themes
+        category_themes = {
+            'boks': {
+                'primary': (220, 53, 69),    # Red
+                'secondary': (255, 215, 0),  # Gold
+                'icon': '🥊',  # Boxing glove
+                'name': 'BOKS'
+            },
+            'karate': {
+                'primary': (255, 87, 51),    # Orange
+                'secondary': (255, 255, 255), # White
+                'icon': '🥋',  # Karate uniform
+                'name': 'KARATE'
+            },
+            'taekwondo': {
+                'primary': (0, 123, 255),    # Blue
+                'secondary': (255, 215, 0),  # Gold
+                'icon': '🥋',  # Martial arts
+                'name': 'TAEKWONDO'
+            },
+            'judo': {
+                'primary': (255, 165, 0),    # Orange
+                'secondary': (255, 255, 255), # White
+                'icon': '🥋',  # Judo
+                'name': 'JUDO'
+            },
+            'muaythai': {
+                'primary': (220, 20, 60),    # Crimson
+                'secondary': (255, 215, 0),  # Gold
+                'icon': '🥊',  # Fighting
+                'name': 'MUAY THAI'
+            },
+            'kickboks': {
+                'primary': (142, 68, 173),   # Purple
+                'secondary': (255, 215, 0),  # Gold
+                'icon': '🥊',  # Kickboxing
+                'name': 'KİCKBOKS'
+            },
+            'gures': {
+                'primary': (25, 25, 112),    # Navy
+                'secondary': (255, 215, 0),  # Gold
+                'icon': '🤼',  # Wrestling
+                'name': 'GÜREŞ'
+            },
+            'mma': {
+                'primary': (128, 128, 128),  # Gray
+                'secondary': (255, 69, 0),   # Red-Orange
+                'icon': '🥊',  # MMA
+                'name': 'MMA'
+            },
+            'wushu-kung-fu': {
+                'primary': (255, 140, 0),    # Dark Orange
+                'secondary': (139, 0, 0),    # Dark Red
+                'icon': '🥋',  # Kung Fu
+                'name': 'WUSHU KUNG FU'
+            },
+            'jiu-jitsu': {
+                'primary': (72, 61, 139),    # Dark Slate Blue
+                'secondary': (255, 255, 255), # White
+                'icon': '🥋',  # Brazilian Jiu-Jitsu
+                'name': 'JIU JITSU'
+            }
+        }
+        
+        # Get category theme or use default
+        category_slug = haber.kategori.slug if haber.kategori else 'default'
+        theme = category_themes.get(category_slug, {
+            'primary': (25, 25, 112),      # Navy Blue
+            'secondary': (255, 255, 255),  # White
+            'icon': '🥋',            # Generic sports
+            'name': haber.kategori.ad.upper() if haber.kategori else 'SPOR'
+        })
+        
+        # Image dimensions
+        width, height = 1200, 630
+        
+        # Create image with gradient background
+        image = Image.new('RGB', (width, height), theme['primary'])
+        draw = ImageDraw.Draw(image)
+        
+        # Create diagonal gradient effect
+        for y in range(height):
+            for x in range(0, width, 4):  # Skip pixels for performance
+                # Calculate gradient position
+                gradient_pos = (x + y) / (width + height)
+                
+                # Mix primary and darker version
+                r = int(theme['primary'][0] * (1 - gradient_pos * 0.4))
+                g = int(theme['primary'][1] * (1 - gradient_pos * 0.4))
+                b = int(theme['primary'][2] * (1 - gradient_pos * 0.4))
+                
+                # Ensure colors stay within bounds
+                r, g, b = max(0, r), max(0, g), max(0, b)
+                
+                draw.line([(x, y), (x + 3, y)], fill=(r, g, b))
+        
+        # Add decorative elements
+        self._add_decorative_shapes(draw, width, height, theme)
+        
+        # Add category name
+        self._add_category_text(draw, width, height, theme)
+        
+        # Add news title (if it fits)
+        self._add_news_title(draw, width, height, haber.baslik, theme)
+        
+        # Add sport icon
+        self._add_sport_icon(draw, width, height, theme)
+        
+        # Save image
+        output = io.BytesIO()
+        image.save(output, format='JPEG', quality=90, optimize=True)
+        output.seek(0)
+        
+        # Generate filename
+        safe_title = slugify(haber.baslik)[:30]
+        unique_id = hashlib.md5(f"{haber.id}_{haber.baslik}".encode()).hexdigest()[:8]
+        filename = f"category_{category_slug}_{safe_title}_{unique_id}.jpg"
+        
+        # Save to news item
+        haber.resim.save(filename, ContentFile(output.read()), save=True)
+        
+    def _add_decorative_shapes(self, draw, width, height, theme):
+        """Add decorative geometric shapes"""
+        try:
+            # Add some geometric patterns
+            primary = theme['primary']
+            secondary = theme['secondary']
+            
+            # Create semi-transparent overlay color
+            overlay_color = tuple(min(255, c + 30) for c in primary)
+            
+            # Add diagonal lines
+            for i in range(0, width + height, 60):
+                draw.line([(i, 0), (i - height, height)], fill=overlay_color, width=2)
+            
+            # Add corner accents
+            corner_size = 100
+            draw.polygon([(0, 0), (corner_size, 0), (0, corner_size)], fill=secondary)
+            draw.polygon([(width - corner_size, height), (width, height), (width, height - corner_size)], fill=secondary)
+            
+        except Exception:
+            pass  # Skip decorations if they fail
+    
+    def _add_category_text(self, draw, width, height, theme):
+        """Add category name text"""
+        try:
+            # Try to load a font
+            try:
+                font = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 48)
+            except:
+                try:
+                    font = ImageFont.truetype('arial.ttf', 48)
+                except:
+                    font = ImageFont.load_default()
+            
+            text = theme['name']
+            
+            # Calculate text position (top center)
+            try:
+                bbox = draw.textbbox((0, 0), text, font=font)
+                text_width = bbox[2] - bbox[0]
+            except:
+                text_width = len(text) * 30  # Fallback estimate
+            
+            x = (width - text_width) // 2
+            y = 80
+            
+            # Add text shadow
+            draw.text((x + 3, y + 3), text, fill=(0, 0, 0, 128), font=font)
+            # Add main text
+            draw.text((x, y), text, fill=theme['secondary'], font=font)
+            
+        except Exception:
+            pass  # Skip text if it fails
+    
+    def _add_news_title(self, draw, width, height, title, theme):
+        """Add news title text (wrapped)"""
+        try:
+            # Try to load a smaller font for the title
+            try:
+                font = ImageFont.truetype('C:/Windows/Fonts/arial.ttf', 24)
+            except:
+                try:
+                    font = ImageFont.truetype('arial.ttf', 24)
+                except:
+                    font = ImageFont.load_default()
+            
+            # Wrap the title text
+            max_chars_per_line = 50
+            wrapped_lines = textwrap.wrap(title, width=max_chars_per_line)
+            
+            # Limit to 3 lines
+            if len(wrapped_lines) > 3:
+                wrapped_lines = wrapped_lines[:3]
+                wrapped_lines[2] = wrapped_lines[2][:47] + "..."
+            
+            # Calculate starting position (center bottom area)
+            line_height = 35
+            total_height = len(wrapped_lines) * line_height
+            start_y = height - total_height - 100
+            
+            # Draw each line
+            for i, line in enumerate(wrapped_lines):
+                try:
+                    bbox = draw.textbbox((0, 0), line, font=font)
+                    text_width = bbox[2] - bbox[0]
+                except:
+                    text_width = len(line) * 15  # Fallback estimate
+                
+                x = (width - text_width) // 2
+                y = start_y + (i * line_height)
+                
+                # Add text shadow
+                draw.text((x + 2, y + 2), line, fill=(0, 0, 0, 180), font=font)
+                # Add main text
+                draw.text((x, y), line, fill=theme['secondary'], font=font)
+                
+        except Exception:
+            pass  # Skip title if it fails
+    
+    def _add_sport_icon(self, draw, width, height, theme):
+        """Add sport icon/emoji"""
+        try:
+            # Try to add emoji icon (may not work on all systems)
+            try:
+                icon_font = ImageFont.truetype('seguiemj.ttf', 80)
+                icon = theme['icon']
+                
+                # Position in bottom right
+                x = width - 150
+                y = height - 150
+                
+                draw.text((x, y), icon, font=icon_font)
+            except:
+                # Fallback: draw a simple geometric shape
+                x = width - 120
+                y = height - 120
+                size = 60
+                
+                # Draw a circle as fallback icon
+                draw.ellipse([x, y, x + size, y + size], 
+                           fill=theme['secondary'], 
+                           outline=theme['primary'], 
+                           width=4)
+                
+        except Exception:
+            pass  # Skip icon if it fails
+    
+    def reject(self, admin_user):
+        """Reject the pending news item"""
+        if self.onaylandi or self.reddedildi:
+            raise ValueError("Bu haber zaten onaylanmış veya reddedilmiş")
+        
+        self.onaylandi = False
+        self.reddedildi = True
+        self.red_tarihi = timezone.now()
+        self.onaylayan = admin_user
+        self.save()
+
+class Yorum(models.Model):
+    haber = models.ForeignKey(Haber, on_delete=models.CASCADE, related_name='yorumlar')
+    yazar = models.ForeignKey(User, on_delete=models.CASCADE)
+    icerik = models.TextField()
+    olusturma_tarihi = models.DateTimeField(default=timezone.now)
+    guncelleme_tarihi = models.DateTimeField(auto_now=True)
+    onaylandi = models.BooleanField(default=True)
+    ust_yorum = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='alt_yorumlar')
+    
+    class Meta:
+        ordering = ['-olusturma_tarihi']
+        verbose_name_plural = "Yorumlar"
+    
+    def __str__(self):
+        return f"{self.yazar.username} - {self.haber.baslik}"
+    
+    @property
+    def is_reply(self):
+        return self.ust_yorum is not None
+
+class Favori(models.Model):
+    kullanici = models.ForeignKey(User, on_delete=models.CASCADE)
+    haber = models.ForeignKey(Haber, on_delete=models.CASCADE)
+    olusturma_tarihi = models.DateTimeField(default=timezone.now)
+    
+    class Meta:
+        unique_together = ('kullanici', 'haber')
+        ordering = ['-olusturma_tarihi']
+        verbose_name_plural = "Favoriler"
+    
+    def __str__(self):
+        return f'{self.kullanici.username} - {self.haber.baslik}'
+
+class UserProfile(models.Model):
+    USER_TYPE_CHOICES = [
+        ('admin', 'Admin'),
+        ('yetkili', 'Yetkili'),
+        ('abone', 'Abone'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user_type = models.CharField(max_length=10, choices=USER_TYPE_CHOICES, default='abone')
+    bio = models.TextField(blank=True, max_length=500)
+    location = models.CharField(blank=True, max_length=30)
+    birth_date = models.DateField(null=True, blank=True)
+    
+    def __str__(self):
+        return f'{self.user.username} - {self.get_user_type_display()}'

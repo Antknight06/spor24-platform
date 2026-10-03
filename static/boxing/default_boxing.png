@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a1a;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#333333;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="gloveGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#8B0000;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FF0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8B0000;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FFD700;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFA500;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FFD700;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="300" fill="url(#bgGradient)"/>
+  
+  <!-- Boxing Ring -->
+  <rect x="50" y="50" width="300" height="200" fill="none" stroke="url(#ringGradient)" stroke-width="4"/>
+  <rect x="60" y="60" width="280" height="180" fill="none" stroke="url(#ringGradient)" stroke-width="2" stroke-dasharray="10,5"/>
+  
+  <!-- Ring Ropes -->
+  <line x1="50" y1="90" x2="350" y2="90" stroke="url(#ringGradient)" stroke-width="3"/>
+  <line x1="50" y1="150" x2="350" y2="150" stroke="url(#ringGradient)" stroke-width="3"/>
+  <line x1="50" y1="210" x2="350" y2="210" stroke="url(#ringGradient)" stroke-width="3"/>
+  
+  <!-- Boxing Glove -->
+  <g transform="translate(150, 100)">
+    <!-- Glove Base -->
+    <path d="M0,0 Q30,-40 70,-30 Q110,-20 120,20 Q125,70 100,110 Q70,130 30,120 Q0,110 -10,80 Q-15,50 0,0 Z" fill="url(#gloveGradient)" stroke="#000000" stroke-width="3"/>
+    
+    <!-- Palm Area -->
+    <ellipse cx="50" cy="50" rx="30" ry="25" fill="#FF6347" stroke="#000000" stroke-width="2"/>
+    
+    <!-- Fingers -->
+    <ellipse cx="90" cy="20" rx="12" ry="20" fill="#FF4500" stroke="#000000" stroke-width="2"/>
+    <ellipse cx="100" cy="45" rx="12" ry="20" fill="#FF4500" stroke="#000000" stroke-width="2"/>
+    <ellipse cx="90" cy="70" rx="12" ry="20" fill="#FF4500" stroke="#000000" stroke-width="2"/>
+    <ellipse cx="75" cy="90" rx="12" ry="15" fill="#FF4500" stroke="#000000" stroke-width="2"/>
+    
+    <!-- Wrist -->
+    <rect x="-15" y="80" width="40" height="25" fill="url(#gloveGradient)" stroke="#000000" stroke-width="3" rx="8"/>
+    
+    <!-- Laces -->
+    <rect x="15" y="35" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    <rect x="25" y="35" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    <rect x="35" y="35" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    <rect x="45" y="35" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    
+    <rect x="15" y="60" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    <rect x="25" y="60" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+    <rect x="35" y="60" width="5" height="20" fill="#FFFFFF" stroke="#CCCCCC" stroke-width="1"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="30" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#FFD700" text-anchor="middle">BOXING NEWS</text>
+</svg>

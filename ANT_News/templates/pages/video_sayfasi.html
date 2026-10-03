@@ -1,0 +1,52 @@
+{% extends 'newsbit/base.html' %}
+{% load static %}
+
+{% block content %}
+<section class="block-wrapper">
+    <div class="container-fluid px-md-5">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="news-style-one mb-40">
+                    <h3 class="news-title">
+                        <span>Videolar</span>
+                    </h3>
+                    
+                    <div class="row mt-4">
+                        <!-- Video 1 -->
+                        <div class="col-lg-4 col-md-6 mb-4 d-flex">
+                            <div class="post-block-wrapper card-news-premium w-100 d-flex flex-column" style="min-height: 350px;">
+                                <div class="post-thumbnail-wrapper zoom-in-effect" style="position: relative; height: 220px; overflow: hidden; background-color: #0b0f19;">
+                                    <a href="https://www.youtube.com/watch?v=lhPmpu_yujo" target="_blank" style="display: block; width: 100%; height: 100%;">
+                                        <!-- Blurry Background -->
+                                        <div class="news-img-blur-bg" style="background-image: url(https://img.youtube.com/vi/lhPmpu_yujo/0.jpg);"></div>
+                                        <!-- Fit Image -->
+                                        <img class="img-fluid news-img-fit" src="https://img.youtube.com/vi/lhPmpu_yujo/0.jpg" alt="Türkiye Ümit Genç U21 Karate Şampiyonası" />
+                                        <div class="play-icon-overlay" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; font-size: 52px; color: rgba(255, 255, 255, 0.9); transition: all 0.3s; text-shadow: 0 4px 15px rgba(0,0,0,0.6);">
+                                            <i class="fa fa-play-circle"></i>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="post-content p-3 d-flex flex-column flex-grow-1">
+                                    <h2 class="post-title" style="font-size: 16px; font-weight: 700; line-height: 22px; margin-bottom: 10px;">
+                                        <a href="https://www.youtube.com/watch?v=lhPmpu_yujo" target="_blank" style="text-decoration: none;">Türkiye Ümit Genç U21 Karate Şampiyonası 2025 Elazığ 3.Gün Tatami-5</a>
+                                    </h2>
+                                    <div class="post-meta mt-auto pt-2 border-top border-secondary">
+                                        <span class="posted-time" style="font-size: 12px; color: #94a3b8;"><i class="fa fa-youtube-play mr-2" style="color: #ff0000;"></i>YouTube</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .play-icon-overlay:hover {
+        transform: translate(-50%, -50%) scale(1.15) !important;
+        color: #ff0000 !important;
+    }
+</style>
+{% endblock %}

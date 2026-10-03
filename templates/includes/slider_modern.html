@@ -1,0 +1,26 @@
+{% load static %}
+<div class="sliderWrapper">
+    <div class="headlineModul type3D swiper-container">
+        <div class="swiper-wrapper">
+            {% for haber in manset_haberler %}
+            <div class="swiper-slide">
+                <a class="img" href="{% url 'haberler:haber_detay' haber.slug %}" target="_self">
+                    <picture>
+                        <!-- Resim -->
+                        <img alt="{{ haber.baslik }}" decoding="async" height="576" loading="lazy"
+                            src="{{ haber.resim.url }}" width="576" />
+                    </picture>
+                </a>
+                <span class="titleWrap">
+                    <a class="link" href="{% url 'haberler:haber_detay' haber.slug %}" target="_self">
+                        {{ haber.baslik }}
+                    </a>
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-pagination"></div>
+        <div class="swiper-button-next"><i class="flaticon-next"></i></div>
+        <div class="swiper-button-prev"><i class="flaticon-back"></i></div>
+    </div>
+</div>

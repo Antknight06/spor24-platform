@@ -1,0 +1,417 @@
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .models import Haber, Kategori, UserProfile, Favori, Yorum
+from django.core.paginator import Paginator
+from django.db.models import Q
+from datetime import datetime, timedelta
+from django.utils import timezone
+import random
+import requests
+from django.core.cache import cache
+from django.db.models import Count
+import json
+
+def kose_yazilari_listesi(request):
+    # Sadece köşe yazıları
+    kose_yazilari = Haber.objects.filter(kose_yazisi=True, yayinlandi=True).order_by('-olusturma_tarihi')
+    return render(request, 'haberler/kose_yazilari_listesi.html', {'kose_yazilari': kose_yazilari})
+
+
+
+def anasayfa(request):
+    # --- HAVA DURUMU KODU BAŞLANGIÇ ---
+    weather_data = cache.get('weather_data') # Önce önbelleğe bak
+    if not weather_data:                     # Önbellekte yoksa
+        # --- BU KOD BLOKU TAMAMEN if'in İÇİNDE OLMALI (GİRİNTİLİ) ---
+        # print("--- Hava Durumu: Önbellek boş, API'den çekiliyor ---") # Logu kapattık
+        API_KEY = "0eee6a155bbb6dbed48dd8f58805f850" 
+        city = "Ankara"
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&appid={API_KEY}&units=metric&lang=tr"
+        
+        try:
+            # Try'ın başında None yapalım ki hata olursa None dönsün
+            current_weather_data = None 
+            response = requests.get(url, timeout=5)
+            response.raise_for_status() 
+            data = response.json()
+            
+            temp_value = data['main']['temp'] 
+            description_value = data['weather'][0]['description'] 
+            icon_value = data['weather'][0]['icon'] 
+
+            current_weather_data = {
+                'city': city,
+                'temp': round(temp_value), 
+                'description': description_value.capitalize(),
+                'icon': icon_value
+            }
+            
+            cache.set('weather_data', current_weather_data, 7200) # Veriyi 2 saatliğine kaydet
+            weather_data = current_weather_data # weather_data değişkenini güncelle
+
+        except Exception as e: 
+            print(f"--- Hava durumu KOD hatası veya API hatası (önbellek boşken): {e} ---") 
+            weather_data = None # Hata durumunda None olarak ayarla (zaten try başında yapmıştık ama garanti olsun)
+        # --- İÇERİDEKİ KOD BLOKU BİTİŞ ---
+    
+    # else: # Önbellekte varsa log yazdırabiliriz (isteğe bağlı)
+    #    print("--- Hava Durumu: Önbellekten okundu ---")
+
+    # --- HAVA DURUMU KODU BİTİŞ ---
+
+    # Sizin mevcut anasayfa kodunuz:
+    manset_haber = Haber.objects.filter(manset_haberi=True, yayinlandi=True).first()
+    son_haberler = Haber.objects.filter(yayinlandi=True, kose_yazisi=False)[:8]
+    anasayfa_haberleri = Haber.objects.filter(yayinlandi=True).order_by('-goruntulenme_sayisi')[:5]
+    son_kose_yazilari = Haber.objects.filter(yayinlandi=True, kose_yazisi=True)[:4]
+    one_week_ago = timezone.now() - timedelta(days=7)
+    weekly_news = Haber.objects.filter(
+        yayinlandi=True,
+        olusturma_tarihi__gte=one_week_ago
+    ).exclude(resim='').order_by('-olusturma_tarihi')
+    if weekly_news.count() < 10:
+        all_recent_news = Haber.objects.filter(
+            yayinlandi=True
+        ).exclude(resim='').order_by('-olusturma_tarihi')[:20]
+        news_list = list(all_recent_news)
+        random.shuffle(news_list)
+        one_cikan_haberler = news_list[:10]
+    else:
+        weekly_list = list(weekly_news[:20]) 
+        random.shuffle(weekly_list) 
+        one_cikan_haberler = weekly_list[:10] 
+    kategoriler = Kategori.objects.all()
+
+    # Context'e 'hava_durumu'nu ekliyoruz:
+    context = {
+        'manset_haber': manset_haber,
+        'son_haberler': son_haberler,
+        'anasayfa_haberleri': anasayfa_haberleri,
+        'son_kose_yazilari': son_kose_yazilari,
+        'one_cikan_haberler': one_cikan_haberler,
+        'kategoriler': kategoriler,
+        'hava_durumu': weather_data, 
+    }
+
+    return render(request, 'ana_sayfa.html', context)
+
+
+
+
+def haber_listesi(request):
+
+    # BU KODLAR DA FONKSİYONUN ANA GİRİNTİ SEVİYESİNDE OLMALI
+    haberler = Haber.objects.filter(yayinlandi=True)
+
+    paginator = Paginator(haberler, 10)
+    sayfa_numarasi = request.GET.get('page')
+    page_obj = paginator.get_page(sayfa_numarasi)
+
+    context = {
+        'page_obj': page_obj,
+        'kategoriler': Kategori.objects.all(), 
+    }
+
+    return render(request, 'ana_sayfa.html', context)
+
+
+def haber_detay(request, slug):
+    # Tüm haberler (otomatik eklenenler dahil)
+    haber = get_object_or_404(Haber, slug=slug, yayinlandi=True)
+    
+    # Görüntülenme sayısını artır
+    haber.goruntulenme_sayisi += 1
+    haber.save(update_fields=['goruntulenme_sayisi'])
+    
+    # Get favorite count for this news article
+    favori_sayisi = Favori.objects.filter(haber=haber).count()
+    
+    # Check if current user is the author of this article
+    kullanici_favori_mi = False
+    if request.user.is_authenticated:
+        kullanici_favori_mi = Favori.objects.filter(haber=haber, kullanici=request.user).exists()
+    
+    # Tüm ilgili haberler (otomatik eklenenler dahil)
+    ilgili_haberler = Haber.objects.filter(
+        kategori=haber.kategori, 
+        yayinlandi=True
+    ).exclude(id=haber.id)[:4]
+    
+    # Count only top-level comments (not replies)
+    yorum_sayisi = Yorum.objects.filter(haber=haber, ust_yorum=None).count()
+    
+    context = {
+        'haber': haber,
+        'ilgili_haberler': ilgili_haberler,
+        'kategoriler': Kategori.objects.all(),
+        'favori_sayisi': favori_sayisi,
+        'kullanici_favori_mi': kullanici_favori_mi,
+        'yorum_sayisi': yorum_sayisi,
+    }
+    
+    return render(request, 'haberler/haber_detay.html', context)
+
+def kategori_haberler(request, slug):
+    kategori = get_object_or_404(Kategori, slug=slug)
+    # Tüm haberler (otomatik eklenenler dahil)
+    haberler = Haber.objects.filter(kategori=kategori, yayinlandi=True, kose_yazisi=False)
+    kose_yazilari = Haber.objects.filter(kategori=kategori, yayinlandi=True, kose_yazisi=True)[:5]
+    
+    paginator = Paginator(haberler, 12)
+    sayfa_numarasi = request.GET.get('page')
+    page_obj = paginator.get_page(sayfa_numarasi)
+    
+    context = {
+        'kategori': kategori,
+        'page_obj': page_obj,
+        'kose_yazilari': kose_yazilari,
+        'kategoriler': Kategori.objects.all(),
+    }
+    
+    return render(request, 'haberler/kategori_haberler.html', context)
+
+def custom_login(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        
+        # Use Django's authenticate function which will use our custom backend
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            # Redirect based on user type
+            try:
+                user_profile = user.userprofile
+                if user_profile.user_type == 'admin':
+                    return redirect('haberler:admin_dashboard')
+                elif user_profile.user_type == 'yetkili':
+                    return redirect('haberler:yetkili_dashboard')
+                else:  # abone
+                    return redirect('haberler:abone_dashboard')
+            except UserProfile.DoesNotExist:
+                # If no profile exists, create one with default abone type
+                UserProfile.objects.create(user=user, user_type='abone')
+                return redirect('haberler:abone_dashboard')
+        else:
+            messages.error(request, 'Geçersiz e-posta adresi veya şifre.' if '@' in username else 'Geçersiz kullanıcı adı veya şifre.')
+    
+    return render(request, 'auth/login.html')
+
+def custom_logout(request):
+    logout(request)
+    return redirect('anasayfa')
+
+def register(request):
+    if request.method == 'POST':
+        # Debug: Print all POST data
+        print("POST data:", request.POST)
+        
+        user_type = request.POST.get('user_type', 'abone')
+        print("User type:", user_type)
+        
+        # Get fields based on user type
+        if user_type == 'yetkili':
+            first_name = request.POST.get('first_name', '')
+            last_name = request.POST.get('last_name', '')
+            email = request.POST.get('yetkili_email', '')
+            password1 = request.POST.get('yetkili_password1', '')
+            password2 = request.POST.get('yetkili_password2', '')
+            # For yetkililer, username will be first name + last name
+            username = f"{first_name} {last_name}".strip()
+        elif user_type == 'admin':
+            # For administrators, use the standard username field
+            username = request.POST.get('abone_username', '')
+            email = request.POST.get('abone_email', '')
+            password1 = request.POST.get('abone_password1', '')
+            password2 = request.POST.get('abone_password2', '')
+            first_name = ''
+            last_name = ''
+        else:  # abone or any other type
+            username = request.POST.get('abone_username', '')
+            email = request.POST.get('abone_email', '')
+            password1 = request.POST.get('abone_password1', '')
+            password2 = request.POST.get('abone_password2', '')
+            first_name = ''
+            last_name = ''
+        
+        print(f"Username: {username}, Email: {email}, Password1: {password1}, Password2: {password2}")
+        print(f"First name: {first_name}, Last name: {last_name}")
+        
+        if password1 != password2:
+            messages.error(request, 'Şifreler eşleşmiyor.')
+            return render(request, 'auth/register.html')
+        
+        if not username:
+            messages.error(request, 'Kullanıcı adı gereklidir.')
+            return render(request, 'auth/register.html')
+            
+        if not email:
+            messages.error(request, 'Email adresi gereklidir.')
+            return render(request, 'auth/register.html')
+            
+        if not password1:
+            messages.error(request, 'Şifre gereklidir.')
+            return render(request, 'auth/register.html')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, 'Bu kullanıcı adı zaten alınmış.')
+            return render(request, 'auth/register.html')
+        
+        if User.objects.filter(email=email).exists():
+            messages.error(request, 'Bu email zaten kullanımda.')
+            return render(request, 'auth/register.html')
+        
+        # Create user
+        try:
+            user = User.objects.create_user(username=username, email=email, password=password1)
+            print("User created successfully:", user)
+        except Exception as e:
+            messages.error(request, f'Kullanıcı oluşturulurken bir hata oluştu: {str(e)}')
+            return render(request, 'auth/register.html')
+        
+        # Set first and last name for yetkili users
+        if user_type == 'yetkili' and first_name and last_name:
+            user.first_name = first_name
+            user.last_name = last_name
+            user.save()
+            print("First and last name set for yetkili user")
+        
+        # Create or update user profile
+        try:
+            user_profile, created = UserProfile.objects.get_or_create(user=user, defaults={'user_type': user_type})
+            if not created:
+                # If profile already existed, update the user_type
+                user_profile.user_type = user_type
+                user_profile.save()
+        except Exception as e:
+            messages.error(request, f'Kullanıcı profili oluşturulurken bir hata oluştu: {str(e)}')
+            return render(request, 'auth/register.html')
+        
+        user_profile.save()
+        print("User profile saved:", user_profile)
+        
+        # Redirect to login page with user_type parameter
+        if user_type == 'yetkili':
+            response = redirect('haberler:custom_login' + '?user_type=yetkili')
+        elif user_type == 'abone':
+            response = redirect('haberler:custom_login' + '?user_type=abone')
+        else:
+            response = redirect('haberler:custom_login')
+        
+        # Add success message after redirect to avoid conflicts
+        messages.success(request, 'Hesabınız oluşturuldu. Şimdi giriş yapabilirsiniz.')
+        return response
+    
+    return render(request, 'auth/register.html')
+
+@login_required
+def admin_dashboard(request):
+    if not hasattr(request.user, 'userprofile') or request.user.userprofile.user_type != 'admin':
+        messages.error(request, 'Bu sayfaya erişim izniniz yok.')
+        return redirect('anasayfa')
+    
+    # Get dashboard statistics (including all news)
+    total_haberler = Haber.objects.count()
+    total_kategoriler = Kategori.objects.count()
+    total_kullanicilar = User.objects.count()
+    total_aboneler = UserProfile.objects.filter(user_type='abone').count()
+    total_yetkililer = UserProfile.objects.filter(user_type='yetkili').count()
+    
+    context = {
+        'user_type': 'Yönetici',
+        'dashboard_title': 'Yönetici Paneli',
+        'permissions': ['Tüm haberleri düzenleme', 'Kullanıcı yönetimi', 'Kategori yönetimi', 'Sistem ayarları'],
+        'total_haberler': total_haberler,
+        'total_kategoriler': total_kategoriler,
+        'total_kullanicilar': total_kullanicilar,
+        'total_aboneler': total_aboneler,
+        'total_yetkililer': total_yetkililer,
+    }
+    return render(request, 'auth/dashboard_admin.html', context)
+
+@login_required
+def yetkili_dashboard(request):
+    if not hasattr(request.user, 'userprofile') or request.user.userprofile.user_type != 'yetkili':
+        messages.error(request, 'Bu sayfaya erişim izniniz yok.')
+        return redirect('anasayfa')
+    
+    # Get user's news and opinion articles
+    user_haberler = Haber.objects.filter(yazar=request.user, kose_yazisi=False).count()
+    user_kose_yazilari = Haber.objects.filter(yazar=request.user, kose_yazisi=True).count()
+    
+    context = {
+        'user_type': 'Yetkili',
+        'dashboard_title': 'Yetkili Paneli',
+        'permissions': ['Haber ekleme', 'Kendi haberlerini düzenleme', 'Köşe yazısı ekleme', 'Kendi köşe yazılarını düzenleme', 'Yorum yönetimi'],
+        'user_haberler': user_haberler,
+        'user_kose_yazilari': user_kose_yazilari
+    }
+    return render(request, 'auth/dashboard_yetkili.html', context)
+
+@login_required
+def abone_dashboard(request):
+    if not hasattr(request.user, 'userprofile') or request.user.userprofile.user_type != 'abone':
+        messages.error(request, 'Bu sayfaya erişim izniniz yok.')
+        return redirect('anasayfa')
+    
+    # Get user's reading stats
+    okunan_haber_sayisi = 42  # This would need to be implemented based on actual reading history
+    yorum_sayisi = Yorum.objects.filter(yazar=request.user).count()
+    favori_sayisi = Favori.objects.filter(kullanici=request.user).count()
+    kategori_sayisi = 5  # This could be dynamic based on user preferences
+    
+    context = {
+        'user_type': 'Abone',
+        'dashboard_title': 'Abone Paneli',
+        'permissions': ['Haber okuma', 'Yorum yapma', 'Profil yönetimi'],
+        'okunan_haber_sayisi': okunan_haber_sayisi,
+        'yorum_sayisi': yorum_sayisi,
+        'favori_sayisi': favori_sayisi,
+        'kategori_sayisi': kategori_sayisi,
+    }
+    return render(request, 'auth/dashboard_abone.html', context)
+
+def haber_arama(request):
+    query = request.GET.get('q', '')
+    haberler = []
+    kategoriler = Kategori.objects.all()
+    
+    if query:
+        # Search in news titles, content, and summaries
+        haberler = Haber.objects.filter(
+            yayinlandi=True
+        ).filter(
+            Q(baslik__icontains=query) | 
+            Q(ozet__icontains=query) | 
+            Q(icerik__icontains=query)
+        )
+    
+    context = {
+        'query': query,
+        'haberler': haberler,
+        'kategoriler': kategoriler,
+    }
+    
+    return render(request, 'haberler/arama_sonuclari.html', context)
+
+# --- Statik Sayfa Fonksiyonları ---
+
+def hakkimizda(request):
+    return render(request, 'pages/hakkimizda.html')
+
+def iletisim(request):
+    return render(request, 'pages/iletisim.html')
+
+def gizlilik_politikasi(request):
+    return render(request, 'pages/gizlilik.html')
+
+def kullanim_sartlari(request):
+    return render(request, 'pages/kullanim.html')
+def video_sayfasi(request):
+    return render(request, 'pages/video_sayfasi.html')
+def kunye(request):
+    return render(request, 'pages/kunye.html')

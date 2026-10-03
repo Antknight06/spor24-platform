@@ -1,0 +1,312 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}İzin & Yetki Matrisi | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block content %}
+<style>
+/* SPOR24 MASTER PERMISSION MATRIX STYLES */
+.matrix-wrapper {
+    padding-bottom: 6rem;
+}
+.matrix-card {
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+html.dark .matrix-card {
+    background-color: #111827 !important;
+    border-color: #1f2937 !important;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4) !important;
+}
+
+.matrix-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+.matrix-table th, .matrix-table td {
+    padding: 0.75rem 1rem;
+    vertical-align: middle;
+}
+.matrix-table thead th {
+    background-color: #f8fafc;
+    color: #475569;
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #e2e8f0;
+    position: sticky;
+    top: 0;
+    z-index: 20;
+}
+html.dark .matrix-table thead th {
+    background-color: #0f172a !important;
+    color: #94a3b8 !important;
+    border-bottom-color: #334155 !important;
+}
+
+.matrix-model-heading {
+    background-color: #f1f5f9;
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 0.875rem;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+}
+html.dark .matrix-model-heading {
+    background-color: #1e293b !important;
+    color: #f8fafc !important;
+    border-color: #334155 !important;
+}
+
+.matrix-row {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.15s ease;
+}
+html.dark .matrix-row {
+    border-bottom: 1px solid #1f2937 !important;
+}
+.matrix-row:hover {
+    background-color: #f8fafc;
+}
+html.dark .matrix-row:hover {
+    background-color: #1a2234 !important;
+}
+
+.perm-checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.35rem;
+    border: 2px solid #94a3b8;
+    cursor: pointer;
+    accent-color: #4f46e5;
+    transition: transform 0.1s ease;
+}
+.perm-checkbox:hover {
+    transform: scale(1.2);
+}
+html.dark .perm-checkbox {
+    border-color: #475569;
+    background-color: #1e293b;
+}
+
+.perm-action-badge {
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 0.35rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.perm-save-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(15, 23, 42, 0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    padding: 0.85rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 50;
+    box-shadow: 0 -10px 25px rgba(0, 0, 0, 0.35);
+}
+</style>
+
+<div class="matrix-wrapper space-y-6">
+    <!-- HEADER BAR -->
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 p-6 md:p-8 text-white shadow-xl border border-indigo-900/50">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-2">
+                    <span class="material-symbols-outlined text-xs">verified_user</span>
+                    GÜVENLİK & ROL YÖNETİMİ
+                </div>
+                <h1 class="text-2xl md:text-3xl font-black tracking-tight">Gelişmiş İzin & Yetki Matrisi</h1>
+                <p class="mt-1 text-sm text-slate-300">
+                    Sistemdeki rollerin haber, köşe yazısı, bot ve reklam modelleri üzerindeki CRUD yetkilerini tek ekrandan yönetin.
+                </p>
+            </div>
+            <!-- YENİ ROL EKLE FORMU -->
+            <div class="flex items-center gap-3">
+                <form method="post" class="flex items-center gap-2 bg-white/10 p-1.5 rounded-xl border border-white/15 backdrop-blur">
+                    {% csrf_token %}
+                    <input type="text" name="new_group_name" placeholder="Yeni Rol / Grup Adı..." required class="px-3 py-1.5 rounded-lg bg-black/40 text-white placeholder-slate-400 text-xs border border-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-400">
+                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1 shadow">
+                        <span class="material-symbols-outlined text-sm">add_circle</span> Rol Ekle
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% if not groups %}
+    <!-- NO GROUPS NOTICE -->
+    <div class="p-8 text-center rounded-2xl border border-dashed border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900/50">
+        <span class="material-symbols-outlined text-5xl text-amber-500 mb-3">group_off</span>
+        <h3 class="text-lg font-bold text-slate-900 dark:text-white">Henüz Bir Rol veya Kullanıcı Grubu Bulunmuyor</h3>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-md mx-auto">
+            İzinleri dağıtmak için önce kullanıcı grupları (roller) tanımlanmalıdır. Varsayılan Spor24 editör rollerini tek tıkla oluşturabilirsiniz.
+        </p>
+        <form method="post" class="mt-5">
+            {% csrf_token %}
+            <button type="submit" name="create_default_groups" value="1" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-sm transition shadow-lg shadow-indigo-600/30">
+                🚀 Varsayılan Rolleri Oluştur (Editör, Yazar, Temsilci)
+            </button>
+        </form>
+    </div>
+    {% else %}
+
+    <!-- MATRIX FORM -->
+    <form method="post" id="permission-matrix-form">
+        {% csrf_token %}
+        <input type="hidden" name="save_permissions" value="1">
+
+        <div class="matrix-card">
+            <div class="overflow-x-auto">
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th style="min-width: 260px;">Model & İşlem Türü</th>
+                            {% for group in groups %}
+                            <th class="text-center" style="min-width: 170px;">
+                                <div class="flex flex-col items-center gap-1.5">
+                                    <span class="text-sm font-black text-slate-900 dark:text-white">{{ group.name }}</span>
+                                    <div class="flex items-center gap-2">
+                                        <button type="button" onclick="toggleColumn({{ group.id }}, true)" class="text-[10px] font-semibold text-indigo-500 dark:text-indigo-400 hover:underline">Hepsini Seç</button>
+                                        <span class="text-slate-400 text-xs">|</span>
+                                        <button type="button" onclick="toggleColumn({{ group.id }}, false)" class="text-[10px] font-semibold text-rose-500 dark:text-rose-400 hover:underline">Temizle</button>
+                                    </div>
+                                </div>
+                            </th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in matrix_data %}
+                        <!-- MODEL HEADING -->
+                        <tr class="matrix-model-heading">
+                            <td colspan="{{ groups|length|add:1 }}" class="py-2.5 px-4">
+                                <div class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined text-indigo-500 text-base">folder</span>
+                                    <span>{{ item.app|upper }} &rsaquo; {{ item.model }}</span>
+                                </div>
+                            </td>
+                        </tr>
+
+                        <!-- VIEW PERMISSION -->
+                        <tr class="matrix-row">
+                            <td class="font-medium text-slate-700 dark:text-slate-300">
+                                <span class="perm-action-badge bg-blue-500/10 text-blue-500 border border-blue-500/20">
+                                    <span class="material-symbols-outlined text-xs">visibility</span> Görüntüleme (View)
+                                </span>
+                            </td>
+                            {% for group in groups %}
+                            <td class="text-center">
+                                {% if item.perms.view %}
+                                <input type="checkbox" name="perm_{{ group.id }}_{{ item.perms.view.id }}" class="perm-checkbox group-col-{{ group.id }}" {% if item.perms.view in group.permissions.all %}checked{% endif %}>
+                                {% else %}
+                                <span class="text-slate-400 dark:text-slate-600 text-xs">—</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- ADD PERMISSION -->
+                        <tr class="matrix-row">
+                            <td class="font-medium text-slate-700 dark:text-slate-300">
+                                <span class="perm-action-badge bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                                    <span class="material-symbols-outlined text-xs">add_circle</span> Ekleme (Add)
+                                </span>
+                            </td>
+                            {% for group in groups %}
+                            <td class="text-center">
+                                {% if item.perms.add %}
+                                <input type="checkbox" name="perm_{{ group.id }}_{{ item.perms.add.id }}" class="perm-checkbox group-col-{{ group.id }}" {% if item.perms.add in group.permissions.all %}checked{% endif %}>
+                                {% else %}
+                                <span class="text-slate-400 dark:text-slate-600 text-xs">—</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- CHANGE PERMISSION -->
+                        <tr class="matrix-row">
+                            <td class="font-medium text-slate-700 dark:text-slate-300">
+                                <span class="perm-action-badge bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                                    <span class="material-symbols-outlined text-xs">edit</span> Düzenleme (Change)
+                                </span>
+                            </td>
+                            {% for group in groups %}
+                            <td class="text-center">
+                                {% if item.perms.change %}
+                                <input type="checkbox" name="perm_{{ group.id }}_{{ item.perms.change.id }}" class="perm-checkbox group-col-{{ group.id }}" {% if item.perms.change in group.permissions.all %}checked{% endif %}>
+                                {% else %}
+                                <span class="text-slate-400 dark:text-slate-600 text-xs">—</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+
+                        <!-- DELETE PERMISSION -->
+                        <tr class="matrix-row">
+                            <td class="font-medium text-slate-700 dark:text-slate-300">
+                                <span class="perm-action-badge bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                    <span class="material-symbols-outlined text-xs">delete</span> Silme (Delete)
+                                </span>
+                            </td>
+                            {% for group in groups %}
+                            <td class="text-center">
+                                {% if item.perms.delete %}
+                                <input type="checkbox" name="perm_{{ group.id }}_{{ item.perms.delete.id }}" class="perm-checkbox group-col-{{ group.id }}" {% if item.perms.delete in group.permissions.all %}checked{% endif %}>
+                                {% else %}
+                                <span class="text-slate-400 dark:text-slate-600 text-xs">—</span>
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FLOATING SAVE BAR -->
+        <div class="perm-save-footer">
+            <div class="flex items-center gap-3">
+                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-xs text-slate-300 font-medium hidden sm:inline">Değişiklikleri yaptıktan sonra kaydet butonuna basmayı unutmayın.</span>
+            </div>
+            <div class="flex items-center gap-3">
+                <a href="{% url 'admin:auth_group_changelist' %}" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-white/10 hover:bg-white/20 transition">
+                    Rol Listesini Aç
+                </a>
+                <button type="submit" class="bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-6 py-2.5 rounded-xl text-sm transition shadow-lg shadow-emerald-600/30 flex items-center gap-2 active:scale-95">
+                    <span class="material-symbols-outlined text-base">save</span>
+                    İzinleri Kaydet
+                </button>
+            </div>
+        </div>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+function toggleColumn(groupId, state) {
+    const checkboxes = document.querySelectorAll('.group-col-' + groupId);
+    checkboxes.forEach(cb => cb.checked = state);
+}
+</script>
+{% endblock %}

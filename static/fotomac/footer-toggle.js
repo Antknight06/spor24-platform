@@ -1,0 +1,1 @@
+﻿$(".siteFooter .toggleLink").click((function(){$(this).toggleClass("open"),$(".siteFooter .tag").toggleClass("open");var e=$(this).contents().filter((function(){return 3===this.nodeType})).get(0);"DAHA FAZLA"===e.nodeValue.trim()?e.nodeValue="DAHA AZ":e.nodeValue="DAHA FAZLA "}));

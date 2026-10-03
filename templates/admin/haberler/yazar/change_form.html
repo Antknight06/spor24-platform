@@ -1,0 +1,93 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrajs %}
+    {{ block.super }}
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                console.log("Yazar admin custom tab helper initialized.");
+
+                // Custom robust tab switcher
+                $('#jazzy-tabs a').on('click', function(e) {
+                    e.preventDefault();
+                    var targetHash = $(this).attr('href');
+                    if (!targetHash || !targetHash.startsWith('#')) return;
+
+                    console.log("Switching to tab:", targetHash);
+
+                    // 1. Update tab anchors UI
+                    $('#jazzy-tabs a').removeClass('active');
+                    $(this).addClass('active');
+
+                    // 2. Update tab panes UI
+                    $('.tab-content .tab-pane').removeClass('active show');
+                    $(targetHash).addClass('active show');
+
+                    // 3. Update URL hash without scrolling the page
+                    if (history.pushState) {
+                        history.pushState(null, null, targetHash);
+                    } else {
+                        window.location.hash = targetHash;
+                    }
+                    
+                    // Call resize to adjust nested widgets (like select2)
+                    window.dispatchEvent(new Event('resize'));
+                });
+
+                // Map legacy/encoded Turkish hashes to new ASCII hashes
+                var legacyMappings = {
+                    '#kişisel-bilgiler-tab': '#kisisel-bilgiler-tab',
+                    '#ki%C5%9Fisel-bilgiler-tab': '#kisisel-bilgiler-tab',
+                    '#izinler-tab': '#izinler-ve-yetkiler-tab',
+                    '#izinler-ve-yetkiler-tab': '#izinler-ve-yetkiler-tab',
+                    '#%C3%B6nemli-tarihler-tab': '#giris-ve-kayit-tarihleri-tab',
+                    '#önemli-tarihler-tab': '#giris-ve-kayit-tarihleri-tab',
+                    '#yazar-istatistikleri-tab': '#yazar-istatistikleri-tab',
+                    '#yazar-i%CC%87statistikleri-tab': '#yazar-istatistikleri-tab',
+                    '#profil-bilgileri-tab': '#profil-detaylari-tab',
+                    '#profil-detaylari-tab': '#profil-detaylari-tab'
+                };
+
+                // Check initial hash on load
+                function handleInitialHash() {
+                    var currentHash = window.location.hash;
+                    if (!currentHash) return;
+
+                    var decodedHash = decodeURIComponent(currentHash);
+                    console.log("Handling initial hash:", currentHash, "(decoded:", decodedHash + ")");
+
+                    // Try to find the tab link directly
+                    var $targetTab = $('#jazzy-tabs a[href="' + currentHash + '"]');
+                    if ($targetTab.length === 0) {
+                        $targetTab = $('#jazzy-tabs a[href="' + decodedHash + '"]');
+                    }
+
+                    // Try legacy mapping
+                    if ($targetTab.length === 0) {
+                        var mappedHash = legacyMappings[currentHash] || legacyMappings[decodedHash];
+                        if (mappedHash) {
+                            console.log("Mapped legacy hash to:", mappedHash);
+                            $targetTab = $('#jazzy-tabs a[href="' + mappedHash + '"]');
+                        }
+                    }
+
+                    // Click the tab if found
+                    if ($targetTab.length > 0) {
+                        setTimeout(function() {
+                            $targetTab.trigger('click');
+                        }, 100);
+                    }
+                }
+
+                // Run on load
+                handleInitialHash();
+
+                // Listen to hashchange events (browser back/forward button)
+                $(window).on('hashchange', function() {
+                    handleInitialHash();
+                });
+            });
+        })(window.jQuery || window.django.jQuery || jQuery);
+    </script>
+{% endblock %}

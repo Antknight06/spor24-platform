@@ -1,0 +1,14 @@
+{% extends "admin/change_list.html" %}
+{% block object-tools-items %}
+  <li>
+    <a href="{% url 'admin:haberler_bekleyensosyalmedya_trigger_scrape' %}" class="addlink" style="background-color: #28a745; color: white; font-weight: bold; border-radius: 4px; padding: 10px 15px; margin-right: 5px;">
+      🔄 Haberleri Tara
+    </a>
+  </li>
+  <li>
+    <a href="{% url 'admin:social_media_health' %}" class="historylink" style="background-color: #17a2b8; color: white; font-weight: bold; border-radius: 4px; padding: 10px 15px; margin-right: 5px;">
+      📊 Sosyal Medya Sağlık Paneli
+    </a>
+  </li>
+  {{ block.super }}
+{% endblock %}

@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <link rel="canonical" href="https://www.spor24.net{{ request.path }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gizlilik Politikası - Spor24</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4099153035746180"
+     crossorigin="anonymous"></script>
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; flex-direction: column; min-height: 100vh; }
+        main { flex: 1; }
+        footer { background-color: #212529; color: #adb5bd; margin-top: auto; }
+        footer a { color: #adb5bd; text-decoration: none; }
+        footer a:hover { color: #fff; }
+        .policy-content h3 { margin-top: 30px; font-weight: 600; color: #212529; }
+        .policy-content p, .policy-content ul { color: #555; line-height: 1.7; }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">Spor24</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" href="/">Anasayfa</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Karate</a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{% url 'haberler:karate_antrenorler' %}?mod=harita">Antrenör Haritası</a></li>
+                            <li><a class="dropdown-item" href="{% url 'haberler:karate_antrenorler' %}?mod=liste">Antrenör Listesi</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'haberler:video_sayfasi' %}">Video</a></li>
+                    <li class="nav-item"><a class="nav-link" href="{% url 'haberler:kose-yazilari-listesi' %}">Köşe Yazıları</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container mt-5 mb-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="card shadow-sm border-0">
+                        <div class="card-body p-5 policy-content">
+                            <h1 class="mb-4 text-center fw-bold">Gizlilik Politikası</h1>
+                            <p class="text-center text-muted border-bottom pb-4">Son Güncelleme: 29 Kasım 2025</p>
+
+                            <p><strong>Spor24.net</strong> ("biz", "sitemiz") olarak kişisel verilerinizin güvenliği hususuna azami hassasiyet göstermekteyiz. Bu Gizlilik Politikası, sitemizi ziyaret ettiğinizde toplanan bilgiler ve bu bilgilerin nasıl kullanıldığı hakkında sizi bilgilendirmek amacıyla hazırlanmıştır.</p>
+
+                            <h3>1. Google AdSense ve Çerezler (Cookies)</h3>
+                            <p>Sitemiz, reklam hizmeti vermek için üçüncü taraf tedarikçi olarak Google AdSense'i kullanmaktadır.</p>
+                            <ul>
+                                <li>Google, sitemizde reklam yayınlamak için çerezleri (cookies) kullanır.</li>
+                                <li>Google'ın DART çerezlerini kullanması, kendisinin ve iş ortaklarının, sitemize ve internetteki diğer sitelere yaptığınız ziyaretlere dayalı olarak size reklam sunmasına olanak tanır.</li>
+                                <li>Kullanıcılar, <a href="https://policies.google.com/technologies/ads" target="_blank" rel="nofollow">Google Reklam ve İçerik Ağı Gizlilik Politikası</a>'nı ziyaret ederek DART çerezinin kullanılmasını engelleyebilirler.</li>
+                            </ul>
+
+                            <h3>2. Kayıt Dosyaları (Log Files)</h3>
+                            <p>Birçok standart web sunucusu gibi <strong>Spor24.net</strong> de istatistiksel amaçlı log dosyaları kaydı tutar. Bu dosyalar; IP adresiniz, internet servis sağlayıcınız, tarayıcınızın özellikleri, işletim sisteminiz ve siteye giriş-çıkış sayfalarınız gibi standart bilgileri içerir. Log dosyaları kesinlikle istatistiksel amaçlar dışında kullanılmamakta ve mahremiyetinizi ihlal etmemektedir. IP adresiniz ve diğer bilgiler, kişisel bilgilerinizle ilişkilendirilmemektedir.</p>
+
+                            <h3>3. Dış Bağlantılar</h3>
+                            <p><strong>Spor24.net</strong>, sayfalarından farklı internet adreslerine bağlantı vermektedir. Sitemiz, link verdiği veya banner tanıtımını yaptığı sitelerin içeriklerinden veya gizlilik prensiplerinden sorumlu değildir.</p>
+
+                            <h3>4. İletişim</h3>
+                            <p>Gizlilik politikamız ile ilgili her türlü soru ve görüşleriniz için bize <a href="{% url 'haberler:iletisim' %}">iletişim sayfamızdan</a> ulaşabilirsiniz.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="py-4">
+        <div class="container text-center">
+            <div class="mb-3">
+                <a href="{% url 'haberler:hakkimizda' %}" class="mx-2">Hakkımızda</a>
+                <a href="{% url 'haberler:iletisim' %}" class="mx-2">İletişim</a>
+                <a href="{% url 'haberler:gizlilik_politikasi' %}" class="mx-2">Gizlilik Politikası</a>
+                <a href="{% url 'haberler:kullanim_sartlari' %}" class="mx-2">Kullanım Şartları</a>
+            </div>
+            <p class="small mb-0">&copy; 2025 Spor24.net - Tüm Hakları Saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

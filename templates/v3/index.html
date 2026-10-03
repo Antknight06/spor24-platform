@@ -1,0 +1,956 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <!-- Clean Console & Harmless Browser Engine WebGPU Noise Suppressor -->
+    <script>
+      (function() {
+        try {
+          if (typeof Navigator !== 'undefined' && 'gpu' in Navigator.prototype) {
+            Object.defineProperty(Navigator.prototype, 'gpu', {
+              get: function() { return undefined; },
+              configurable: true
+            });
+          }
+        } catch(e) {}
+        const _warn = console.warn;
+        console.warn = function(...args) {
+          const msg = args.map(a => (typeof a === 'object' ? JSON.stringify(a) : String(a))).join(' ');
+          if (msg.includes('powerPreference') || msg.includes('requestAdapter') || msg.includes('crbug.com/369219127')) {
+            return;
+          }
+          _warn.apply(console, args);
+        };
+      })();
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDHC74QWC4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DDHC74QWC4');
+    </script>
+
+    <!-- SPOR24.NET - MODERN v3 DARK/LIGHT PORTAL -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>SPOR24.NET | Türkiye'nin En Kapsamlı Spor Haberleri Portalı</title>
+    <!-- SEO & Social OpenGraph / Twitter Cards -->
+    <meta name="description" content="Türkiye'nin En Kapsamlı Spor Haberleri Portalı. 60+ Federasyon, Dövüş Sporları, Canlı TV ve En Güncel Spor Haberleri." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SPOR24.NET" />
+    <meta property="og:title" content="SPOR24.NET | Türkiye'nin En Kapsamlı Spor Haberleri Portalı" />
+    <meta property="og:description" content="60+ Federasyon, Dövüş Sporları, Canlı TV ve En Güncel Spor Haberleri." />
+    <meta property="og:url" content="https://spor24.net/" />
+    <meta property="og:image" content="https://spor24.net/static/img/logo_5.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SPOR24.NET | Türkiye'nin En Kapsamlı Spor Haberleri Portalı" />
+    <meta name="twitter:description" content="60+ Federasyon, Dövüş Sporları, Canlı TV ve En Güncel Spor Haberleri." />
+    <meta name="twitter:image" content="https://spor24.net/static/img/logo_5.png" />
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsMediaOrganization",
+      "name": "SPOR24.NET",
+      "url": "https://spor24.net/",
+      "logo": "https://spor24.net/static/img/logo_5.png",
+      "sameAs": [
+        "https://www.youtube.com/@spor24net",
+        "https://twitter.com/spor24net"
+      ]
+    }
+    </script>
+
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo_5.png' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="{% static 'v3/css/styles.css' %}?v=3.2.0" rel="stylesheet" />
+    <!-- Owl Carousel CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.carousel.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/assets/owl.theme.default.min.css" />
+    <link href="{% static 'v3/css/slider.css' %}?v=3.2.0" rel="stylesheet" />
+    <!-- FontAwesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .navbar-brand {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            font-size: 2rem;
+        }
+
+        .text-danger {
+            color: #c8102e !important;
+        }
+
+        .bg-danger {
+            background-color: #c8102e !important;
+        }
+
+        .btn-danger {
+            background-color: #c8102e !important;
+            border-color: #c8102e !important;
+        }
+
+        .font-black {
+            font-weight: 900;
+        }
+
+        .italic {
+            font-style: italic;
+        }
+
+        /* --- HABER KARTLARI VE GÖRSEL UYUM SİSTEMİ (4 SÜTUN) --- */
+        .one_cikan_img {
+            display: block;
+            width: 100%;
+            height: 190px;
+            overflow: hidden;
+            border-radius: 12px 12px 0 0;
+            background-color: #1a1a1a;
+        }
+        .one_cikan_img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center 20%;
+            transition: transform 0.4s ease;
+        }
+        .one_cikan_img:hover img {
+            transform: scale(1.06);
+        }
+        .one_cikan {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 16px;
+        }
+        .haber_kisa {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-weight: 700;
+            line-height: 1.4;
+            font-size: 1.05rem;
+        }
+        /* 4 SÜTUN EKSİKSİZ HİZALAMA */
+        @media (min-width: 992px) {
+            #news-container .col-lg-3, #news-container .col-xl-3 {
+                flex: 0 0 auto !important;
+                width: 25% !important;
+                max-width: 25% !important;
+            }
+        }
+
+        /* --- CARD SHARE & SOCIAL BUTTONS --- */
+        .card-share-btn {
+            font-size: 11px;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            background: none;
+        }
+        .card-share-btn:hover {
+            color: #c8102e !important;
+            transform: scale(1.05);
+        }
+        .btn-share {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            padding: 9px 16px;
+            border-radius: 50px;
+            color: #ffffff !important;
+            text-decoration: none !important;
+            border: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+        }
+        .btn-share:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            color: #ffffff !important;
+        }
+        .btn-whatsapp { background-color: #25D366; }
+        .btn-whatsapp:hover { background-color: #1eb757; }
+        .btn-facebook { background-color: #1877F2; }
+        .btn-facebook:hover { background-color: #0b65e3; }
+        .btn-x { background-color: #000000; border: 1px solid rgba(255,255,255,0.25); }
+        .btn-x:hover { background-color: #1a1a1a; }
+        .btn-telegram { background-color: #229ED9; }
+        .btn-telegram:hover { background-color: #1a8ec4; }
+        .btn-instagram {
+            background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+        }
+        .btn-instagram:hover {
+            filter: brightness(1.12);
+        }
+        .btn-copy { background-color: #475569; }
+        .btn-copy:hover { background-color: #334155; }
+
+        .hover-red:hover {
+            color: #c8102e !important;
+        }
+
+        /* --- SEARCH MODAL OVERLAY --- */
+        .search-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 80px;
+            animation: fadeInModal 0.2s ease;
+        }
+        @keyframes fadeInModal {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .search-modal-box {
+            width: 90%;
+            max-width: 680px;
+            background: #111827;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .search-modal-header {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            gap: 12px;
+        }
+        .search-modal-header input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+        .search-modal-header input::placeholder {
+            color: #64748B;
+        }
+        .search-close-btn {
+            background: none;
+            border: none;
+            color: #94A3B8;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 6px;
+            transition: color 0.15s ease;
+        }
+        .search-close-btn:hover {
+            color: #FDA4AF;
+        }
+        .search-results-list {
+            max-height: 420px;
+            overflow-y: auto;
+            padding: 10px;
+        }
+        .search-result-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            text-decoration: none !important;
+            color: #E2E8F0;
+            transition: background 0.15s ease;
+        }
+        .search-result-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #FFFFFF;
+        }
+        .search-result-img {
+            width: 58px;
+            height: 44px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: #1e293b;
+            flex-shrink: 0;
+        }
+        .search-result-info {
+            flex-grow: 1;
+            min-width: 0;
+        }
+        .search-result-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+            color: #FFFFFF;
+        }
+        .search-result-meta {
+            font-size: 0.78rem;
+            color: #94A3B8;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-search-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #ffffff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+        }
+        .nav-search-btn:hover {
+            background: #c8102e;
+            border-color: #c8102e;
+            transform: scale(1.08);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Son Dakika Bandı -->
+    <div class="bg-danger text-white py-2 shadow-sm" style="z-index: 1050; position: relative;">
+        <div class="container d-flex align-items-center">
+            <span class="badge bg-white text-danger me-3 font-black italic">SON DAKİKA</span>
+            <marquee class="font-bold flex-grow-1" scrollamount="6">
+                Muaythai Federasyonu 2025 Faaliyet Raporunu Açıkladı... | Karate Gençler Türkiye Şampiyonası Başlıyor...
+                | MMA Türkiye Ligi Tarihleri Belli Oldu...
+            </marquee>
+        </div>
+    </div>
+
+    <!-- Menü -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-lg">
+        <div class="container">
+            <a class="navbar-brand text-uppercase d-flex align-items-center gap-2" href="/">
+                <img src="{% static 'img/logo_5.png' %}" alt="SPOR24" style="height: 38px; width: auto;" onerror="this.onerror=null;this.src='/static/img/logo_5.png';">
+                <span>SPOR<span class="text-danger">24.NET</span></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <i class="fas fa-bars text-white" style="font-size: 1.25rem;"></i>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 text-uppercase italic font-black align-items-lg-center">
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red active" href="/">ANASAYFA</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-danger" href="#" id="navbarDropdownBranches"
+                            role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            🏆 BRANŞLAR ({{ aktif_federasyon_sayisi|default:"44" }})
+                        </a>
+                        <ul class="dropdown-menu bg-dark border-0 shadow-lg" style="max-height: 400px; overflow-y: auto;" aria-labelledby="navbarDropdownBranches"
+                            id="nav-branches">
+                            <!-- JS fills this -->
+                            <li><a class="dropdown-item text-white" href="#">Yükleniyor...</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="#spor24-live-tv-section">VİDEO</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/yazarlar/">YAZARLAR</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/kunye/">KÜNYE</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white hover-red" href="/istatistik/" title="Canlı Medya İstatistikleri">
+                            İSTATİSTİK
+                        </a>
+                    </li>
+
+                    {% if user.is_authenticated and user.is_staff %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-warning font-black" href="#" id="adminDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fa fa-user-shield me-1"></i>ADMIN
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-0 shadow-lg" aria-labelledby="adminDropdown">
+                            <li><a class="dropdown-item text-danger font-bold" href="/admin/" target="_blank">⚙️ Django Admin</a></li>
+                            <li><a class="dropdown-item text-warning font-bold" href="/yetkili-giris/">✍️ Yetkili Paneli</a></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/istatistik/">📊 İstatistik Merkezi</a></li>
+                            <li><hr class="dropdown-divider bg-secondary"></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/cikis/">🚪 Çıkış Yap</a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle text-white hover-red" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            GİRİŞ
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end bg-dark border-0 shadow-lg"
+                            aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item text-warning font-bold" href="/yetkili-giris/">✍️ Yetkili Paneli</a></li>
+                            <li><a class="dropdown-item text-white hover-red" href="/haberler/login/?user_type=abone">🔔 Abonelik / Bildirimler</a></li>
+                            <li>
+                                <hr class="dropdown-divider bg-secondary">
+                            </li>
+                            <li><a class="dropdown-item text-danger font-bold" href="/admin/" target="_blank">⚙️ Admin Girişi</a></li>
+                        </ul>
+                    </li>
+                    {% endif %}
+
+                    <!-- Search Modal Trigger Button -->
+                    <li class="nav-item ms-lg-2">
+                        <button class="nav-search-btn" onclick="openSearchModal()" title="Haber Ara">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </li>
+
+                    <!-- Dark / Light Mode Toggle Button -->
+                    <li class="nav-item ms-lg-2 mt-2 mt-lg-0">
+                        <button id="theme-toggle-btn" onclick="toggleTheme()" title="Koyu / Açık Tema Değiştir">
+                            <span id="theme-icon">🌙</span>
+                            <span id="theme-text">Koyu Tema</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Live Search Modal Overlay -->
+    <div id="search-modal" class="search-modal-overlay" style="display: none;" onclick="handleOverlayClick(event)">
+        <div class="search-modal-box">
+            <div class="search-modal-header">
+                <i class="fas fa-search text-danger" style="font-size: 1.2rem;"></i>
+                <input type="text" id="live-search-input" placeholder="Haber, federasyon veya sporcu ara..." autofocus autocomplete="off" oninput="handleLiveSearch(this.value)">
+                <button class="search-close-btn" onclick="closeSearchModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="search-results-box" class="search-results-list">
+                <div class="search-hint text-muted p-4 text-center" style="font-size:0.9rem;">
+                    <i class="fas fa-magnifying-glass me-2"></i>Aramak istediğiniz anahtar kelimeyi yazın...
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- DİNAMİK OWL CAROUSEL MANŞET SLIDER (v2.0 50% Slider + 3 Yan Kart) -->
+    <section class="py-0 mt-3" id="conbg">
+        <div class="container">
+            <div class="row g-3 align-items-stretch">
+                <!-- Sol %50 / 7 Sütun: Ana Slayt -->
+                <div class="col-12 col-lg-7 col-xl-7">
+                    <div class="custom-slider-wrapper clearfix">
+                        <!-- Sol Numara Listesi -->
+                        <div class="custom-nav-container">
+                            <ul class="list-group" id="custom-slider-nav">
+                                <!-- JS ile dolacak -->
+                            </ul>
+                        </div>
+
+                        <!-- Sağ Slayt Alanı -->
+                        <div class="custom-owl-carousel owl-carousel owl-theme" id="custom-haber-slider">
+                            <!-- JS ile dolacak -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sağ Yan Konteyner (3 Yan Haber / Öne Çıkan Kartlar - 480px) -->
+                <div class="col-12 col-lg-5 col-xl-5 d-flex flex-column justify-content-between" id="side-featured-container">
+                    <!-- JS ile 3 Yan Kart dolacak -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- KÖŞE YAZARLARI SLIDER SEKSİYONU -->
+    <section id="columnists-section" class="my-4">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-title-tab">KÖŞE YAZARLARI</div>
+                <div class="custom-owl-nav">
+                    <button id="columnists-prev-btn"><i class="fas fa-chevron-left"></i></button>
+                    <button id="columnists-next-btn"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="owl-carousel owl-theme" id="columnists-carousel">
+                <!-- JS ile dolacak -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SPOR24 7/24 CANLI TV & YAYIN KUŞAĞI -->
+    <section id="spor24-live-tv-section" class="my-4">
+        <div class="container">
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden" style="background: linear-gradient(135deg, #0b0f19 0%, #111827 100%); border: 1px solid rgba(220, 38, 38, 0.35) !important;">
+                <div class="row g-0 align-items-stretch">
+                    <!-- Sol 7/24 16:9 Canlı Yayın Oynatıcısı (8 Sütun) -->
+                    <div id="tv-player-container" class="col-12 col-lg-8 position-relative bg-black overflow-hidden" style="min-height: 380px; height: 100%;">
+                        <video 
+                            id="spor24-tv-video"
+                            autoplay 
+                            muted 
+                            loop 
+                            playsinline 
+                            preload="auto"
+                            poster="https://medya.spor24.net/videos/sport_news_opener.jpg"
+                            class="w-100 h-100 position-absolute"
+                            style="top:0; left:0; width:100%; height:100%; object-fit: cover; display: block;">
+                            <source src="https://medya.spor24.net/videos/sport_news_opener.mp4" type="video/mp4">
+                            Tarayıcınız video oynatmayı desteklemiyor.
+                        </video>
+                        <!-- TV Üst Kontroller (Canlı Rozeti & Ses Butonu) -->
+                        <div class="position-absolute d-flex align-items-center justify-content-between p-3" style="top: 0; left: 0; right: 0; z-index: 10; pointer-events: none; background: linear-gradient(180deg, rgba(0,0,0,0.65) 0%, transparent 100%);">
+                            <span class="badge bg-danger px-3 py-2 font-black italic d-inline-flex align-items-center gap-2 shadow" style="font-size: 11px; pointer-events: auto;">
+                                <span class="spinner-grow spinner-grow-sm text-white" role="status" style="width: 7px; height: 7px;"></span>
+                                7/24 CANLI YAYIN
+                            </span>
+                            <button id="tv-audio-toggle" type="button" class="btn btn-dark btn-sm rounded-pill px-3 py-1.5 text-white border-0 shadow d-inline-flex align-items-center gap-2" style="background: rgba(15,23,42,0.88); backdrop-filter: blur(8px); font-size: 11px; font-weight: 700; pointer-events: auto; cursor: pointer;">
+                                <i class="fas fa-volume-mute text-danger" id="tv-audio-icon"></i>
+                                <span id="tv-audio-text">Sesi Aç</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Sağ Panel: Canlı Yayın Akışı & Bilgi Kartı (4 Sütun) -->
+                    <div class="col-12 col-lg-4 p-4 d-flex flex-column justify-content-between text-white" style="background: rgba(15, 23, 42, 0.92); backdrop-filter: blur(12px);">
+                        <div>
+                            <!-- Üst Rozet & Başlık -->
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="badge bg-danger px-3 py-2 font-black italic d-inline-flex align-items-center gap-2 shadow" style="font-size: 12px; letter-spacing: 0.5px;">
+                                    <span class="spinner-grow spinner-grow-sm text-white" role="status" style="width: 8px; height: 8px;"></span>
+                                    7/24 CANLI YAYIN
+                                </span>
+                                <span class="text-secondary font-bold" style="font-size: 11px; letter-spacing: 1px;">ANT MEDYA HD</span>
+                            </div>
+
+                            <h4 class="font-black italic text-white mb-2" style="font-size: 1.35rem; line-height: 1.3;">
+                                SPOR<span class="text-danger">24</span> TV CANLI YAYIN
+                            </h4>
+                            <p class="text-secondary mb-4" style="font-size: 0.85rem;">
+                                Şampiyonalar, özel bültenler, dövüş sporları ve federasyonlardan en son sıcak görüntüler kesintisiz yayında.
+                            </p>
+
+                            <!-- Mini Yayın Akışı -->
+                            <div class="d-flex flex-column gap-2 mb-3">
+                                <div class="p-2 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05); border-left: 3px solid #ef4444;">
+                                    <div>
+                                        <div class="text-danger font-black" style="font-size: 10px;">ŞU AN YAYINDA</div>
+                                        <div class="font-bold text-white text-truncate" style="font-size: 12px; max-width: 180px;">Özel Maç & Arşiv Kuşağı</div>
+                                    </div>
+                                    <span class="badge bg-dark text-danger font-black">1080p</span>
+                                </div>
+
+                                <div class="p-2 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.02); border-left: 3px solid #64748b;">
+                                    <div>
+                                        <div class="text-secondary font-black" style="font-size: 10px;">SIRADAKİ PROGRAM</div>
+                                        <div class="font-bold text-light text-truncate" style="font-size: 12px; max-width: 180px;">Karate Federasyonu Özel</div>
+                                    </div>
+                                    <span class="text-secondary font-bold" style="font-size: 11px;">18:00</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Alt Butonlar & Yayıncı Tanıtım Reklamı -->
+                        <div class="pt-3 border-top border-secondary border-opacity-25 d-flex flex-column gap-2">
+                            <a href="https://medya.spor24.net/#/tanitim" target="_blank" class="btn btn-warning btn-sm font-black italic py-2 d-flex align-items-center justify-content-center gap-2 shadow" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); border: none; color: #0f172a;">
+                                <i class="fas fa-bullhorn"></i>
+                                <span>🎙️ YAYINCI OLMAK İSTER MİSİNİZ? (ÜCRETSİZ DENE)</span>
+                            </a>
+                            <div class="d-flex gap-2">
+                                <a href="https://medya.spor24.net/#/tv?channel=ant-tv" target="_blank" class="btn btn-danger btn-sm flex-grow-1 font-black italic py-2 d-flex align-items-center justify-content-center gap-2 shadow">
+                                    <i class="fas fa-play-circle"></i>
+                                    <span>WEB TV'DE İZLE</span>
+                                </a>
+                                <a href="https://medya.spor24.net/#/channels" target="_blank" class="btn btn-outline-light btn-sm font-bold py-2 px-3 d-flex align-items-center gap-1">
+                                    <i class="fas fa-th-large"></i>
+                                    <span>Kanallar</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Haber Akışı (4 SÜTUN: X X X X) -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="news-container">
+                    {% if initial_news %}
+                    <div class="row">
+                        {% for item in initial_news %}
+                        <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-12 mt-20">
+                            <div class="item-shadow-gray">
+                                <div class="position-relative">
+                                    <div class="topic-box-top-xs">
+                                        <div class="topic-box-sm {{ item.color_class }} mb-20">{{ item.cat_name }}</div>
+                                    </div>
+                                    <a href="/post.html?id={{ item.id }}" class="img-opacity-hover one_cikan_img">
+                                        <img src="{{ item.resim_url }}" alt="{{ item.baslik }}" class="img-fluid" loading="lazy" onerror="this.onerror=null;this.src='/static/img/logo_5.png';">
+                                    </a>
+                                </div>
+                                <div class="box-padding15 bg-body item-shadow-gray one_cikan">
+                                    <div class="text-dark mb-10 d-flex justify-content-between align-items-center" style="font-size: 13px;">
+                                        <span><i class="far fa-clock text-danger"></i> {{ item.olusturma_tarihi|date:"d F Y H:i" }}</span>
+                                        <button class="btn btn-sm btn-link text-muted p-0 text-decoration-none card-share-btn" onclick="openShareModal(event, '{{ item.baslik|escapejs }}', 'https://spor24.net/post.html?id={{ item.id }}')" title="Haberi Paylaş">
+                                            <i class="fas fa-share-nodes text-danger"></i> <span style="font-size: 11px; font-weight: 700;">Paylaş</span>
+                                        </button>
+                                    </div>
+                                    <h3 class="title-medium-dark size-sm mb-10 haber_kisa">
+                                        <a href="/post.html?id={{ item.id }}">{{ item.baslik }}</a>
+                                    </h3>
+                                    <div class="d-flex justify-content-between align-items-center mt-2 pt-2" style="border-top: 1px solid rgba(255,255,255,0.06);">
+                                        <span class="text-muted" style="font-size: 11px;">SPOR24</span>
+                                        <span class="card-view-count" style="font-size: 12px; font-weight: 700; color: #f59e0b; display: inline-flex; align-items: center; gap: 4px;" title="Görüntülenme Sayısı">
+                                            <i class="far fa-eye"></i> {{ item.goruntulenme_sayisi|default:1 }}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="text-center my-5" id="load-more-container">
+                    <button class="btn btn-danger btn-lg rounded-pill px-5 font-black italic shadow"
+                        id="btn-load-more">DAHA FAZLA HABER YÜKLE ↓</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="py-5 bg-dark mt-5 border-top border-danger">
+        <div class="container text-center text-white font-bold italic">
+            <p>© 2026 TÜM HAKLARI SAKLIDIR | <span class="text-danger">S P O R 2 4 . N E T</span> <span class="badge bg-danger text-white ms-2 font-bold" style="font-size: 11px; font-style: normal; letter-spacing: 1px;">v3.0 UI</span></p>
+        </div>
+    </footer>
+
+    <!-- Social Share Modal -->
+    <div class="modal fade" id="shareModal" tabindex="-1" aria-labelledby="shareModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content rounded-4 border-0 shadow-lg" style="background: #181f2a; color: #ffffff;">
+                <div class="modal-header border-0 pb-0">
+                    <h6 class="modal-title font-black italic text-uppercase text-danger d-flex align-items-center gap-2" id="shareModalLabel">
+                        <i class="fas fa-share-nodes"></i> Haberi Paylaş
+                    </h6>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body pt-2 text-center">
+                    <p id="shareModalTitle" class="small text-white-50 mb-3 fw-bold text-truncate px-1"></p>
+                    <div class="d-grid gap-2">
+                        <a id="modal-share-wa" href="#" onclick="handleModalWhatsApp(event)" class="btn btn-share btn-whatsapp w-100 justify-content-center">
+                            <i class="fab fa-whatsapp"></i> WhatsApp'ta Paylaş
+                        </a>
+                        <a id="modal-share-fb" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook w-100 justify-content-center">
+                            <i class="fab fa-facebook-f"></i> Facebook'ta Paylaş
+                        </a>
+                        <a id="modal-share-x" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x w-100 justify-content-center">
+                            <i class="fa-brands fa-x-twitter"></i> X'te Paylaş
+                        </a>
+                        <a id="modal-share-tg" href="#" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram w-100 justify-content-center">
+                            <i class="fab fa-telegram-plane"></i> Telegram'da Paylaş
+                        </a>
+                        <button type="button" id="modal-share-ig" class="btn btn-share btn-instagram w-100 justify-content-center" onclick="handleModalInstagram()">
+                            <i class="fab fa-instagram"></i> Instagram'da Paylaş
+                        </button>
+                        <button type="button" class="btn btn-share btn-copy w-100 justify-content-center" onclick="handleModalCopy()">
+                            <i class="fas fa-link"></i> <span id="modal-copy-label">Bağlantıyı Kopyala</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scriptler -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/OwlCarousel2/2.3.4/owl.carousel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{% static 'v3/js/news-loader.js' %}?v=6.6.1"></script>
+    
+    <!-- Share Handlers Script -->
+    <script>
+        let activeShareTitle = '';
+        let activeShareUrl = '';
+
+        function openShareModal(e, title, url) {
+            if (e) {
+                if (e.preventDefault) e.preventDefault();
+                if (e.stopPropagation) e.stopPropagation();
+            }
+            activeShareTitle = title || 'Spor24 Haberi';
+            activeShareUrl = url || window.location.href;
+
+            if (navigator.share) {
+                navigator.share({
+                    title: activeShareTitle,
+                    text: activeShareTitle + ' | SPOR24.NET',
+                    url: activeShareUrl
+                }).catch(err => {
+                    if (err.name !== 'AbortError') {
+                        triggerBootstrapModal();
+                    }
+                });
+            } else {
+                triggerBootstrapModal();
+            }
+        }
+
+                function handleModalWhatsApp(e) {
+            if (e) e.preventDefault();
+            const text = `${activeShareTitle}\n\n${activeShareUrl}`;
+            window.location.href = `whatsapp://send?text=${encodeURIComponent(text)}`;
+        }
+
+        function triggerBootstrapModal() {
+            const encTitle = encodeURIComponent(activeShareTitle);
+            const encUrl = encodeURIComponent(activeShareUrl);
+
+            const titleEl = document.getElementById('shareModalTitle');
+            if (titleEl) titleEl.innerText = activeShareTitle;
+
+            const wa = document.getElementById('modal-share-wa');
+            const fb = document.getElementById('modal-share-fb');
+            const x = document.getElementById('modal-share-x');
+            const tg = document.getElementById('modal-share-tg');
+            const copyLbl = document.getElementById('modal-copy-label');
+
+            if (wa) { wa.href = `whatsapp://send?text=${encTitle}%0A%0A${encUrl}`; wa.removeAttribute('target'); }
+            if (fb) fb.href = `https://www.facebook.com/sharer/sharer.php?u=${encUrl}`;
+            if (x) x.href = `https://twitter.com/intent/tweet?url=${encUrl}&text=${encTitle}`;
+            if (tg) tg.href = `https://t.me/share/url?url=${encUrl}&text=${encTitle}`;
+            if (copyLbl) copyLbl.innerText = 'Bağlantıyı Kopyala';
+
+            const modalEl = document.getElementById('shareModal');
+            if (modalEl && window.bootstrap) {
+                const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+                modal.show();
+            }
+        }
+
+        function handleModalInstagram() {
+            if (navigator.share) {
+                navigator.share({
+                    title: activeShareTitle,
+                    text: activeShareTitle + ' | SPOR24.NET',
+                    url: activeShareUrl
+                });
+            } else {
+                handleModalCopy();
+                alert('Haber bağlantısı kopyalandı! Instagram uygulamanızda veya hikayenizde kolayca paylaşabilirsiniz.');
+            }
+        }
+
+        function handleModalCopy() {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(activeShareUrl).then(() => {
+                    const el = document.getElementById('modal-copy-label');
+                    if (el) el.innerText = 'Kopyalandı! ✓';
+                    setTimeout(() => {
+                        if (el) el.innerText = 'Bağlantıyı Kopyala';
+                    }, 2500);
+                });
+            } else {
+                prompt('Bağlantıyı kopyalayabilirsiniz:', activeShareUrl);
+            }
+        }
+    </script>
+    
+    <!-- Theme Switch Script -->
+    <script>
+        function applyTheme(theme) {
+            const body = document.body;
+            const icon = document.getElementById('theme-icon');
+            const text = document.getElementById('theme-text');
+            
+            if (theme === 'light') {
+                body.classList.add('light-theme');
+                if (icon) icon.textContent = '☀️';
+                if (text) text.textContent = 'Açık Tema';
+            } else {
+                body.classList.remove('light-theme');
+                if (icon) icon.textContent = '🌙';
+                if (text) text.textContent = 'Koyu Tema';
+            }
+            localStorage.setItem('spor24_theme', theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = localStorage.getItem('spor24_theme') || 'dark';
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            applyTheme(newTheme);
+        }
+
+        // Initialize Theme from localStorage (Defaults to Dark)
+        (function() {
+            const savedTheme = localStorage.getItem('spor24_theme') || 'dark';
+            applyTheme(savedTheme);
+        })();
+
+        // --- Live Search Modal Controller ---
+        let searchDebounceTimer = null;
+
+        function openSearchModal() {
+            const modal = document.getElementById('search-modal');
+            const input = document.getElementById('live-search-input');
+            if (modal) {
+                modal.style.display = 'flex';
+                setTimeout(() => input && input.focus(), 50);
+            }
+        }
+
+        function closeSearchModal() {
+            const modal = document.getElementById('search-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function handleOverlayClick(event) {
+            if (event.target && event.target.id === 'search-modal') {
+                closeSearchModal();
+            }
+        }
+
+        // Close on ESC key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeSearchModal();
+        });
+
+        async function handleLiveSearch(query) {
+            clearTimeout(searchDebounceTimer);
+            const box = document.getElementById('search-results-box');
+            const q = query.trim();
+
+            if (!q) {
+                box.innerHTML = '<div class="search-hint text-muted p-4 text-center" style="font-size:0.9rem;"><i class="fas fa-magnifying-glass me-2"></i>Aramak istediğiniz anahtar kelimeyi yazın...</div>';
+                return;
+            }
+
+            if (q.length < 2) {
+                box.innerHTML = '<div class="search-hint text-muted p-3 text-center" style="font-size:0.85rem;">En az 2 karakter giriniz...</div>';
+                return;
+            }
+
+            searchDebounceTimer = setTimeout(async () => {
+                box.innerHTML = '<div class="p-4 text-center text-muted"><i class="fas fa-spinner fa-spin me-2"></i> Aranıyor...</div>';
+                try {
+                    const res = await fetch(`/api/news/?search=${encodeURIComponent(q)}&page_size=8`);
+                    const data = await res.json();
+                    const results = data.results || [];
+
+                    if (results.length === 0) {
+                        box.innerHTML = `<div class="p-4 text-center text-muted" style="font-size:0.9rem;">"${q}" ile eşleşen haber bulunamadı.</div>`;
+                        return;
+                    }
+
+                    box.innerHTML = results.map(item => {
+                        const imgSrc = item.image || item.resim || item.image_url || '/static/img/logo_5.png';
+                        const postUrl = `/post.html?id=${item.id}`;
+                        const cat = item.category_name || 'GENEL';
+                        const dStr = item.created_at ? new Date(item.created_at).toLocaleDateString('tr-TR', {day: 'numeric', month: 'short', year: 'numeric'}) : '';
+                        return `
+                        <a href="${postUrl}" class="search-result-item">
+                            <img src="${imgSrc}" alt="${item.title}" class="search-result-img" onerror="this.onerror=null;this.src='/static/img/logo_5.png';">
+                            <div class="search-result-info">
+                                <div class="search-result-title">${item.title}</div>
+                                <div class="search-result-meta">
+                                    <span class="badge bg-danger text-white" style="font-size:10px;">${cat}</span>
+                                    <span>${dStr}</span>
+                                </div>
+                            </div>
+                        </a>
+                        `;
+                    }).join('');
+                } catch (err) {
+                    box.innerHTML = '<div class="p-3 text-center text-danger">Arama yapılırken bir hata oluştu.</div>';
+                }
+            }, 250);
+        }
+
+        // TV Stream Lazy Loader (Zero bandwidth & zero lag on initial page load)
+        (function() {
+            function initTvLazyLoad() {
+                var tvIframe = document.getElementById('spor24-tv-iframe');
+                if (!tvIframe) return;
+                if ('IntersectionObserver' in window) {
+                    var observer = new IntersectionObserver(function(entries) {
+                        entries.forEach(function(entry) {
+                            if (entry.isIntersecting && !tvIframe.src) {
+                                var dSrc = tvIframe.getAttribute('data-src');
+                                if (dSrc) {
+                                    tvIframe.src = dSrc;
+                                }
+                                observer.disconnect();
+                            }
+                        });
+                    }, { rootMargin: '350px' });
+                    observer.observe(tvIframe);
+                } else {
+                    // Fallback for older browsers
+                    var dSrc = tvIframe.getAttribute('data-src');
+                    if (dSrc) tvIframe.src = dSrc;
+                }
+            }
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initTvLazyLoad);
+            } else {
+                initTvLazyLoad();
+            }
+        })();
+
+        // Global Audio Guardian: ensure YouTube videos and media default to MUTED
+        document.addEventListener("DOMContentLoaded", function() {
+            function enforceMute() {
+                document.querySelectorAll('video').forEach(function(v) {
+                    v.muted = true;
+                    v.setAttribute('muted', '');
+                });
+                document.querySelectorAll('iframe').forEach(function(f) {
+                    try {
+                        var s = f.getAttribute('src') || '';
+                        if (s.includes('youtube.com') || s.includes('youtu.be') || s.includes('medya.spor24.net')) {
+                            if (f.contentWindow) {
+                                f.contentWindow.postMessage('mute', '*');
+                                f.contentWindow.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                                f.contentWindow.postMessage('{"event":"command","func":"setVolume","args":[0]}', '*');
+                            }
+                        }
+                    } catch(e) {}
+                });
+            }
+            enforceMute();
+            setTimeout(enforceMute, 500);
+            setTimeout(enforceMute, 1200);
+            setTimeout(enforceMute, 2500);
+        });
+    </script>
+</body>
+
+</html>

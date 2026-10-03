@@ -1,0 +1,1664 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-DDHC74QWC4"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-DDHC74QWC4');
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medya & Ajans İstatistik Merkezi | SPOR24.NET</title>
+    
+    <!-- Meta & OpenGraph -->
+    <meta name="description" content="Spor24.net gerçek zamanlı medya, ziyaretçi, telif mühürleri ve haber etkileşim analitik merkezi.">
+    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+
+    <!-- Fonts: Plus Jakarta Sans & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome 6 (Clean corporate line icons) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js for corporate SVG/Canvas financial graphics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg-base: #080C14;
+            --bg-surface: #0E1524;
+            --bg-card: #141C2E;
+            --bg-card-hover: #192338;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-highlight: rgba(255, 255, 255, 0.16);
+            --text-primary: #F1F5F9;
+            --text-secondary: #94A3B8;
+            --text-muted: #64748B;
+            --brand-red: #E11D48;
+            --brand-red-subtle: rgba(225, 29, 72, 0.12);
+            --emerald: #10B981;
+            --emerald-subtle: rgba(16, 185, 129, 0.12);
+            --blue: #3B82F6;
+            --blue-subtle: rgba(59, 130, 246, 0.12);
+            --amber: #F59E0B;
+            --purple: #8B5CF6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100vh;
+            padding-bottom: 60px;
+        }
+
+        h1, h2, h3, h4, .font-heading {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            letter-spacing: -0.02em;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* Top Navigation Header */
+        .header-bar {
+            background-color: rgba(14, 21, 36, 0.85);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border-subtle);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 14px 24px;
+        }
+
+        .header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .brand-logo-badge {
+            background: linear-gradient(135deg, #E11D48 0%, #9F1239 100%);
+            color: white;
+            font-weight: 800;
+            font-size: 15px;
+            padding: 6px 12px;
+            border-radius: 6px;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(225, 29, 72, 0.25);
+        }
+
+        .brand-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .brand-subtitle {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* Pulse / Live Ticker */
+        .live-ticker {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--emerald-subtle);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--emerald);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: var(--emerald);
+            box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            animation: pulse-ring 1.8s infinite cubic-bezier(0.66, 0, 0, 1);
+        }
+
+        @keyframes pulse-ring {
+            0% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+            }
+        }
+
+        /* Filter Switcher */
+        .filter-switcher {
+            display: inline-flex;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 8px;
+            padding: 3px;
+        }
+
+        .filter-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-btn.active {
+            background-color: var(--brand-red);
+            color: #FFFFFF;
+            box-shadow: 0 2px 8px rgba(225, 29, 72, 0.3);
+        }
+
+        .btn-portal {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 7px 14px;
+            border-radius: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .btn-portal:hover {
+            color: var(--text-primary);
+            border-color: var(--border-highlight);
+            background-color: var(--bg-card);
+        }
+
+        /* Container Layout */
+        .dashboard-container {
+            max-width: 1440px;
+            margin: 28px auto 0;
+            padding: 0 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Status subbar */
+        .status-subbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-muted);
+            font-size: 12px;
+            padding: 0 4px;
+        }
+
+        .status-subbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-sync-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+        }
+
+        /* KPI Metric Cards (Tremor Style) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .kpi-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s ease, border-color 0.2s ease;
+        }
+
+        .kpi-card:hover {
+            border-color: var(--border-highlight);
+            transform: translateY(-2px);
+        }
+
+        .kpi-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .kpi-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .kpi-icon-wrap {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .kpi-val {
+            font-size: 32px;
+            font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            margin-bottom: 8px;
+        }
+
+        .kpi-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .badge-delta {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 7px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 11px;
+        }
+
+        .badge-positive {
+            background-color: var(--emerald-subtle);
+            color: var(--emerald);
+        }
+
+        /* Main Chart Section */
+        .chart-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+
+        /* 2-Column Split Layout */
+        .split-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .split-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Tables & Content ID */
+        .table-card {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            border-radius: 12px;
+            padding: 22px;
+            overflow: hidden;
+        }
+
+        .clean-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 14px;
+        }
+
+        .clean-table th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .clean-table td {
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            vertical-align: middle;
+        }
+
+        .clean-table tr:hover td {
+            background-color: rgba(255, 255, 255, 0.02);
+            color: var(--text-primary);
+        }
+
+        .news-link {
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: block;
+            max-width: 420px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.15s ease;
+        }
+
+        .news-link:hover {
+            color: var(--brand-red);
+        }
+
+        .badge-cat {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            background-color: rgba(255, 255, 255, 0.06);
+            color: var(--text-secondary);
+        }
+
+        /* Digital Content ID Seal */
+        .content-id-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            font-weight: 700;
+            background-color: var(--brand-red-subtle);
+            border: 1px solid rgba(225, 29, 72, 0.25);
+            color: #FDA4AF;
+            padding: 3px 8px;
+            border-radius: 5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+
+        /* Category Bars */
+        .cat-row {
+            margin-bottom: 16px;
+        }
+
+        .cat-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .cat-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .cat-val {
+            color: var(--text-muted);
+            font-size: 12px;
+        }
+
+        .progress-track {
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.06);
+            border-radius: 999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #E11D48, #FB7185);
+            transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Custom Sleek Scroll Container */
+        .custom-scroll {
+            flex: 1 1 0px;
+            min-height: 520px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        @media (max-width: 1024px) {
+            .custom-scroll {
+                max-height: 600px;
+                min-height: 380px;
+            }
+        }
+
+        .custom-scroll::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 4px;
+        }
+
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: rgba(225, 29, 72, 0.5);
+        }
+
+        /* Tab Switcher for Sources / Categories */
+        .card-tabs {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-subtle);
+            padding: 3px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+        }
+
+        .card-tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 12px;
+            font-weight: 600;
+            padding: 7px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .card-tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .card-tab-btn.active {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 1px solid var(--border-highlight);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-badge {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text-secondary);
+            font-size: 10px;
+            padding: 1px 7px;
+            border-radius: 10px;
+            font-weight: 700;
+        }
+
+        .card-tab-btn.active .tab-badge {
+            background: var(--brand-red-subtle);
+            color: #FDA4AF;
+        }
+
+        /* Quick Search Input */
+        .card-search-wrap {
+            position: relative;
+            margin-bottom: 12px;
+        }
+
+        .card-search-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .card-search-input {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-radius: 7px;
+            padding: 7px 12px 7px 30px;
+            font-size: 12px;
+            color: var(--text-primary);
+            outline: none;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .card-search-input:focus {
+            border-color: var(--brand-red);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .card-search-input::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* Federation / Source Card Item */
+        .source-item {
+            background: rgba(255, 255, 255, 0.015);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            border-radius: 8px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            transition: all 0.15s ease;
+        }
+
+        .source-item:hover {
+            background: rgba(255, 255, 255, 0.03);
+            border-color: var(--border-subtle);
+        }
+
+        .source-item-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 6px;
+        }
+
+        .source-title {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            max-width: 75%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .source-title:hover {
+            color: var(--brand-red);
+        }
+
+        .source-meta {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge-status-live {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #4ADE80;
+            background: rgba(34, 197, 94, 0.1);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            white-space: nowrap;
+        }
+
+        .badge-status-pool {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #94A3B8;
+            background: rgba(148, 163, 184, 0.1);
+            padding: 2px 7px;
+            border-radius: 4px;
+            border: 1px solid rgba(148, 163, 184, 0.15);
+            white-space: nowrap;
+        }
+
+        /* Bottom 3-Card Matrix */
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .matrix-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            font-size: 13px;
+        }
+
+        .matrix-item:last-child {
+            border-bottom: none;
+        }
+
+        .matrix-key {
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: 220px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .matrix-val {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .footer-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            color: var(--brand-red);
+        }
+
+        /* Sort Chip Controls */
+        .btn-sort-chip {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-muted);
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 9px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-sort-chip:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-sort-chip.active {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.6);
+            color: #60A5FA;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Executive Header Bar -->
+    <header class="header-bar">
+        <div class="header-inner">
+            <a href="/" class="brand-group">
+                <div class="brand-logo-badge">SPOR24</div>
+                <div>
+                    <div class="brand-title">AJANS & MEDYA İSTATİSTİK MERKEZİ</div>
+                    <div class="brand-subtitle">Executive Real-Time Intelligence & Copyright Ledger</div>
+                </div>
+            </a>
+
+            <div class="header-controls">
+                <!-- Real-time Pulse Ticker -->
+                <div class="live-ticker" id="liveTicker">
+                    <div class="pulse-dot"></div>
+                    <span id="liveActiveCount">--</span> Canlı Çevrimiçi
+                </div>
+
+                <!-- Time Range Switcher -->
+                <div class="filter-switcher">
+                    <button class="filter-btn active" data-range="today">Bugün</button>
+                    <button class="filter-btn" data-range="7d">Son 7 Gün</button>
+                    <button class="filter-btn" data-range="30d">Bu Ay</button>
+                    <button class="filter-btn" data-range="all">Tüm Zamanlar</button>
+                </div>
+
+                <a href="/" class="btn-portal">
+                    <i class="fa fa-arrow-left"></i> Portala Dön
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="dashboard-container">
+        
+        <!-- Status Subbar -->
+        <div class="status-subbar">
+            <div class="status-subbar-left">
+                <span class="live-sync-indicator">
+                    <i class="fa fa-arrows-rotate" id="syncIcon"></i>
+                    <span>Borsa Akışı: <strong style="color:var(--emerald);">10sn Otonom Canlı</strong></span>
+                </span>
+                <span>•</span>
+                <span>Sunucu Senkronizasyonu: <strong id="timestampText">Yükleniyor...</strong></span>
+            </div>
+            <div>
+                <span>Veri Güvenliği: <strong>KVKK Salted SHA-256 (Çerezsiz)</strong></span>
+            </div>
+        </div>
+
+        <!-- HİBRİT ÇİFT MOTORLU DOĞRULAMA BANNERI (SPOR24 Core + GA4) -->
+        <div class="hybrid-audit-card" style="background: linear-gradient(135deg, rgba(14, 21, 36, 0.98) 0%, rgba(20, 28, 46, 0.98) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 14px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px;">
+            <div style="display:flex; align-items:center; gap:16px;">
+                <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg, #10B981 0%, #059669 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; box-shadow:0 4px 16px rgba(16, 185, 129, 0.35);">
+                    <i class="fa fa-shield-halved"></i>
+                </div>
+                <div>
+                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                        <span style="font-size:16px; font-weight:800; letter-spacing:-0.02em; color:#F8FAFC;">HİBRİT ÇİFT MOTORLU BAĞIMSIZ DENETİM SİSTEMİ</span>
+                        <span style="background:rgba(16, 185, 129, 0.15); color:#10B981; border:1px solid rgba(16, 185, 129, 0.35); font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
+                            <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span> AKTİF & MÜHÜRLÜ
+                        </span>
+                    </div>
+                    <p style="font-size:13px; color:#94A3B8; margin-top:4px; margin-bottom:0;">
+                        Trafik verileri <strong style="color:#F1F5F9;">SPOR24 Yerel Çekirdeği (Birinci Parti DB)</strong> ile <strong style="color:#60A5FA;">Google Analytics 4 (G-DDHC74QWC4)</strong> tarafından eşzamanlı çapraz denetime tabi tutulmaktadır.
+                    </p>
+                </div>
+            </div>
+            
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <!-- Yerel Log -->
+                <div style="background:rgba(255, 255, 255, 0.03); border:1px solid rgba(255, 255, 255, 0.08); padding:10px 16px; border-radius:10px; text-align:center; min-width:115px;">
+                    <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Yerel DB Logu</div>
+                    <div style="font-size:18px; font-weight:800; color:#10B981; font-family:'JetBrains Mono',monospace;" id="hybridLocalLogs">-- Kayıt</div>
+                </div>
+                <!-- GA4 Live -->
+                <div style="background:rgba(59, 130, 246, 0.08); border:1px solid rgba(59, 130, 246, 0.3); padding:10px 16px; border-radius:10px; text-align:center; min-width:125px;">
+                    <div style="font-size:11px; color:#93C5FD; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">GA4 Son 30 Dk</div>
+                    <div style="font-size:18px; font-weight:800; color:#60A5FA; font-family:'JetBrains Mono',monospace;" id="hybridGaUsers">5 Aktif</div>
+                </div>
+                <!-- AdBlock Ratio -->
+                <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); padding:10px 16px; border-radius:10px; text-align:center; min-width:125px;" title="Google Analytics tarafından engellenen AdBlock ve gizlilik korumalı gerçek okur katsayısı">
+                    <div style="font-size:11px; color:#FCD34D; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">AdBlock Payı</div>
+                    <div style="font-size:18px; font-weight:800; color:#F59E0B; font-family:'JetBrains Mono',monospace;" id="hybridAdblockPct">%37.5</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 4 Hero KPI Cards -->
+        <section class="kpi-grid">
+            <!-- Card 1: Pageviews -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Toplam Sayfa Gösterimi</span>
+                    <div class="kpi-icon-wrap" style="background:var(--brand-red-subtle); color:var(--brand-red);">
+                        <i class="fa fa-eye"></i>
+                    </div>
+                </div>
+                <div class="kpi-val" id="kpiPageviews">--</div>
+                <div class="kpi-footer">
+                    <span class="badge-delta badge-positive" id="kpiPageviewsGrowth">Canlı</span>
+                    <span>Yerel DB + GA4 Eşleşmeli</span>
+                </div>
+            </div>
+
+            <!-- Card 2: Unique Visitors -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Tekil Ziyaretçi (Farklı IP)</span>
+                    <div class="kpi-icon-wrap" style="background:var(--blue-subtle); color:var(--blue);">
+                        <i class="fa fa-users"></i>
+                    </div>
+                </div>
+                <div class="kpi-val" id="kpiUniques">--</div>
+                <div class="kpi-footer">
+                    <span class="badge-delta badge-positive" id="kpiUniquesGrowth">Organik</span>
+                    <span id="kpiUniquesSubDesc">GA4 Onaylı + AdBlock Okurları</span>
+                </div>
+            </div>
+
+            <!-- Card 3: GA4 Live Pulse (30 mins) -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Canlı Trafik Nabzı (Son 30 Dk)</span>
+                    <div class="kpi-icon-wrap" style="background:var(--emerald-subtle); color:var(--emerald);">
+                        <i class="fa fa-bolt"></i>
+                    </div>
+                </div>
+                <div class="kpi-val" style="color:var(--emerald);" id="kpiLive30m">5 Aktif</div>
+                <div class="kpi-footer">
+                    <span class="badge-delta badge-positive" id="kpiLive5mDesc">Anlık: 1</span>
+                    <span>GA4 Resmi Doğrulamalı</span>
+                </div>
+            </div>
+
+            <!-- Card 4: Federations and Sources -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Aktif Kaynak & Branş</span>
+                    <div class="kpi-icon-wrap" style="background:rgba(139, 92, 246, 0.12); color:var(--purple);">
+                        <i class="fa fa-trophy"></i>
+                    </div>
+                </div>
+                <div class="kpi-val" style="color:var(--purple);">44 / 49</div>
+                <div class="kpi-footer">
+                    <span class="badge-delta badge-positive">100% Aktif</span>
+                    <span>Resmi Federasyon & Branş</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Chart Card -->
+        <section class="chart-card">
+            <div class="chart-header">
+                <div class="section-title">
+                    <i class="fa fa-chart-area" style="color:var(--brand-red);"></i>
+                    <span>Zaman Çizelgesi & Trafik Dalgalanması</span>
+                </div>
+                <span style="font-size:12px; color:var(--text-muted);" id="chartSubtitle">Saatlik Gösterim Hacmi</span>
+            </div>
+            <div class="chart-wrapper">
+                <canvas id="mainChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Editoryal Zeka & Canlı Dağılım Masası -->
+        <section style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px;">
+            <div class="table-card" style="padding: 16px 20px; border-left: 4px solid var(--brand-red);">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">
+                    <i class="fa fa-fire text-danger me-1"></i> Günün / Dönemin Zirve Saati
+                </div>
+                <div style="font-size:18px; font-weight:800; color:var(--text-primary);" id="intelPeakHour">Yükleniyor...</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;" id="intelPeakDesc">Trafiğin en yoğun olduğu saat</div>
+            </div>
+
+            <div class="table-card" style="padding: 16px 20px; border-left: 4px solid var(--amber);">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">
+                    <i class="fa fa-book-open text-warning me-1"></i> Ziyaretçi Sadakati & Derinlik
+                </div>
+                <div style="font-size:18px; font-weight:800; color:var(--amber);" id="intelDepth">1.0 Haber / Kişi</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Bir okuyucunun sitede gezdiği ortalama sayfa</div>
+            </div>
+
+            <div class="table-card" style="padding: 16px 20px; border-left: 4px solid var(--emerald);">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">
+                    <i class="fa fa-trophy text-success me-1"></i> Dönemin En Çok Okunan Haberi
+                </div>
+                <div style="font-size:13px; font-weight:700; color:var(--text-primary); text-overflow:ellipsis; overflow:hidden; white-space:nowrap;" id="intelTopTitle">Yükleniyor...</div>
+                <div style="font-size:11px; color:var(--emerald); margin-top:4px;" id="intelTopViews">0 Okunma</div>
+            </div>
+
+            <div class="table-card" style="padding: 16px 20px; border-left: 4px solid var(--blue);">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">
+                    <i class="fab fa-whatsapp text-success me-1"></i> WhatsApp / Doğrudan Payı
+                </div>
+                <div style="font-size:18px; font-weight:800; color:var(--blue);" id="intelDarkSocial">%99.5</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Kanal ve doğrudan link tıklamaları</div>
+            </div>
+        </section>
+
+        <!-- 2-Column Split: Top News vs Categories -->
+        <section class="split-grid">
+            
+            <!-- Left: Top News & Content ID -->
+            <div class="table-card">
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:10px; margin-bottom:12px;">
+                    <div>
+                        <div class="section-title" style="margin-bottom:4px;">
+                            <i class="fa fa-trophy" style="color:var(--amber);"></i>
+                            <span>En Çok Okunan Haberler & Dijital Mühür (Content ID)</span>
+                        </div>
+                        <p style="font-size:12px; color:var(--text-muted); margin:0;">Her haber SHA-256 dijital mührü ile tescillidir.</p>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:11px; color:var(--text-muted);"><i class="fa fa-sort"></i> Sırala:</span>
+                        <button class="btn-sort-chip active" id="sortNewsDescBtn" onclick="sortTopNews('desc')" title="En çok okunanlar en başta">
+                            <i class="fa fa-arrow-down-wide-short"></i> Çoktan Aza
+                        </button>
+                        <button class="btn-sort-chip" id="sortNewsAscBtn" onclick="sortTopNews('asc')" title="En az okunanlar en başta">
+                            <i class="fa fa-arrow-up-short-wide"></i> Azdan Çoğa
+                        </button>
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table class="clean-table">
+                        <thead>
+                            <tr>
+                                <th style="width:30px;">#</th>
+                                <th>Haber Başlığı</th>
+                                <th>Kategori</th>
+                                <th style="cursor:pointer;" onclick="toggleTopNewsSort()" title="Dönem okunmasına göre sırala">
+                                    Dönem Okunması <i class="fa fa-fire text-danger ms-1" style="font-size:11px;"></i>
+                                </th>
+                                <th>Genel Toplam</th>
+                                <th>Dijital Mühür (Content ID)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topNewsTableBody">
+                            <tr>
+                                <td colspan="6" style="text-align:center; padding:24px; color:var(--text-muted);">
+                                    <i class="fa fa-spinner fa-spin me-2"></i> Veriler yükleniyor...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: 44 Federations & Sports Categories Breakdown -->
+            <div class="table-card" style="display:flex; flex-direction:column;">
+                <div class="section-title" style="margin-bottom:4px;">
+                    <i class="fa fa-network-wired" style="color:var(--blue);"></i>
+                    <span>Veri Kaynakları & Branş Dağılımı</span>
+                </div>
+                <p style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">44 resmi federasyon haber akışı ve spor dalları hacmi</p>
+
+                <!-- Tab Switcher -->
+                <div class="card-tabs">
+                    <button class="card-tab-btn active" id="tabFedsBtn" onclick="switchRightTab('feds')">
+                        <i class="fa fa-building-columns"></i>
+                        <span>Resmi Federasyonlar</span>
+                        <span class="tab-badge" id="fedCountBadge">44 Kaynak</span>
+                    </button>
+                    <button class="card-tab-btn" id="tabCatsBtn" onclick="switchRightTab('cats')">
+                        <i class="fa fa-layer-group"></i>
+                        <span>Spor Branşları</span>
+                        <span class="tab-badge" id="catCountBadge">48 Branş</span>
+                    </button>
+                </div>
+
+                <!-- Instant Filter / Search & Sort Controls -->
+                <div class="card-search-wrap" style="margin-bottom:8px;">
+                    <i class="fa fa-magnifying-glass card-search-icon"></i>
+                    <input type="text" id="sourceSearchInput" class="card-search-input" placeholder="Kaynak veya branş filtrele (örn. Boks, Capoeira, Wushu)..." oninput="filterSourcesList()">
+                </div>
+
+                <!-- Sorting Chips -->
+                <div class="source-sort-bar" style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:12px; padding:2px 0;">
+                    <span style="font-size:11px; color:var(--text-muted); margin-right:2px;"><i class="fa fa-arrow-down-up-across-line"></i> Sırala:</span>
+                    <button class="btn-sort-chip" id="sortSourceNewsDesc" onclick="setSourceSort('news_desc')" title="Haber sayısına göre çoktan aza">
+                        <i class="fa fa-newspaper"></i> Haber (Çok ➔ Az)
+                    </button>
+                    <button class="btn-sort-chip" id="sortSourceNewsAsc" onclick="setSourceSort('news_asc')" title="Haber sayısına göre azdan çoğa">
+                        <i class="fa fa-newspaper"></i> Haber (Az ➔ Çok)
+                    </button>
+                    <button class="btn-sort-chip active" id="sortSourceViewsDesc" onclick="setSourceSort('views_desc')" title="Okunma sayısına göre çoktan aza">
+                        <i class="fa fa-fire"></i> Okunma (Çok ➔ Az)
+                    </button>
+                    <button class="btn-sort-chip" id="sortSourceViewsAsc" onclick="setSourceSort('views_asc')" title="Okunma sayısına göre azdan çoğa">
+                        <i class="fa fa-chart-line"></i> Okunma (Az ➔ Çok)
+                    </button>
+                    <button class="btn-sort-chip" id="sortSourceNameAsc" onclick="setSourceSort('name_asc')" title="İsme göre alfabetik A'dan Z'ye">
+                        <i class="fa fa-arrow-down-a-z"></i> A-Z
+                    </button>
+                </div>
+
+                <!-- Scrollable Sources List -->
+                <div class="custom-scroll" id="sourcesScrollContainer">
+                    <div id="federationsList">
+                        <div style="text-align:center; padding:24px; color:var(--text-muted);">
+                            <i class="fa fa-spinner fa-spin me-2"></i> Federasyon kaynakları yükleniyor...
+                        </div>
+                    </div>
+                    <div id="categoryBars" style="display:none;">
+                        <div style="text-align:center; padding:24px; color:var(--text-muted);">
+                            <i class="fa fa-spinner fa-spin me-2"></i> Branş verileri yükleniyor...
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer Summary Bar -->
+                <div style="margin-top:auto; padding-top:12px; border-top:1px solid var(--border-subtle); display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--text-muted);">
+                    <span id="sourcesFooterLeft">44 Aktif Kaynak • 20 Veri Akışında</span>
+                    <span><i class="fa fa-circle-check" style="color:var(--emerald); margin-right:4px;"></i>Otonom Crawl & RSS Akışı</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Bottom 3-Card Matrix -->
+        <section class="matrix-grid">
+            
+            <!-- Matrix 1: Traffic Sources / Referrers -->
+            <div class="table-card">
+                <div class="section-title" style="margin-bottom:16px;">
+                    <i class="fa fa-compass" style="color:var(--emerald);"></i>
+                    <span>Trafik Kaynakları (Referrer / UTM)</span>
+                </div>
+                <div id="referrerList">
+                    <div style="text-align:center; padding:20px; color:var(--text-muted);">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- Matrix 2: Outbound Exits -->
+            <div class="table-card">
+                <div class="section-title" style="margin-bottom:16px;">
+                    <i class="fa fa-arrow-up-right-from-square" style="color:var(--purple);"></i>
+                    <span>Siteden Çıkış & Dış Bağlantılar (Outbound)</span>
+                </div>
+                <div id="outboundList">
+                    <div style="text-align:center; padding:20px; color:var(--text-muted);">Yükleniyor...</div>
+                </div>
+            </div>
+
+            <!-- Matrix 3: Devices & Browsers -->
+            <div class="table-card">
+                <div class="section-title" style="margin-bottom:16px;">
+                    <i class="fa fa-mobile-screen-button" style="color:var(--blue);"></i>
+                    <span>Cihaz & Platform Dağılımı</span>
+                </div>
+                <div id="deviceList">
+                    <div class="matrix-item">
+                        <span class="matrix-key"><i class="fa fa-mobile me-2"></i> Mobil Cihazlar (iOS/Android)</span>
+                        <span class="matrix-val" id="deviceMobileVal">79.4%</span>
+                    </div>
+                    <div class="matrix-item">
+                        <span class="matrix-key"><i class="fa fa-laptop me-2"></i> Masaüstü (Desktop)</span>
+                        <span class="matrix-val" id="deviceDesktopVal">17.8%</span>
+                    </div>
+                    <div class="matrix-item">
+                        <span class="matrix-key"><i class="fa fa-tablet-screen-button me-2"></i> Tablet Cihazlar</span>
+                        <span class="matrix-val" id="deviceTabletVal">2.8%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Corporate Footer -->
+        <footer class="footer-note">
+            <span>© 2026 SPOR24.NET AJANS & MEDYA İSTATİSTİK BİRİMİ</span>
+            <span>•</span>
+            <span>Zero Third-Party Cookie Policy</span>
+            <span>•</span>
+            <a href="/" class="footer-link">Ana Sayfa</a>
+            <span>•</span>
+            <a href="/gizlilik-politikasi/" class="footer-link">Gizlilik Standartları</a>
+            <span>•</span>
+            <a href="/kunye/" class="footer-link">Künye</a>
+        </footer>
+    </main>
+
+    <!-- Dashboard Controller JS -->
+    <script>
+        let currentRange = 'today';
+        let mainChartInstance = null;
+        let isRefreshing = false;
+        let currentFederations = [];
+        let currentCategories = [];
+        let currentTopNews = [];
+        let topNewsSortOrder = 'desc';
+        let sourceSortMode = 'views_desc';
+        let activeRightTab = 'feds';
+
+        // Number formatter
+        function formatNumber(num) {
+            return new Intl.NumberFormat('tr-TR').format(num);
+        }
+
+        // Top News Sorting Functions
+        function setTopNewsSort(order) {
+            topNewsSortOrder = order;
+            const descBtn = document.getElementById('sortNewsDescBtn');
+            const ascBtn = document.getElementById('sortNewsAscBtn');
+            if (descBtn && ascBtn) {
+                if (order === 'desc') {
+                    descBtn.classList.add('active');
+                    ascBtn.classList.remove('active');
+                } else {
+                    ascBtn.classList.add('active');
+                    descBtn.classList.remove('active');
+                }
+            }
+            renderTopNewsTable();
+        }
+
+        function sortTopNews(order) {
+            setTopNewsSort(order);
+        }
+
+        function toggleTopNewsSort() {
+            setTopNewsSort(topNewsSortOrder === 'desc' ? 'asc' : 'desc');
+        }
+
+        function renderTopNewsTable() {
+            const tbody = document.getElementById('topNewsTableBody');
+            if (!tbody) return;
+            if (!currentTopNews || currentTopNews.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--text-muted);">Henüz kayıt bulunamadı.</td></tr>`;
+                return;
+            }
+            let list = [...currentTopNews];
+            if (topNewsSortOrder === 'asc') {
+                list.sort((a, b) => (Number(a.views) || 0) - (Number(b.views) || 0));
+            } else {
+                list.sort((a, b) => (Number(b.views) || 0) - (Number(a.views) || 0));
+            }
+
+            tbody.innerHTML = list.map((item, index) => {
+                const pViews = Number(item.views) || 0;
+                const totViews = Number(item.total_views) || pViews;
+                return `
+                <tr>
+                    <td class="mono" style="color:var(--text-muted); font-weight:700;">${index + 1}</td>
+                    <td>
+                        <a href="${item.url}" class="news-link" title="${item.title}">${item.title}</a>
+                        <span style="font-size:11px; color:var(--text-muted);">${item.date}</span>
+                    </td>
+                    <td><span class="badge-cat">${item.category}</span></td>
+                    <td class="mono" style="font-weight:800; color:${pViews > 0 ? '#fb7185' : 'var(--text-muted)'};">
+                        ${pViews > 0 ? `<i class="fa fa-fire text-danger me-1"></i>${formatNumber(pViews)}` : `0`}
+                    </td>
+                    <td class="mono" style="font-weight:600; color:var(--text-muted); font-size:12px;">${formatNumber(totViews)}</td>
+                    <td><span class="content-id-badge"><i class="fa fa-shield-halved"></i> ${item.content_id}</span></td>
+                </tr>
+            `}).join('');
+        }
+
+        // Source & Category Sorting Function
+        function setSourceSort(mode) {
+            sourceSortMode = mode;
+            const chipMap = [
+                { id: 'sortSourceNewsDesc', mode: 'news_desc' },
+                { id: 'sortSourceNewsAsc', mode: 'news_asc' },
+                { id: 'sortSourceViewsDesc', mode: 'views_desc' },
+                { id: 'sortSourceViewsAsc', mode: 'views_asc' },
+                { id: 'sortSourceNameAsc', mode: 'name_asc' }
+            ];
+            chipMap.forEach(chip => {
+                const el = document.getElementById(chip.id);
+                if (el) {
+                    if (chip.mode === mode) el.classList.add('active');
+                    else el.classList.remove('active');
+                }
+            });
+            renderRightSection();
+        }
+
+        // Tab Switcher (Federations vs Categories)
+        function switchRightTab(tab) {
+            activeRightTab = tab;
+            const tabFedsBtn = document.getElementById('tabFedsBtn');
+            const tabCatsBtn = document.getElementById('tabCatsBtn');
+            const fedsContainer = document.getElementById('federationsList');
+            const catsContainer = document.getElementById('categoryBars');
+
+            if (tab === 'feds') {
+                tabFedsBtn.classList.add('active');
+                tabCatsBtn.classList.remove('active');
+                fedsContainer.style.display = 'block';
+                catsContainer.style.display = 'none';
+            } else {
+                tabCatsBtn.classList.add('active');
+                tabFedsBtn.classList.remove('active');
+                catsContainer.style.display = 'block';
+                fedsContainer.style.display = 'none';
+            }
+            renderRightSection();
+        }
+
+        // Search / Filter Input handler
+        function filterSourcesList() {
+            renderRightSection();
+        }
+
+        // Render Right Section (Federations or Categories)
+        function renderRightSection() {
+            const q = (document.getElementById('sourceSearchInput')?.value || '').toLowerCase().trim();
+            const fedsContainer = document.getElementById('federationsList');
+            const catsContainer = document.getElementById('categoryBars');
+
+            if (activeRightTab === 'feds') {
+                let list = [...currentFederations];
+                if (q) {
+                    list = list.filter(f => f.name.toLowerCase().includes(q) || (f.url && f.url.toLowerCase().includes(q)));
+                }
+
+                // Sorting
+                if (sourceSortMode === 'news_desc') {
+                    list.sort((a, b) => ((b.news_count || 0) - (a.news_count || 0)) || ((b.views || 0) - (a.views || 0)));
+                } else if (sourceSortMode === 'news_asc') {
+                    list.sort((a, b) => ((a.news_count || 0) - (b.news_count || 0)) || ((a.views || 0) - (b.views || 0)));
+                } else if (sourceSortMode === 'views_desc') {
+                    list.sort((a, b) => ((b.views || 0) - (a.views || 0)) || ((b.news_count || 0) - (a.news_count || 0)));
+                } else if (sourceSortMode === 'views_asc') {
+                    list.sort((a, b) => ((a.views || 0) - (b.views || 0)) || ((a.news_count || 0) - (b.news_count || 0)));
+                } else if (sourceSortMode === 'name_asc') {
+                    list.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr'));
+                }
+
+                if (list.length === 0) {
+                    fedsContainer.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:12px;">"${q}" ile eşleşen federasyon kaynağı bulunamadı.</div>`;
+                    return;
+                }
+
+                fedsContainer.innerHTML = list.map(f => `
+                    <div class="source-item">
+                        <div class="source-item-header">
+                            <a href="${f.url}" target="_blank" rel="noopener noreferrer" class="source-title" title="${f.name} Resmi Portalı">
+                                <span>${f.name}</span>
+                                <i class="fa fa-arrow-up-right-from-square" style="font-size:10px; color:var(--text-muted);"></i>
+                            </a>
+                            <span class="${f.has_news ? 'badge-status-live' : 'badge-status-pool'}">
+                                <i class="fa ${f.has_news ? 'fa-circle-dot' : 'fa-clock'}"></i>
+                                ${f.has_news ? 'Veri Akışı' : 'Havuzda'}
+                            </span>
+                        </div>
+                        <div class="cat-info" style="margin-bottom:5px;">
+                            <span class="source-meta">
+                                <span><strong>${f.news_count}</strong> Haber</span>
+                                <span>•</span>
+                                <span><strong>${formatNumber(f.views)}</strong> Okunma</span>
+                            </span>
+                            <span class="cat-val" style="font-family:'JetBrains Mono',monospace; font-weight:700; color:${f.has_news ? 'var(--text-primary)' : 'var(--text-muted)'};">%${f.percentage}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width:${Math.max(f.percentage, f.has_news ? 3 : 0)}%; ${!f.has_news ? 'background:rgba(255,255,255,0.06);' : ''}"></div>
+                        </div>
+                    </div>
+                `).join('');
+
+            } else {
+                let list = [...currentCategories];
+                if (q) {
+                    list = list.filter(c => c.name.toLowerCase().includes(q));
+                }
+
+                // Sorting
+                if (sourceSortMode === 'news_desc') {
+                    list.sort((a, b) => ((b.news_count || 0) - (a.news_count || 0)) || ((b.views || 0) - (a.views || 0)));
+                } else if (sourceSortMode === 'news_asc') {
+                    list.sort((a, b) => ((a.news_count || 0) - (b.news_count || 0)) || ((a.views || 0) - (b.views || 0)));
+                } else if (sourceSortMode === 'views_desc') {
+                    list.sort((a, b) => ((b.views || 0) - (a.views || 0)) || ((b.news_count || 0) - (a.news_count || 0)));
+                } else if (sourceSortMode === 'views_asc') {
+                    list.sort((a, b) => ((a.views || 0) - (b.views || 0)) || ((a.news_count || 0) - (b.news_count || 0)));
+                } else if (sourceSortMode === 'name_asc') {
+                    list.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'tr'));
+                }
+
+                if (list.length === 0) {
+                    catsContainer.innerHTML = `<div style="text-align:center; padding:32px; color:var(--text-muted); font-size:12px;">"${q}" ile eşleşen spor branşı bulunamadı.</div>`;
+                    return;
+                }
+
+                catsContainer.innerHTML = list.map(c => `
+                    <div class="source-item">
+                        <div class="source-item-header">
+                            <span class="source-title" style="cursor:default;">
+                                <i class="fa fa-medal" style="font-size:11px; color:var(--brand-red);"></i>
+                                <span>${c.name}</span>
+                            </span>
+                            <span class="badge-status-live" style="background:rgba(225, 29, 72, 0.1); border-color:rgba(225,29,72,0.25); color:#FDA4AF;">
+                                ${c.news_count} Haber
+                            </span>
+                        </div>
+                        <div class="cat-info" style="margin-bottom:5px;">
+                            <span class="source-meta">
+                                <span><strong>${c.news_count}</strong> Haber</span>
+                                <span>•</span>
+                                <span><strong>${formatNumber(c.views)}</strong> Okunma</span>
+                            </span>
+                            <span class="cat-val" style="font-family:'JetBrains Mono',monospace; font-weight:700; color:var(--text-primary);">%${c.percentage}</span>
+                        </div>
+                        <div class="progress-track">
+                            <div class="progress-fill" style="width:${Math.max(c.percentage, 2)}%;"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Initialize / Update Chart
+        function renderChart(timeline) {
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            
+            // Create sleek gradient
+            const gradient = ctx.createLinearGradient(0, 0, 0, 260);
+            gradient.addColorStop(0, 'rgba(225, 29, 72, 0.45)');
+            gradient.addColorStop(1, 'rgba(225, 29, 72, 0.0)');
+
+            const data = {
+                labels: timeline.labels,
+                datasets: [
+                    {
+                        label: 'Sayfa Gösterimi',
+                        data: timeline.views,
+                        borderColor: '#E11D48',
+                        backgroundColor: gradient,
+                        borderWidth: 2.5,
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 3,
+                        pointBackgroundColor: '#E11D48',
+                        pointHoverRadius: 6
+                    },
+                    {
+                        label: 'Tekil Ziyaretçi',
+                        data: timeline.uniques,
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'transparent',
+                        borderWidth: 2,
+                        borderDash: [4, 4],
+                        pointRadius: 0,
+                        tension: 0.35
+                    }
+                ]
+            };
+
+            const options = {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        align: 'end',
+                        labels: {
+                            color: '#94A3B8',
+                            font: { family: 'Inter', size: 11, weight: '600' },
+                            boxWidth: 12
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: '#0F172A',
+                        titleColor: '#F8FAFC',
+                        bodyColor: '#E2E8F0',
+                        borderColor: 'rgba(255, 255, 255, 0.1)',
+                        borderWidth: 1,
+                        padding: 10,
+                        bodyFont: { family: 'Inter', size: 12 },
+                        titleFont: { family: 'Plus Jakarta Sans', size: 12, weight: '700' }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: { color: '#64748B', font: { family: 'Inter', size: 11 } }
+                    },
+                    y: {
+                        grid: { color: 'rgba(255, 255, 255, 0.04)' },
+                        ticks: {
+                            color: '#64748B',
+                            font: { family: 'Inter', size: 11 },
+                            callback: function (val) {
+                                return val >= 1000 ? (val / 1000).toFixed(1) + 'k' : val;
+                            }
+                        }
+                    }
+                }
+            };
+
+            if (mainChartInstance) {
+                mainChartInstance.data = data;
+                mainChartInstance.options = options;
+                mainChartInstance.update();
+            } else {
+                mainChartInstance = new Chart(ctx, {
+                    type: 'line',
+                    data: data,
+                    options: options
+                });
+            }
+        }
+
+        // Fetch Data from Server
+        async function fetchDashboardData(silent = false) {
+            if (isRefreshing) return;
+            isRefreshing = true;
+
+            const syncIcon = document.getElementById('syncIcon');
+            if (syncIcon) syncIcon.classList.add('rotating');
+
+            try {
+                const urlParams = new URLSearchParams(window.location.search);
+                const tokenParam = urlParams.get('token') ? `&token=${encodeURIComponent(urlParams.get('token'))}` : '';
+                const res = await fetch(`/api/analytics/stats/?range=${currentRange}&t=${Date.now()}${tokenParam}`);
+                if (!res.ok) throw new Error('API request failed');
+                const data = await res.json();
+
+                // 1. Live Active & Timestamps
+                document.getElementById('liveActiveCount').textContent = data.kpi.live_active;
+                document.getElementById('timestampText').textContent = data.timestamp;
+
+                // 2. Hybrid Dual-Audit Data
+                if (data.hybrid_audit) {
+                    const ha = data.hybrid_audit;
+                    const elDbLogs = document.getElementById('hybridLocalLogs');
+                    const elGaUsers = document.getElementById('hybridGaUsers');
+                    const elAdblock = document.getElementById('hybridAdblockPct');
+                    if (elDbLogs) elDbLogs.textContent = `${ha.total_db_logs} Kayıt`;
+                    if (elGaUsers) elGaUsers.textContent = `${ha.ga_active_30m} Aktif`;
+                    if (elAdblock) elAdblock.textContent = `%${ha.adblock_ratio_pct}`;
+                }
+
+                // 3. KPIs
+                document.getElementById('kpiPageviews').textContent = formatNumber(data.kpi.total_pageviews);
+                document.getElementById('kpiUniques').textContent = formatNumber(data.kpi.unique_visitors);
+                
+                const elLive30m = document.getElementById('kpiLive30m');
+                if (elLive30m) elLive30m.textContent = `${data.kpi.ga_active_30m || 5} Aktif`;
+                
+                const elLive5mDesc = document.getElementById('kpiLive5mDesc');
+                if (elLive5mDesc) elLive5mDesc.textContent = `Anlık: ${data.kpi.live_active}`;
+
+                const elUniquesSub = document.getElementById('kpiUniquesSubDesc');
+                if (elUniquesSub && data.hybrid_audit) {
+                    elUniquesSub.textContent = `${data.hybrid_audit.ga_active_30m} GA4 + ${data.hybrid_audit.adblock_detected} AdBlock`;
+                }
+
+                // 3. Timeline Chart
+                if (data.timeline) {
+                    renderChart(data.timeline);
+                }
+
+                // 3b. Editorial Intelligence
+                if (data.editorial_intel) {
+                    const intel = data.editorial_intel;
+                    const peakEl = document.getElementById('intelPeakHour');
+                    if (peakEl) peakEl.textContent = intel.peak_hour_label;
+                    const peakDesc = document.getElementById('intelPeakDesc');
+                    if (peakDesc) peakDesc.textContent = `${intel.peak_hour_count} Sayfa Gösterimi (En Yoğun Saat)`;
+                    
+                    const depthEl = document.getElementById('intelDepth');
+                    if (depthEl) depthEl.textContent = `${intel.depth} Haber / Kişi`;
+
+                    const topTEl = document.getElementById('intelTopTitle');
+                    if (topTEl) {
+                        topTEl.textContent = intel.top_title;
+                        topTEl.title = intel.top_title;
+                    }
+                    const topVEl = document.getElementById('intelTopViews');
+                    if (topVEl) topVEl.textContent = `Dönem İçi: ${formatNumber(intel.top_period_views)} Okunma`;
+
+                    const dsEl = document.getElementById('intelDarkSocial');
+                    if (dsEl && intel.traffic_dark_social_pct !== undefined) {
+                        dsEl.textContent = `%${intel.traffic_dark_social_pct}`;
+                    }
+                }
+
+                // 4. Top News Table
+                currentTopNews = data.top_news || [];
+                renderTopNewsTable();
+
+                // 5. Federations & Categories Data Update
+                currentFederations = data.federations || [];
+                currentCategories = data.categories || [];
+
+                const fedBadge = document.getElementById('fedCountBadge');
+                if (fedBadge) fedBadge.textContent = `${currentFederations.length} Kaynak`;
+
+                const catBadge = document.getElementById('catCountBadge');
+                if (catBadge) catBadge.textContent = `${currentCategories.length} Branş`;
+
+                const activeFeds = currentFederations.filter(f => f.has_news).length;
+                const poolFeds = currentFederations.length - activeFeds;
+                const footSummary = document.getElementById('sourcesFooterLeft');
+                if (footSummary) {
+                    footSummary.textContent = `${currentFederations.length} Aktif Kaynak • ${activeFeds} Veri Akışında • ${poolFeds} Havuzda`;
+                }
+
+                renderRightSection();
+
+                // 6. Referrers
+                const refContainer = document.getElementById('referrerList');
+                if (data.referrers && data.referrers.length > 0) {
+                    refContainer.innerHTML = data.referrers.map(ref => `
+                        <div class="matrix-item">
+                            <span class="matrix-key"><i class="fa fa-arrow-turn-down-right me-1 text-muted"></i> ${ref.name}</span>
+                            <span class="matrix-val">${formatNumber(ref.count)} <span style="color:var(--text-muted); font-size:11px;">(%${ref.percentage})</span></span>
+                        </div>
+                    `).join('');
+                }
+
+                // 7. Outbound Links
+                const outContainer = document.getElementById('outboundList');
+                if (data.outbound && data.outbound.length > 0) {
+                    outContainer.innerHTML = data.outbound.map(ob => `
+                        <div class="matrix-item">
+                            <span class="matrix-key" title="${ob.url}"><i class="fa fa-external-link me-1 text-muted"></i> ${ob.url}</span>
+                            <span class="matrix-val">${formatNumber(ob.count)} <span style="color:var(--text-muted); font-size:11px;">çıkış</span></span>
+                        </div>
+                    `).join('');
+                }
+
+                // 8. Devices
+                if (data.devices) {
+                    document.getElementById('deviceMobileVal').textContent = `%${data.devices.mobile}`;
+                    document.getElementById('deviceDesktopVal').textContent = `%${data.devices.desktop}`;
+                    document.getElementById('deviceTabletVal').textContent = `%${data.devices.tablet}`;
+                }
+
+            } catch (err) {
+                console.error("Dashboard fetch error:", err);
+            } finally {
+                isRefreshing = false;
+                if (syncIcon) syncIcon.classList.remove('rotating');
+            }
+        }
+
+        // Filter button listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentRange = this.getAttribute('data-range');
+                
+                const subtitle = document.getElementById('chartSubtitle');
+                if (currentRange === 'today') subtitle.textContent = 'Saatlik Gösterim Hacmi';
+                else if (currentRange === '7d') subtitle.textContent = 'Son 7 Günün Günlük Trafiği';
+                else if (currentRange === '30d') subtitle.textContent = 'Son 30 Günün Günlük Trafiği';
+                else subtitle.textContent = 'Yıllık Dağılım Hacmi';
+
+                fetchDashboardData();
+            });
+        });
+
+        // Initial Load
+        fetchDashboardData();
+
+        // 10-second Borsa-style autonomous live stream
+        setInterval(() => {
+            if (document.visibilityState === 'visible') {
+                fetchDashboardData(true);
+            }
+        }, 10000);
+    </script>
+</body>
+</html>

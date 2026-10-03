@@ -1,0 +1,607 @@
+{% extends 'newsbit/base.html' %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} - Spor24 Yarışması{% endblock %}
+
+{% block extra_head %}
+<style>
+/* =============================================
+   QUIZ DETAIL - PREMIUM INTERACTIVE UI
+============================================= */
+.quiz-page-wrap {
+    max-width: 760px;
+    margin: 40px auto;
+    padding: 0 16px;
+}
+
+/* Quiz Header */
+.quiz-header-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid rgba(251,191,36,0.15);
+    border-radius: 20px;
+    padding: 32px;
+    margin-bottom: 28px;
+    position: relative;
+    overflow: hidden;
+}
+.quiz-header-card::before {
+    content: '';
+    position: absolute;
+    top: -30px; right: -30px;
+    width: 120px; height: 120px;
+    background: radial-gradient(circle, rgba(251,191,36,0.08), transparent);
+}
+.quiz-header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(16,185,129,0.15);
+    border: 1px solid rgba(16,185,129,0.25);
+    color: #10b981;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+}
+.quiz-header-title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #f1f5f9;
+    margin-bottom: 10px;
+    line-height: 1.3;
+}
+.quiz-header-desc { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+.quiz-header-stats { display: flex; gap: 20px; flex-wrap: wrap; }
+.quiz-stat {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #94a3b8;
+}
+.quiz-stat i { color: #fbbf24; }
+.quiz-stat strong { color: #e2e8f0; }
+
+/* Progress Bar */
+.quiz-progress-wrap {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.quiz-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+}
+.quiz-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #fbbf24, #f59e0b);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+}
+.quiz-progress-text { font-size: 13px; color: #64748b; white-space: nowrap; }
+.quiz-progress-counter { font-size: 13px; font-weight: 700; color: #fbbf24; white-space: nowrap; }
+
+/* Question Card */
+.question-card {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    display: none;
+    animation: slideIn 0.3s ease;
+}
+.question-card.active { display: block; }
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+.question-number {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #64748b;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+}
+.question-text {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f1f5f9;
+    line-height: 1.5;
+    margin-bottom: 24px;
+}
+
+/* Answer Options */
+.answer-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    border: 1.5px solid rgba(255,255,255,0.07);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.02);
+    user-select: none;
+}
+.answer-option:hover { border-color: rgba(251,191,36,0.35); background: rgba(251,191,36,0.04); }
+.answer-option.selected { border-color: #fbbf24; background: rgba(251,191,36,0.1); }
+.answer-option.correct { border-color: #10b981 !important; background: rgba(16,185,129,0.12) !important; }
+.answer-option.wrong { border-color: #ef4444 !important; background: rgba(239,68,68,0.1) !important; }
+.answer-letter {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 800;
+    color: #94a3b8;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+.answer-option.selected .answer-letter { background: #fbbf24; color: #0f172a; }
+.answer-option.correct .answer-letter { background: #10b981; color: #fff; }
+.answer-option.wrong .answer-letter { background: #ef4444; color: #fff; }
+.answer-text { font-size: 14px; color: #cbd5e1; flex-grow: 1; }
+.answer-option.selected .answer-text { color: #fbbf24; font-weight: 600; }
+.answer-option.correct .answer-text { color: #10b981; font-weight: 600; }
+.answer-option.wrong .answer-text { color: #ef4444; font-weight: 600; }
+
+/* Navigation */
+.quiz-nav {
+    display: flex;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 24px;
+}
+.btn-quiz-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+}
+.btn-prev { background: rgba(255,255,255,0.06); color: #94a3b8; }
+.btn-prev:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; }
+.btn-next { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
+.btn-next:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-next:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+.btn-submit { background: linear-gradient(135deg, #10b981, #059669); color: #fff; }
+.btn-submit:hover { opacity: 0.9; transform: translateY(-1px); }
+
+/* Timer */
+.quiz-timer {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #94a3b8;
+}
+.quiz-timer.warning { color: #f59e0b; }
+.quiz-timer.danger { color: #ef4444; }
+.timer-dot { width: 8px; height: 8px; border-radius: 50%; background: currentColor; animation: pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;} 50%{opacity:0.3;} }
+
+/* Result Screen */
+.result-screen {
+    display: none;
+    text-align: center;
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 50px 40px;
+    animation: fadeIn 0.5s ease;
+}
+@keyframes fadeIn { from{opacity:0;transform:scale(0.95);} to{opacity:1;transform:scale(1);} }
+.result-icon { font-size: 72px; margin-bottom: 20px; }
+.result-score-circle {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#fbbf24 var(--pct), rgba(255,255,255,0.06) 0deg);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 24px;
+    position: relative;
+}
+.result-score-inner {
+    width: 96px; height: 96px;
+    border-radius: 50%;
+    background: #0f172a;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.result-score-pct { font-size: 24px; font-weight: 800; color: #fbbf24; }
+.result-score-label { font-size: 10px; color: #64748b; }
+.result-title { font-size: 24px; font-weight: 800; color: #f1f5f9; margin-bottom: 8px; }
+.result-subtitle { font-size: 14px; color: #64748b; margin-bottom: 30px; }
+.result-stats { display: flex; justify-content: center; gap: 30px; margin-bottom: 30px; }
+.result-stat { text-align: center; }
+.result-stat-value { font-size: 28px; font-weight: 800; color: #fbbf24; }
+.result-stat-label { font-size: 12px; color: #64748b; }
+.btn-retry {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: #fff; padding: 12px 28px; border-radius: 10px;
+    font-size: 14px; font-weight: 700; text-decoration: none;
+    margin: 0 6px; transition: all 0.2s ease; border: none; cursor: pointer;
+}
+.btn-retry:hover { opacity: 0.9; color: #fff; text-decoration: none; }
+.btn-back {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.06);
+    color: #94a3b8; padding: 12px 28px; border-radius: 10px;
+    font-size: 14px; font-weight: 700; text-decoration: none;
+    margin: 0 6px; transition: all 0.2s ease;
+}
+.btn-back:hover { background: rgba(255,255,255,0.1); color: #e2e8f0; text-decoration: none; }
+
+/* Login Prompt */
+.login-prompt {
+    background: rgba(99,102,241,0.1);
+    border: 1px solid rgba(99,102,241,0.25);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 20px;
+    font-size: 13px;
+    color: #a5b4fc;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.login-prompt a { color: #818cf8; font-weight: 700; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="quiz-page-wrap">
+
+    <!-- Quiz Header -->
+    <div class="quiz-header-card">
+        <div class="quiz-header-badge">
+            <i class="fa fa-trophy"></i> ÖDÜLLÜ YARISMA
+        </div>
+        <h1 class="quiz-header-title">{{ quiz.title }}</h1>
+        <p class="quiz-header-desc">{{ quiz.description }}</p>
+        <div class="quiz-header-stats">
+            <span class="quiz-stat">
+                <i class="fa fa-question-circle"></i>
+                <strong>{{ questions.count }}</strong> Soru
+            </span>
+            <span class="quiz-stat">
+                <i class="fa fa-users"></i>
+                <strong>{{ quiz.userquizscore_set.count }}</strong> Katılımcı
+            </span>
+            {% if user_best_score %}
+            <span class="quiz-stat">
+                <i class="fa fa-star"></i>
+                En İyi: <strong>%{{ user_best_score.score }}</strong>
+            </span>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Login Prompt for guests -->
+    {% if not user.is_authenticated %}
+    <div class="login-prompt">
+        <i class="fa fa-info-circle" style="font-size:18px;"></i>
+        <span>Puanınızın liderlik tablosuna kaydedilmesi için <a href="{% url 'haberler:custom_login' %}">giriş yapın</a> veya <a href="{% url 'haberler:register' %}">üye olun</a>.</span>
+    </div>
+    {% endif %}
+
+    <!-- Quiz Engine -->
+    <div id="quiz-engine">
+
+        <!-- Progress -->
+        <div class="quiz-progress-wrap" id="progress-bar-section">
+            <span class="quiz-progress-counter" id="progress-counter">1 / {{ questions.count }}</span>
+            <div class="quiz-progress-bar">
+                <div class="quiz-progress-fill" id="progress-fill" style="width: {% if questions.count > 0 %}{% widthratio 1 questions.count 100 %}%{% else %}0%{% endif %}"></div>
+            </div>
+            <div class="quiz-timer" id="quiz-timer">
+                <div class="timer-dot"></div>
+                <span id="timer-value">--</span>s
+            </div>
+        </div>
+
+        <!-- Questions -->
+        {% for question in questions %}
+        <div class="question-card {% if forloop.first %}active{% endif %}" 
+             id="question-{{ forloop.counter }}"
+             data-question-id="{{ question.id }}"
+             data-correct="{{ question.correct_option }}">
+            <div class="question-number">Soru {{ forloop.counter }} / {{ questions.count }}</div>
+            <div class="question-text">{{ question.question_text }}</div>
+            <div class="answers">
+                <div class="answer-option" onclick="selectAnswer(this, 'A')">
+                    <div class="answer-letter">A</div>
+                    <span class="answer-text">{{ question.option_a }}</span>
+                </div>
+                <div class="answer-option" onclick="selectAnswer(this, 'B')">
+                    <div class="answer-letter">B</div>
+                    <span class="answer-text">{{ question.option_b }}</span>
+                </div>
+                <div class="answer-option" onclick="selectAnswer(this, 'C')">
+                    <div class="answer-letter">C</div>
+                    <span class="answer-text">{{ question.option_c }}</span>
+                </div>
+                <div class="answer-option" onclick="selectAnswer(this, 'D')">
+                    <div class="answer-letter">D</div>
+                    <span class="answer-text">{{ question.option_d }}</span>
+                </div>
+            </div>
+            <div class="quiz-nav">
+                <button class="btn-quiz-nav btn-prev" onclick="goToPrev()" {% if forloop.first %}style="visibility:hidden"{% endif %}>
+                    <i class="fa fa-arrow-left"></i> Önceki
+                </button>
+                {% if forloop.last %}
+                <button class="btn-quiz-nav btn-submit" id="btn-submit" onclick="submitQuiz()" disabled>
+                    <i class="fa fa-check"></i> Tamamla
+                </button>
+                {% else %}
+                <button class="btn-quiz-nav btn-next" id="btn-next-{{ forloop.counter }}" onclick="goToNext()" disabled>
+                    Sonraki <i class="fa fa-arrow-right"></i>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align:center;padding:60px;color:#64748b;">
+            <i class="fa fa-exclamation-circle" style="font-size:40px;margin-bottom:16px;display:block;"></i>
+            Bu yarışmada henüz soru bulunmamaktadır.
+        </div>
+        {% endfor %}
+
+    </div><!-- end quiz-engine -->
+
+    <!-- Result Screen -->
+    <div class="result-screen" id="result-screen">
+        <div class="result-icon" id="result-icon">🏆</div>
+        <div class="result-score-circle" id="result-circle" style="--pct:0deg;">
+            <div class="result-score-inner">
+                <span class="result-score-pct" id="result-pct">--%</span>
+                <span class="result-score-label">BAŞARI</span>
+            </div>
+        </div>
+        <h2 class="result-title" id="result-title">Tebrikler!</h2>
+        <p class="result-subtitle" id="result-subtitle">Yarışmayı tamamladınız.</p>
+        <div class="result-stats">
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-correct">-</div>
+                <div class="result-stat-label">Doğru</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-wrong" style="color:#ef4444;">-</div>
+                <div class="result-stat-label">Yanlış</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value">{{ questions.count }}</div>
+                <div class="result-stat-label">Toplam</div>
+            </div>
+        </div>
+        <div>
+            <a href="{% url 'haberler:quiz_list' %}" class="btn-back">
+                <i class="fa fa-list"></i> Diğer Yarışmalar
+            </a>
+            <button class="btn-retry" onclick="retryQuiz()">
+                <i class="fa fa-refresh"></i> Tekrar Dene
+            </button>
+        </div>
+    </div>
+
+</div><!-- end quiz-page-wrap -->
+
+<script>
+var QUIZ_ID = {{ quiz.id }};
+var TOTAL_QUESTIONS = {{ questions.count }};
+var currentQuestion = 1;
+var answers = {};
+var timerInterval = null;
+var timeLeft = 30;
+var isAuthenticated = {{ user.is_authenticated|yesno:"true,false" }};
+var SUBMIT_URL = "{% url 'haberler:submit_quiz' quiz.id %}";
+var LOGIN_URL = "{% url 'haberler:custom_login' %}";
+
+// Start timer
+function startTimer() {
+    clearInterval(timerInterval);
+    timeLeft = 30;
+    updateTimerDisplay();
+    timerInterval = setInterval(function() {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            autoAdvance();
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay() {
+    var el = document.getElementById('timer-value');
+    var wrap = document.getElementById('quiz-timer');
+    el.textContent = timeLeft;
+    wrap.className = 'quiz-timer';
+    if (timeLeft <= 10) wrap.classList.add('danger');
+    else if (timeLeft <= 20) wrap.classList.add('warning');
+}
+
+function autoAdvance() {
+    // Mark unanswered as wrong
+    if (currentQuestion < TOTAL_QUESTIONS) {
+        goToNext();
+    } else {
+        submitQuiz();
+    }
+}
+
+function selectAnswer(el, letter) {
+    var card = el.closest('.question-card');
+    var questionNum = parseInt(card.id.replace('question-', ''));
+    var questionId = card.dataset.questionId;
+
+    // Remove selected from all
+    card.querySelectorAll('.answer-option').forEach(function(o) { o.classList.remove('selected'); });
+    el.classList.add('selected');
+    answers[questionId] = letter;
+
+    // Enable next/submit button
+    var nextBtn = document.getElementById('btn-next-' + questionNum);
+    var submitBtn = document.getElementById('btn-submit');
+    if (nextBtn) nextBtn.disabled = false;
+    if (submitBtn && questionNum === TOTAL_QUESTIONS) submitBtn.disabled = false;
+
+    // Reset timer slightly
+    clearInterval(timerInterval);
+    timerInterval = setInterval(function() {
+        timeLeft--;
+        updateTimerDisplay();
+        if (timeLeft <= 0) { clearInterval(timerInterval); autoAdvance(); }
+    }, 1000);
+}
+
+function goToNext() {
+    if (currentQuestion < TOTAL_QUESTIONS) {
+        document.getElementById('question-' + currentQuestion).classList.remove('active');
+        currentQuestion++;
+        document.getElementById('question-' + currentQuestion).classList.add('active');
+        updateProgress();
+        startTimer();
+    }
+}
+
+function goToPrev() {
+    if (currentQuestion > 1) {
+        document.getElementById('question-' + currentQuestion).classList.remove('active');
+        currentQuestion--;
+        document.getElementById('question-' + currentQuestion).classList.add('active');
+        updateProgress();
+    }
+}
+
+function updateProgress() {
+    var pct = (currentQuestion / TOTAL_QUESTIONS) * 100;
+    document.getElementById('progress-fill').style.width = pct + '%';
+    document.getElementById('progress-counter').textContent = currentQuestion + ' / ' + TOTAL_QUESTIONS;
+}
+
+function submitQuiz() {
+    clearInterval(timerInterval);
+
+    if (!isAuthenticated) {
+        // Show result locally (unlogged user)
+        showLocalResult();
+        return;
+    }
+
+    fetch(SUBMIT_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ answers: answers })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            showResult(data.correct_count, data.total_questions, data.score);
+        }
+    })
+    .catch(function() {
+        showLocalResult();
+    });
+}
+
+function showLocalResult() {
+    // Calculate locally
+    var correct = 0;
+    document.querySelectorAll('.question-card').forEach(function(card) {
+        var qId = card.dataset.questionId;
+        var correctOpt = card.dataset.correct;
+        if (answers[qId] === correctOpt) correct++;
+    });
+    var total = TOTAL_QUESTIONS;
+    var score = Math.round((correct / total) * 100);
+    showResult(correct, total, score);
+}
+
+function showResult(correct, total, score) {
+    // Hide quiz engine
+    document.getElementById('quiz-engine').style.display = 'none';
+    document.getElementById('progress-bar-section') && 
+        (document.getElementById('progress-bar-section').style.display = 'none');
+
+    // Show result
+    var resultEl = document.getElementById('result-screen');
+    resultEl.style.display = 'block';
+
+    document.getElementById('result-correct').textContent = correct;
+    document.getElementById('result-wrong').textContent = total - correct;
+    document.getElementById('result-pct').textContent = score + '%';
+
+    // Conic gradient for circle
+    var deg = Math.round((score / 100) * 360);
+    document.getElementById('result-circle').style.setProperty('--pct', deg + 'deg');
+    document.getElementById('result-circle').style.background = 
+        'conic-gradient(#fbbf24 ' + deg + 'deg, rgba(255,255,255,0.06) 0deg)';
+
+    if (score >= 80) {
+        document.getElementById('result-icon').textContent = '🏆';
+        document.getElementById('result-title').textContent = 'Mükemmel! Harikasın!';
+        document.getElementById('result-subtitle').textContent = 'Spor bilginiz üst seviyede! Liderlik tablosuna girdiniz.';
+    } else if (score >= 50) {
+        document.getElementById('result-icon').textContent = '⭐';
+        document.getElementById('result-title').textContent = 'İyi Iş!';
+        document.getElementById('result-subtitle').textContent = 'Fena değil! Biraz daha pratikle zirveye ulaşabilirsiniz.';
+    } else {
+        document.getElementById('result-icon').textContent = '💪';
+        document.getElementById('result-title').textContent = 'Devam Et!';
+        document.getElementById('result-subtitle').textContent = 'Tekrar dene ve skorunu yükselt! Pratik mükemmelleştirir.';
+    }
+}
+
+function retryQuiz() {
+    // Reset state
+    currentQuestion = 1;
+    answers = {};
+    document.querySelectorAll('.question-card').forEach(function(c) { c.classList.remove('active'); });
+    document.querySelectorAll('.answer-option').forEach(function(o) {
+        o.classList.remove('selected','correct','wrong');
+    });
+    document.querySelectorAll('.btn-quiz-nav.btn-next, .btn-quiz-nav.btn-submit').forEach(function(b) {
+        b.disabled = true;
+    });
+    document.getElementById('question-1').classList.add('active');
+    document.getElementById('result-screen').style.display = 'none';
+    document.getElementById('quiz-engine').style.display = 'block';
+    updateProgress();
+    startTimer();
+}
+
+function getCookie(name) {
+    var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+    return v ? v[2] : null;
+}
+
+// Start on load
+if (TOTAL_QUESTIONS > 0) {
+    startTimer();
+}
+</script>
+{% endblock %}

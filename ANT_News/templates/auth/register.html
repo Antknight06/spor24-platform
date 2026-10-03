@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <script>
+        // Trusted Types Default Policy to prevent HTML blockages from third-party scripts
+        if (window.trustedTypes && window.trustedTypes.createPolicy) {
+            try {
+                window.trustedTypes.createPolicy('default', {
+                    createHTML: (string) => string,
+                    createScript: (string) => string,
+                    createScriptURL: (string) => string,
+                });
+            } catch (e) {
+                console.warn('Trusted Types policy could not be initialized:', e);
+            }
+        }
+    </script>
+    <link rel="canonical" href="https://www.spor24.net{{ request.path }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol - Spor24</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+        
+        /* User type specific backgrounds */
+        body.admin-bg {
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        }
+        
+        body.yetkili-bg {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        
+        body.abone-bg {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        }
+        
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+        
+        /* User type specific container borders */
+        .register-container.admin-border {
+            border: 3px solid #dc3545;
+        }
+        
+        .register-container.yetkili-border {
+            border: 3px solid #28a745;
+        }
+        
+        .register-container.abone-border {
+            border: 3px solid #17a2b8;
+        }
+        
+        .register-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .register-header h2 {
+            color: #333;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        .register-header p {
+            color: #666;
+            margin-bottom: 0;
+        }
+        .form-control {
+            border-radius: 10px;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            transition: all 0.3s;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.25rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+        }
+        
+        /* User type specific button styles */
+        .btn-register {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-register.admin-btn {
+            background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+        }
+        
+        .btn-register.yetkili-btn {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+        }
+        
+        .btn-register.abone-btn {
+            background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+        }
+        
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-register.admin-btn:hover {
+            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.4);
+        }
+        
+        .btn-register.yetkili-btn:hover {
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-register.abone-btn:hover {
+            box-shadow: 0 5px 15px rgba(23, 162, 184, 0.4);
+        }
+        
+        .alert {
+            border-radius: 10px;
+        }
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .links a:hover {
+            text-decoration: underline;
+        }
+        .user-type-selector {
+            border: 2px solid #e1e1e1;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            background-color: #f8f9fa;
+        }
+        .user-type-option {
+            cursor: pointer;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+            background-color: white;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .user-type-option:hover {
+            background-color: #e9ecef;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        .user-type-option.selected {
+            border-color: #667eea;
+            background-color: #eef2ff;
+            box-shadow: 0 4px 8px rgba(102, 126, 234, 0.2);
+        }
+        .user-type-option input[type="radio"] {
+            margin-right: 10px;
+        }
+        .user-type-badge {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+        .admin-badge {
+            background-color: #dc3545;
+            color: white;
+        }
+        .yetkili-badge {
+            background-color: #28a745;
+            color: white;
+        }
+        .abone-badge {
+            background-color: #17a2b8;
+            color: white;
+        }
+        
+        /* User type indicator */
+        .user-type-indicator {
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-weight: bold;
+            color: white;
+        }
+        
+        .admin-indicator {
+            background-color: #dc3545;
+        }
+        
+        .yetkili-indicator {
+            background-color: #28a745;
+        }
+        
+        .abone-indicator {
+            background-color: #17a2b8;
+        }
+        
+        /* Ensure button is always clickable */
+        .btn-register:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        /* Hidden fields */
+        .hidden-field {
+            display: none;
+        }
+        
+        /* Username info text for yetkili username */
+        .username-info {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
+        /* Email validation message styles */
+        .email-validation-message {
+            font-size: 0.85em;
+            margin-top: 5px;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        
+        .email-validation-message.error {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .email-validation-message.success {
+            color: #155724;
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .email-validation-message.warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+        }
+    </style>
+</head>
+<body id="register-body">
+    <div class="register-container" id="register-container">
+        <div class="register-header">
+            <h2>Kayıt Ol</h2>
+            <p>Spor24 Sistemi</p>
+        </div>
+        
+        <!-- User Type Indicator -->
+        <div class="user-type-indicator" id="user-type-indicator" style="display: none;">
+            <span id="indicator-text"></span>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="post" id="registration-form">
+            {% csrf_token %}
+            <!-- Dynamic fields based on user type -->
+            <div id="abone-fields">
+                <div class="mb-3">
+                    <label for="abone_email" class="form-label">Email Adresi</label>
+                    <input type="email" class="form-control" id="abone_email" name="abone_email" placeholder="ornek@eposta.com" required>
+                    <div class="email-validation-wrapper" style="min-height: 38px; display: flex; align-items: center; margin-top: 5px;">
+                        <div class="email-validation-message" id="abone_email_message" style="display: none; margin-top: 0; width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="abone_password1" class="form-label">Şifre</label>
+                    <input type="password" class="form-control" id="abone_password1" name="abone_password1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="abone_password2" class="form-label">Şifre (Tekrar)</label>
+                    <input type="password" class="form-control" id="abone_password2" name="abone_password2" required>
+                </div>
+            </div>
+            
+            <div id="yetkili-fields" class="hidden-field">
+                <div class="mb-3">
+                    <label for="first_name" class="form-label">Ad</label>
+                    <input type="text" class="form-control" id="first_name" name="first_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="last_name" class="form-label">Soyad</label>
+                    <input type="text" class="form-control" id="last_name" name="last_name" required>
+                </div>
+                <div class="mb-3">
+                    <label for="yetkili_email" class="form-label">Email Adresi</label>
+                    <input type="email" class="form-control" id="yetkili_email" name="yetkili_email" placeholder="ornek@eposta.com" required>
+                    <div class="email-validation-wrapper" style="min-height: 38px; display: flex; align-items: center; margin-top: 5px;">
+                        <div class="email-validation-message" id="yetkili_email_message" style="display: none; margin-top: 0; width: 100%;"></div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="yetkili_password1" class="form-label">Şifre</label>
+                    <input type="password" class="form-control" id="yetkili_password1" name="yetkili_password1" required>
+                </div>
+                <div class="mb-3">
+                    <label for="yetkili_password2" class="form-label">Şifre (Tekrar)</label>
+                    <input type="password" class="form-control" id="yetkili_password2" name="yetkili_password2" required>
+                </div>
+                <div class="mb-3">
+                    <div class="username-info">
+                        Kullanıcı adınız otomatik olarak "Ad Soyad" şeklinde oluşturulacaktır.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Hidden field for user type -->
+            <input type="hidden" id="user_type" name="user_type" value="yetkili">
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-register text-white" id="register-button">Kayıt Ol</button>
+            </div>
+        </form>
+
+        <div class="links">
+            <p>Zaten hesabınız var mı? <a href="{% url 'haberler:custom_login' %}" id="login-link">Giriş Yap</a></p>
+            <p><a href="{% url 'anasayfa' %}">← Ana Sayfaya Dön</a></p>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Debug logging function
+        function debugLog(message) {
+            console.log('[Registration Debug] ' + message);
+        }
+        
+        // Error logging function
+        function errorLog(message, error) {
+            console.error('[Registration Error] ' + message, error);
+        }
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            errorLog('Global error occurred', e.error);
+        });
+        
+        // Handle form submission errors
+        window.addEventListener('unhandledrejection', function(e) {
+            errorLog('Unhandled promise rejection', e.reason);
+        });
+        
+        // Get user type from URL parameter
+        const urlParams = new URLSearchParams(window.location.search);
+        const userType = urlParams.get('user_type');
+        
+        debugLog('Page loaded, user type from URL: ' + userType);
+        
+        // Apply styling based on user type
+        if (userType) {
+            try {
+                const body = document.getElementById('register-body');
+                const container = document.getElementById('register-container');
+                const button = document.getElementById('register-button');
+                const indicator = document.getElementById('user-type-indicator');
+                const indicatorText = document.getElementById('indicator-text');
+                const loginLink = document.getElementById('login-link');
+                
+                // Set the hidden user_type field
+                const userTypeField = document.getElementById('user_type');
+                if (userTypeField) {
+                    userTypeField.value = userType;
+                    debugLog('User type field set to: ' + userType);
+                }
+                
+                // Update login link to include user type
+                if (loginLink) {
+                    loginLink.href = "{% url 'haberler:custom_login' %}?user_type=" + userType;
+                    debugLog('Login link updated to include user type: ' + userType);
+                }
+                
+                // Show appropriate fields based on user type
+                showFieldsForUserType(userType);
+                
+                // Set user type specific styles
+                switch(userType) {
+                    case 'admin':
+                        if (body) body.className = 'admin-bg';
+                        if (container) container.classList.add('admin-border');
+                        if (button) button.classList.add('admin-btn');
+                        if (indicator) {
+                            indicator.style.display = 'block';
+                            indicator.classList.add('admin-indicator');
+                        }
+                        if (indicatorText) indicatorText.textContent = 'YÖNETİCİ KAYIT';
+                        break;
+                    case 'yetkili':
+                        if (body) body.className = 'yetkili-bg';
+                        if (container) container.classList.add('yetkili-border');
+                        if (button) button.classList.add('yetkili-btn');
+                        if (indicator) {
+                            indicator.style.display = 'block';
+                            indicator.classList.add('yetkili-indicator');
+                        }
+                        if (indicatorText) indicatorText.textContent = 'YETKİLİ KAYIT';
+                        break;
+                    case 'abone':
+                        if (body) body.className = 'abone-bg';
+                        if (container) container.classList.add('abone-border');
+                        if (button) button.classList.add('abone-btn');
+                        if (indicator) {
+                            indicator.style.display = 'block';
+                            indicator.classList.add('abone-indicator');
+                        }
+                        if (indicatorText) indicatorText.textContent = 'ABONE KAYIT';
+                        break;
+                }
+            } catch (e) {
+                errorLog('Error in user type setup', e);
+            }
+        } else {
+            // Set default to abone if no user type is specified
+            document.addEventListener('DOMContentLoaded', function() {
+                debugLog('DOM loaded, setting default selection');
+                try {
+                    // Set the hidden user_type field to abone by default
+                    const userTypeField = document.getElementById('user_type');
+                    if (userTypeField) {
+                        userTypeField.value = 'abone';
+                        debugLog('User type field set to default: abone');
+                    }
+                    
+                    // Update login link to include user type
+                    const loginLink = document.getElementById('login-link');
+                    if (loginLink) {
+                        loginLink.href = "{% url 'haberler:custom_login' %}?user_type=abone";
+                        debugLog('Login link updated to include default user type: abone');
+                    }
+                    
+                    // Ensure abone fields are visible
+                    const aboneFields = document.getElementById('abone-fields');
+                    if (aboneFields) {
+                        aboneFields.style.display = 'block';
+                        debugLog('Abone fields displayed by default');
+                    }
+                } catch (e) {
+                    errorLog('Error in default selection setup', e);
+                }
+            });
+        }
+        
+        function showFieldsForUserType(type) {
+            debugLog('Showing fields for type: ' + type);
+            try {
+                // Hide all fields
+                document.getElementById('abone-fields').style.display = 'none';
+                document.getElementById('yetkili-fields').className = 'hidden-field';
+                
+                // Show fields for selected type and set required attributes
+                if (type === 'abone') {
+                    document.getElementById('abone-fields').style.display = 'block';
+                    // Add required attributes to abone fields
+                    document.getElementById('abone_email').setAttribute('required', 'required');
+                    document.getElementById('abone_password1').setAttribute('required', 'required');
+                    document.getElementById('abone_password2').setAttribute('required', 'required');
+                    // Remove required attributes from yetkili fields
+                    document.getElementById('first_name').removeAttribute('required');
+                    document.getElementById('last_name').removeAttribute('required');
+                    document.getElementById('yetkili_email').removeAttribute('required');
+                    document.getElementById('yetkili_password1').removeAttribute('required');
+                    document.getElementById('yetkili_password2').removeAttribute('required');
+                    debugLog('Abone fields displayed and required attributes set');
+                } else if (type === 'yetkili') {
+                    document.getElementById('yetkili-fields').className = '';
+                    // Add required attributes to yetkili fields
+                    document.getElementById('first_name').setAttribute('required', 'required');
+                    document.getElementById('last_name').setAttribute('required', 'required');
+                    document.getElementById('yetkili_email').setAttribute('required', 'required');
+                    document.getElementById('yetkili_password1').setAttribute('required', 'required');
+                    document.getElementById('yetkili_password2').setAttribute('required', 'required');
+                    // Remove required attributes from abone fields
+                    document.getElementById('abone_email').removeAttribute('required');
+                    document.getElementById('abone_password1').removeAttribute('required');
+                    document.getElementById('abone_password2').removeAttribute('required');
+                    debugLog('Yetkili fields displayed and required attributes set');
+                }
+            } catch (e) {
+                errorLog('Error in showFieldsForUserType function', e);
+            }
+        }
+        
+        // Add debugging for form submission
+        document.addEventListener('DOMContentLoaded', function() {
+            debugLog('DOM content loaded, setting up form submission handler');
+            const form = document.getElementById('registration-form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    debugLog('Form submission started');
+                    
+                    // Get the CSRF token from the form
+                    const csrfToken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                    debugLog('CSRF token from form: ' + csrfToken);
+                    
+                    // Log the hidden_user_type field value
+                    const userTypeField = document.getElementById('user_type');
+                    const userType = userTypeField ? userTypeField.value : 'NOT FOUND';
+                    debugLog('Hidden user_type field value: ' + userType);
+                    
+                    // Log all form data
+                    const formData = new FormData(form);
+                    debugLog('Form data:');
+                    for (let [key, value] of formData.entries()) {
+                        debugLog(key + ': ' + value);
+                    }
+                    
+                    // Check if we have the required fields based on user type
+                    if (userType === 'abone') {
+                        const email = document.getElementById('abone_email');
+                        const pass1 = document.getElementById('abone_password1');
+                        const pass2 = document.getElementById('abone_password2');
+                        debugLog('Abone fields check - Email: ' + (email ? email.value : 'NOT FOUND') + 
+                                ', Pass1: ' + (pass1 ? pass1.value : 'NOT FOUND') + 
+                                ', Pass2: ' + (pass2 ? pass2.value : 'NOT FOUND'));
+                    } else if (userType === 'yetkili') {
+                        const firstName = document.getElementById('first_name');
+                        const lastName = document.getElementById('last_name');
+                        const email = document.getElementById('yetkili_email');
+                        const pass1 = document.getElementById('yetkili_password1');
+                        const pass2 = document.getElementById('yetkili_password2');
+                        debugLog('Yetkili fields check - First: ' + (firstName ? firstName.value : 'NOT FOUND') + 
+                                ', Last: ' + (lastName ? lastName.value : 'NOT FOUND') + 
+                                ', Email: ' + (email ? email.value : 'NOT FOUND') + 
+                                ', Pass1: ' + (pass1 ? pass1.value : 'NOT FOUND') + 
+                                ', Pass2: ' + (pass2 ? pass2.value : 'NOT FOUND'));
+                        
+                        // Basic validation
+                        if (!firstName || !firstName.value.trim()) {
+                            errorLog('First name is required');
+                            alert('Ad alanı zorunludur.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        if (!lastName || !lastName.value.trim()) {
+                            errorLog('Last name is required');
+                            alert('Soyad alanı zorunludur.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        if (!email || !email.value.trim()) {
+                            errorLog('Email is required');
+                            alert('Email alanı zorunludur.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        if (!pass1 || !pass1.value.trim()) {
+                            errorLog('Password is required');
+                            alert('Şifre alanı zorunludur.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        if (!pass2 || !pass2.value.trim()) {
+                            errorLog('Password confirmation is required');
+                            alert('Şifre tekrar alanı zorunludur.');
+                            e.preventDefault();
+                            return false;
+                        }
+                        
+                        if (pass1.value !== pass2.value) {
+                            errorLog('Passwords do not match');
+                            alert('Şifreler eşleşmiyor.');
+                            e.preventDefault();
+                            return false;
+                        }
+                    }
+                    
+                    // If validation passes, let the form submit normally to preserve CSRF token
+                    debugLog('Form validation passed, allowing normal submission');
+                });
+            }
+        });
+        
+        // Ensure the button is always enabled
+        document.addEventListener('DOMContentLoaded', function() {
+            const button = document.getElementById('register-button');
+            if (button) {
+                button.disabled = false;
+                debugLog('Register button enabled');
+            }
+        });
+        
+        // Email validation functionality
+        let emailValidationTimeout;
+        
+        function validateEmailRealTime(emailField, messageDiv) {
+            const email = emailField.value.trim();
+            
+            if (!email) {
+                messageDiv.style.display = 'none';
+                return;
+            }
+            
+            // Clear previous timeout
+            clearTimeout(emailValidationTimeout);
+            
+            // Show loading message
+            messageDiv.className = 'email-validation-message warning';
+            messageDiv.textContent = 'Email doğrulanıyor...';
+            messageDiv.style.display = 'block';
+            
+            // Delay validation to avoid too many requests
+            emailValidationTimeout = setTimeout(() => {
+                fetch('{% url "haberler:validate_email_ajax" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify({ email: email })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.valid) {
+                        messageDiv.className = 'email-validation-message success';
+                        messageDiv.textContent = '✓ ' + data.message;
+                    } else {
+                        messageDiv.className = 'email-validation-message error';
+                        messageDiv.textContent = '✗ ' + data.message;
+                    }
+                    messageDiv.style.display = 'block';
+                })
+                .catch(error => {
+                    messageDiv.className = 'email-validation-message warning';
+                    messageDiv.textContent = 'Email doğrulanamadı';
+                    messageDiv.style.display = 'block';
+                });
+            }, 1000); // 1 second delay
+        }
+        
+        // Setup email validation when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Abone email validation
+            const aboneEmailField = document.getElementById('abone_email');
+            const aboneEmailMessage = document.getElementById('abone_email_message');
+            
+            if (aboneEmailField && aboneEmailMessage) {
+                aboneEmailField.addEventListener('input', function() {
+                    validateEmailRealTime(aboneEmailField, aboneEmailMessage);
+                });
+                
+                aboneEmailField.addEventListener('blur', function() {
+                    validateEmailRealTime(aboneEmailField, aboneEmailMessage);
+                });
+            }
+            
+            // Yetkili email validation
+            const yetkiliEmailField = document.getElementById('yetkili_email');
+            const yetkiliEmailMessage = document.getElementById('yetkili_email_message');
+            
+            if (yetkiliEmailField && yetkiliEmailMessage) {
+                yetkiliEmailField.addEventListener('input', function() {
+                    validateEmailRealTime(yetkiliEmailField, yetkiliEmailMessage);
+                });
+                
+                yetkiliEmailField.addEventListener('blur', function() {
+                    validateEmailRealTime(yetkiliEmailField, yetkiliEmailMessage);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

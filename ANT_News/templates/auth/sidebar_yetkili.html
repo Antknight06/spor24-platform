@@ -1,0 +1,37 @@
+<div class="text-center mb-4">
+    <h4>NET Spor</h4>
+    <div>
+        <span class="user-badge">YETKİLİ</span>
+    </div>
+    <small>{{ user.get_username }}</small>
+</div>
+
+<nav class="nav flex-column">
+    <a class="nav-link {% if request.resolver_match.url_name == 'yetkili_dashboard' %}active{% endif %}" href="{% url 'haberler:yetkili_dashboard' %}">
+        <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'bekleyen_yetkili_haberlerim' %}active{% endif %}" href="{% url 'haberler:bekleyen_yetkili_haberlerim' %}">
+        <i class="fas fa-hourglass-half me-2"></i> Bekleyen Haberlerim
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'kose_yazilarim' %}active{% endif %}" href="{% url 'haberler:kose_yazilarim' %}">
+        <i class="fas fa-file-alt me-2"></i> Köşe Yazılarım
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'yeni_kose_yazisi' %}active{% endif %}" href="{% url 'haberler:yeni_kose_yazisi' %}">
+        <i class="fas fa-plus-circle me-2"></i> Yeni Köşe Yazısı Ekle
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'haberlerim' %}active{% endif %}" href="{% url 'haberler:haberlerim' %}">
+        <i class="fas fa-newspaper me-2"></i> Haberlerim
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'yeni_haber' %}active{% endif %}" href="{% url 'haberler:yeni_haber' %}">
+        <i class="fas fa-plus-circle me-2"></i> Yeni Haber Ekle
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'yorum_yonetimi' %}active{% endif %}" href="{% url 'haberler:yorum_yonetimi' %}">
+        <i class="fas fa-comments me-2"></i> Yorum Yönetimi
+    </a>
+    <a class="nav-link {% if request.resolver_match.url_name == 'istatistikler' %}active{% endif %}" href="{% url 'haberler:istatistikler' %}">
+        <i class="fas fa-chart-bar me-2"></i> İstatistikler
+    </a>
+    <a class="nav-link" href="{% url 'haberler:custom_logout' %}">
+        <i class="fas fa-sign-out-alt me-2"></i> Çıkış Yap
+    </a>
+</nav>

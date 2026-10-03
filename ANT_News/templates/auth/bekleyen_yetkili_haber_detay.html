@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ bekleyen_haber.baslik }} - Bekleyen Haber Detay</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .sidebar {
+            background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+            color: white;
+            min-height: 100vh;
+            padding-top: 20px;
+        }
+        .main-content {
+            padding: 20px;
+        }
+        .card {
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: none;
+            margin-bottom: 20px;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .nav-link:hover, .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .user-badge {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+        .status-pending {
+            border-left: 4px solid #ffc107;
+            background-color: #fff3cd;
+        }
+        .status-approved {
+            border-left: 4px solid #28a745;
+            background-color: #d4edda;
+        }
+        .status-rejected {
+            border-left: 4px solid #dc3545;
+            background-color: #f8d7da;
+        }
+        .content-section {
+            background-color: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .status-badge {
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .badge-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+        .badge-approved {
+            background-color: #28a745;
+            color: white;
+        }
+        .badge-rejected {
+            background-color: #dc3545;
+            color: white;
+        }
+        .meta-info {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+        .content-text {
+            line-height: 1.8;
+            font-size: 1.1em;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            {% include 'auth/sidebar_yetkili.html' %}
+            
+            <!-- Main Content -->
+            <div class="col-md-9 col-lg-10 main-content">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>📖 Haber Detayı</h2>
+                    <a href="{% url 'haberler:bekleyen_yetkili_haberlerim' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i> Listeye Dön
+                    </a>
+                </div>
+                
+                <!-- Status Card -->
+                <div class="card 
+                    {% if bekleyen_haber.onaylandi %}status-approved
+                    {% elif bekleyen_haber.reddedildi %}status-rejected
+                    {% else %}status-pending
+                    {% endif %}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1">
+                                    {% if bekleyen_haber.kose_yazisi %}
+                                        📝 Köşe Yazısı
+                                    {% else %}
+                                        📰 Haber
+                                    {% endif %}
+                                </h5>
+                                <small class="text-muted">{{ bekleyen_haber.kategori.ad }} kategorisinde</small>
+                            </div>
+                            <div>
+                                {% if bekleyen_haber.onaylandi %}
+                                    <span class="status-badge badge-approved">✅ Onaylandı</span>
+                                {% elif bekleyen_haber.reddedildi %}
+                                    <span class="status-badge badge-rejected">❌ Reddedildi</span>
+                                {% else %}
+                                    <span class="status-badge badge-pending">⏳ Onay Bekliyor</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Content Card -->
+                <div class="content-section">
+                    <!-- Title -->
+                    <h1 class="mb-4" style="color: #2c3e50; border-bottom: 3px solid #28a745; padding-bottom: 10px;">
+                        {{ bekleyen_haber.baslik }}
+                    </h1>
+                    
+                    <!-- Meta Information -->
+                    <div class="meta-info">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong><i class="fas fa-user me-2"></i>Yazar:</strong><br>
+                                <span class="text-muted">{{ bekleyen_haber.yazar.get_full_name|default:bekleyen_haber.yazar.get_username }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong><i class="fas fa-folder me-2"></i>Kategori:</strong><br>
+                                <span class="text-muted">{{ bekleyen_haber.kategori.ad }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong><i class="fas fa-calendar me-2"></i>Gönderilme:</strong><br>
+                                <span class="text-muted">{{ bekleyen_haber.olusturma_tarihi|date:"d.m.Y H:i" }}</span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong><i class="fas fa-info-circle me-2"></i>Türü:</strong><br>
+                                <span class="text-muted">
+                                    {% if bekleyen_haber.kose_yazisi %}
+                                        Köşe Yazısı
+                                    {% else %}
+                                        Haber
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Approval/Rejection Info -->
+                        {% if bekleyen_haber.onaylandi %}
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-check-circle text-success me-2"></i>Onaylandı:</strong><br>
+                                    <span class="text-muted">{{ bekleyen_haber.onay_tarihi|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-user-check text-success me-2"></i>Onaylayan:</strong><br>
+                                    <span class="text-muted">{{ bekleyen_haber.onaylayan.get_username }}</span>
+                                </div>
+                            </div>
+                        {% elif bekleyen_haber.reddedildi %}
+                            <hr>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-times-circle text-danger me-2"></i>Reddedildi:</strong><br>
+                                    <span class="text-muted">{{ bekleyen_haber.red_tarihi|date:"d.m.Y H:i" }}</span>
+                                </div>
+                                <div class="col-md-6">
+                                    <strong><i class="fas fa-user-times text-danger me-2"></i>Reddeden:</strong><br>
+                                    <span class="text-muted">{{ bekleyen_haber.onaylayan.get_username }}</span>
+                                </div>
+                            </div>
+                            {% if bekleyen_haber.red_nedeni %}
+                                <hr>
+                                <div class="alert alert-danger">
+                                    <strong><i class="fas fa-exclamation-triangle me-2"></i>Red Nedeni:</strong><br>
+                                    {{ bekleyen_haber.red_nedeni }}
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Summary -->
+                    <div class="mb-4">
+                        <h4 style="color: #28a745;">📋 Özet</h4>
+                        <p class="content-text" style="background-color: #f8f9fa; padding: 15px; border-radius: 8px; font-style: italic;">
+                            {{ bekleyen_haber.ozet }}
+                        </p>
+                    </div>
+                    
+                    <!-- Image -->
+                    {% if bekleyen_haber.resim %}
+                        <div class="image-container">
+                            <img src="{{ bekleyen_haber.resim.url }}" alt="{{ bekleyen_haber.baslik }}" class="img-fluid">
+                        </div>
+                    {% endif %}
+                    
+                    <!-- Content -->
+                    <div class="mb-4">
+                        <h4 style="color: #28a745;">📝 İçerik</h4>
+                        <div class="content-text">
+                            {{ bekleyen_haber.icerik|linebreaks }}
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="text-center mt-4">
+                        {% if not bekleyen_haber.onaylandi and not bekleyen_haber.reddedildi %}
+                            <div class="alert alert-info">
+                                <i class="fas fa-clock me-2"></i>
+                                <strong>Bu {% if bekleyen_haber.kose_yazisi %}köşe yazısı{% else %}haber{% endif %} admin onayı bekliyor.</strong><br>
+                                <small>Onaylandıktan sonra sitede yayınlanacaktır.</small>
+                            </div>
+                        {% elif bekleyen_haber.onaylandi %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                <strong>Bu {% if bekleyen_haber.kose_yazisi %}köşe yazısı{% else %}haber{% endif %} onaylandı ve sitede yayınlandı!</strong><br>
+                                <small>Artık tüm kullanıcılar tarafından görülebilir.</small>
+                            </div>
+                        {% elif bekleyen_haber.reddedildi %}
+                            <div class="alert alert-danger">
+                                <i class="fas fa-times-circle me-2"></i>
+                                <strong>Bu {% if bekleyen_haber.kose_yazisi %}köşe yazısı{% else %}haber{% endif %} reddedildi.</strong><br>
+                                <small>Yukarıda red nedenini görebilirsiniz.</small>
+                            </div>
+                        {% endif %}
+                        
+                        <a href="{% url 'haberler:bekleyen_yetkili_haberlerim' %}" class="btn btn-primary">
+                            <i class="fas fa-list me-1"></i> Tüm Bekleyen Haberlerim
+                        </a>
+                        <a href="{% url 'haberler:yetkili_dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

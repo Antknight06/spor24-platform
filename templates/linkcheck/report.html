@@ -1,0 +1,673 @@
+{% extends "linkcheck/base_linkcheck.html" %}
+{% load i18n %}
+{% load linkcheck_model_tags %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
+.btn-delete-article {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(225, 29, 72, 0.12);
+    color: #E11D48;
+    border: 1px solid rgba(225, 29, 72, 0.3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-delete-article:hover {
+    background: #E11D48;
+    color: #FFFFFF !important;
+}
+
+.btn-action-autofix {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(99, 102, 241, 0.12);
+    color: #6366F1;
+    border: 1px solid rgba(99, 102, 241, 0.3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-action-autofix:hover {
+    background: #6366F1;
+    color: #FFFFFF;
+}
+
+.btn-bulk-magic {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.65rem;
+    font-size: 0.8125rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    color: #FFFFFF;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+.btn-bulk-magic:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(79, 70, 229, 0.5);
+    color: #FFFFFF;
+}
+
+.btn-bulk-danger {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.9rem;
+    border-radius: 0.65rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    background: rgba(225, 29, 72, 0.1);
+    color: #E11D48;
+    border: 1px solid rgba(225, 29, 72, 0.35);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-bulk-danger:hover {
+    background: #E11D48;
+    color: #FFFFFF;
+}
+</style>
+
+<script type="text/javascript">
+    const ACTION_URL = '/admin/linkcheck/custom-action/';
+
+    function getCsrf() {
+        const el = document.querySelector('[name=csrfmiddlewaretoken]');
+        return el ? el.value : '';
+    }
+
+    async function postAction(payload) {
+        const fd = new FormData();
+        fd.append('csrfmiddlewaretoken', getCsrf());
+        for (const k in payload) {
+            fd.append(k, payload[k]);
+        }
+        const response = await fetch(ACTION_URL, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        });
+        return await response.json();
+    }
+
+    // 1. TEK TIKLA HABERİ SİL
+    function deleteNewsArticle(modelName, objectId, title, cardElementId) {
+        const doDelete = () => {
+            const card = document.getElementById(cardElementId);
+            if (card) card.style.opacity = '0.3';
+            
+            postAction({
+                'action': 'delete_object',
+                'model_name': modelName,
+                'object_id': objectId
+            }).then(data => {
+                if (data.success) {
+                    if (card) {
+                        card.style.transition = 'all 0.4s ease';
+                        card.style.transform = 'scale(0.95)';
+                        card.style.opacity = '0';
+                        setTimeout(() => card.remove(), 400);
+                    }
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'success', title: 'Haber Silindi!', text: data.message, timer: 2000, showConfirmButton: false });
+                    } else {
+                        alert(data.message);
+                    }
+                } else {
+                    if (card) card.style.opacity = '1';
+                    if (window.Swal) { Swal.fire('Hata', data.error || 'İşlem başarısız', 'error'); }
+                    else { alert('Hata: ' + (data.error || 'İşlem başarısız')); }
+                }
+            }).catch(err => {
+                if (card) card.style.opacity = '1';
+                alert('Sunucu hatası: ' + err);
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Haberi Silmek İstiyor musunuz?',
+                html: `<div class="text-left text-sm text-slate-600">
+                        <p class="font-bold text-rose-600 mb-2">⚠️ Bu işlem geri alınamaz!</p>
+                        <p class="mb-2"><strong>Başlık:</strong> ${title}</p>
+                        <p class="text-xs text-slate-500">Bu haber veritabanından tamamen silinecek ve bu habere bağlı tüm kırık bağlantılar listeden temizlenecektir.</p>
+                       </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#E11D48',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Evet, Haberi Tamamen Sil',
+                cancelButtonText: 'Vazgeç'
+            }).then((res) => { if (res.isConfirmed) doDelete(); });
+        } else {
+            if (confirm(`"${title}" haberini ve bağlı tüm bağlantıları tamamen silmek istediğinizden emin misiniz?`)) {
+                doDelete();
+            }
+        }
+    }
+
+    // 2. TEK TIKLA KIRIK LİNKİ AYIKLA (HABERİ KORU)
+    function autofixLink(linkId, rowId) {
+        const doFix = () => {
+            const row = document.getElementById(rowId);
+            if (row) row.style.opacity = '0.3';
+
+            postAction({
+                'action': 'autofix_link',
+                'link_id': linkId
+            }).then(data => {
+                if (data.success) {
+                    if (row) {
+                        row.style.transition = 'all 0.3s ease';
+                        row.style.opacity = '0';
+                        setTimeout(() => row.remove(), 300);
+                    }
+                    if (window.Swal) {
+                        Swal.fire({ icon: 'success', title: 'Link Temizlendi!', text: data.message, timer: 1800, showConfirmButton: false });
+                    } else {
+                        alert(data.message);
+                    }
+                } else {
+                    if (row) row.style.opacity = '1';
+                    alert('Hata: ' + (data.error || 'İşlem başarısız'));
+                }
+            }).catch(err => {
+                if (row) row.style.opacity = '1';
+                alert('Sunucu hatası: ' + err);
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Kırık Linki Ayıkla?',
+                text: 'Haberin içeriği bozulmadan korunacak, sadece bu çalışmayan 404 bağlantısı metinden sökülecektir.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#6366F1',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Evet, Linki Ayıkla',
+                cancelButtonText: 'İptal'
+            }).then((res) => { if (res.isConfirmed) doFix(); });
+        } else {
+            if (confirm('Haber içeriğini koruyarak bu kırık bağlantıyı metinden sökmek istiyor musunuz?')) {
+                doFix();
+            }
+        }
+    }
+
+    // 3. TOPLU İŞLEM: TÜM KIRIK LİNKLERİ OTOMATİK AYIKLA (HABERLERİ KURTAR)
+    function autofixAllBroken() {
+        const doBulkFix = () => {
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Kırık Linkler Ayıklanıyor...',
+                    text: 'Lütfen bekleyin, tüm haber metinleri taranıyor...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+            }
+
+            postAction({
+                'action': 'autofix_all_broken'
+            }).then(data => {
+                if (data.success) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'İşlem Başarılı!',
+                            text: data.message,
+                            confirmButtonText: 'Sayfayı Yenile'
+                        }).then(() => { window.location.reload(); });
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            }).catch(err => {
+                alert('Sunucu hatası: ' + err);
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Tüm Kırık Linkler Temizlensin mi?',
+                html: `<div class="text-left text-sm text-slate-600">
+                        <p class="font-bold text-indigo-600 mb-2">✨ Sihirli Temizlik (Haberler Silinmez!)</p>
+                        <p class="mb-2">Sistem tüm haberlerinizi tarar; metinlerdeki ölü 404 linklerini ve geçersiz kaynak adreslerini otomatik olarak söker.</p>
+                        <p class="text-xs text-slate-500">Haber metinleri, başlıkları ve fotoğrafları aynen korunur, arama motorlarında sitenizin SEO'su tertemiz hale gelir.</p>
+                       </div>`,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#4F46E5',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: '✨ Evet, Hepsini Otomatik Temizle',
+                cancelButtonText: 'Vazgeç'
+            }).then((res) => { if (res.isConfirmed) doBulkFix(); });
+        } else {
+            if (confirm('Tüm haber metinlerindeki ölü 404 linklerini otomatik temizlemek istiyor musunuz? (Haberleriniz silinmeyecektir)')) {
+                doBulkFix();
+            }
+        }
+    }
+
+    // 4. TOPLU İŞLEM: KIRIK LİNK İÇEREN TÜM HABERLERİ SİL
+    function deleteAllBrokenNews() {
+        const doBulkDelete = () => {
+            if (window.Swal) {
+                Swal.fire({
+                    title: 'Haberler Siliniyor...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading(); }
+                });
+            }
+
+            postAction({
+                'action': 'delete_all_broken_news'
+            }).then(data => {
+                if (data.success) {
+                    if (window.Swal) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Haberler Silindi!',
+                            text: data.message,
+                            confirmButtonText: 'Sayfayı Yenile'
+                        }).then(() => { window.location.reload(); });
+                    } else {
+                        alert(data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert('Hata: ' + data.error);
+                }
+            }).catch(err => {
+                alert('Sunucu hatası: ' + err);
+            });
+        };
+
+        if (window.Swal) {
+            Swal.fire({
+                title: 'Kırık Linkli Tüm Haberler Silinsin mi?',
+                html: `<div class="text-left text-sm text-slate-600">
+                        <p class="font-bold text-rose-600 mb-2">🚨 DİKKAT: Kalıcı Silme İşlemi!</p>
+                        <p class="mb-2">İçinde kırık bağlantı tespit edilen tüm haberler veritabanından kalıcı olarak kaldırılacaktır.</p>
+                        <p class="text-xs text-slate-500">Önemli haberleriniz de silinebilir. Eğer haberleri koruyup sadece linkleri temizlemek istiyorsanız mor "Tümünü Otomatik Temizle" butonunu tercih edin.</p>
+                       </div>`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#E11D48',
+                cancelButtonColor: '#64748B',
+                confirmButtonText: 'Evet, Tüm Bu Haberleri Sil',
+                cancelButtonText: 'Vazgeç'
+            }).then((res) => { if (res.isConfirmed) doBulkDelete(); });
+        } else {
+            if (confirm('DİKKAT: İçinde kırık link geçen TÜM haberleri kalıcı olarak silmek istediğinizden emin misiniz?')) {
+                doBulkDelete();
+            }
+        }
+    }
+
+    $(document).ready(function() {
+        const csrfToken = getCsrf();
+
+        $(".ignore").submit(function(){
+            var form = $(this);
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
+                form.closest('tr').fadeOut(300, function() { $(this).remove(); });
+                var ignored_count = parseInt($('#ignored_count').text());
+                if (!isNaN(ignored_count)) {
+                    $('#ignored_count').text(ignored_count + 1);
+                }
+            });
+            return false;
+        });
+
+        $(".unignore").submit(function(){
+            var form = $(this);
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
+                form.closest('tr').fadeOut(300, function() { $(this).remove(); });
+                var ignored_count = parseInt($('#ignored_count').text());
+                if (!isNaN(ignored_count) && ignored_count > 0) {
+                    $('#ignored_count').text(ignored_count - 1);
+                }
+            });
+            return false;
+        });
+
+        $(".recheck").submit(function(){
+            var $row = $(this).closest('tr');
+            var $msgCell = $row.find('td.link_message');
+            $msgCell.html('<span class="inline-flex items-center gap-1 text-blue-500 font-semibold"><i class="fa fa-spinner fa-spin"></i> Taranıyor...</span>');
+            $.post(this.action, {'csrfmiddlewaretoken': csrfToken}, (data) => {
+                var links = data['links'];
+                for (var link in links) {
+                    var targetRow = $('tr#link' + links[link]);
+                    var isSuccess = data['message'].indexOf('200') !== -1 || data['message'].toLowerCase().indexOf('valid') !== -1 || data['message'].toLowerCase().indexOf('sağlam') !== -1;
+                    var badgeClass = isSuccess ? 'badge-status-valid' : 'badge-status-broken';
+                    var iconClass = isSuccess ? 'fa-circle-check' : 'fa-circle-xmark';
+                    targetRow.find('td.link_message').html('<span class="' + badgeClass + '"><i class="fa-solid ' + iconClass + '"></i> ' + data['message'] + '</span>');
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{% endblock %}
+
+{% block innercontent %}
+    <!-- ACTION HERO COMMAND BAR (TOPLU İŞLEM MASASI) -->
+    <div class="p-4 md:p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 border border-indigo-500/30 text-white shadow-xl mb-6">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div>
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold uppercase tracking-wider mb-2 border border-indigo-500/30">
+                    <i class="fa-solid fa-bolt"></i> Hızlı Çözüm & Otomatik Onarım Masası
+                </div>
+                <h2 class="text-lg md:text-xl font-black text-white" style="margin: 0;">
+                    Tek Tek Uğraşmak İstemiyor musunuz?
+                </h2>
+                <p class="text-xs md:text-sm text-slate-300 mt-1 max-w-2xl" style="margin-bottom: 0;">
+                    Aşağıdaki 100+ linkle tek tek vakit kaybetmeyin. İster tüm haberleri koruyup içlerindeki ölü bağlantıları tek tıkla ayıklayın, isterseniz bu haberleri doğrudan yayından kaldırın.
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-3">
+                <button type="button" onclick="autofixAllBroken()" class="btn-bulk-magic" title="Haberlerinizi silmeden içlerindeki tüm ölü bağlantıları temizler">
+                    <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                    <span>Tüm Kırık Linkleri Otomatik Ayıkla (Haberleri Koru)</span>
+                </button>
+
+                <button type="button" onclick="deleteAllBrokenNews()" class="btn-bulk-danger" title="Kırık link içeren tüm haberleri tamamen siler">
+                    <i class="fa-solid fa-trash-can"></i>
+                    <span>Tüm Bu Haberleri Sil</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDITORIAL ACTION GUIDE -->
+    <div class="linkcheck-guide-box">
+        <div class="flex items-start justify-between gap-4 mb-2">
+            <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-500 flex items-center justify-center text-sm font-bold">
+                    <i class="fa-solid fa-circle-question"></i>
+                </span>
+                <div>
+                    <h3 class="text-sm font-bold text-slate-800 dark:text-slate-100" style="margin: 0;">
+                        Kırık Link Mantığı: Neden Haberi Silmek Yerine Linki Ayıklamak Daha Mantıklı?
+                    </h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400" style="margin: 0;">
+                        Tabloda gördüğünüz URL'ler sizin siteniz değil, federasyonların kendi sitelerinde sildiği eski duyuru/PDF linkleridir.
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="document.getElementById('guide-details').classList.toggle('hidden');" class="text-xs text-blue-600 dark:text-blue-400 hover:underline font-semibold flex items-center gap-1">
+                <span>Aç / Kapat</span>
+                <i class="fa fa-chevron-down text-[10px]"></i>
+            </button>
+        </div>
+
+        <div id="guide-details" class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-3 border-t border-blue-500/15">
+            <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                <div class="flex items-center gap-2 text-xs font-bold text-indigo-600 dark:text-indigo-400 mb-1">
+                    <i class="fa-solid fa-newspaper"></i> 1. Sitenizdeki Haber Sağlam!
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Örneğin <em>"Balkan Şampiyonasında Madalya"</em> haberiniz Spor24'te mükemmel şekilde duruyor. Ancak federasyon kendi sitesindeki eski PDF'i sildiği için o link 404 veriyor. Haberiniz değerli bir spor içeriğidir.
+                </p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                <div class="flex items-center gap-2 text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-1">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> 2. Linki Ayıkla Butonu Ne Yapar?
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Haberinize dokunmaz! Sadece haberin metnindeki <code>&lt;a href="..."&gt;</code> köprüsünü söker ve düz yazı yapar. Böylece Google botları artık kırık link görmez, haberiniz de sitenizde kalır!
+                </p>
+            </div>
+
+            <div class="p-3 rounded-lg bg-white/70 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60">
+                <div class="flex items-center gap-2 text-xs font-bold text-rose-600 dark:text-rose-400 mb-1">
+                    <i class="fa-solid fa-trash-can"></i> 3. Haberi Sil Butonu Ne Yapar?
+                </div>
+                <p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Eğer haber zaten çok eski, önemsiz bir duyuru bülteniyse ve sitenizde kalmasını istemiyorsanız, kırmızı <strong>"Haberi Sil"</strong> butonuna basarak tek tıkla doğrudan çöpe atabilirsiniz.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILTER NAVIGATION BAR -->
+    <div class="linkcheck-nav-bar flex flex-wrap items-center justify-between gap-3 mb-6">
+        <div class="flex flex-wrap items-center gap-1.5 md:gap-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-500 mr-1">Filtre:</span>
+            
+            <a href="?filters=show_invalid" class="linkcheck-filter-btn {% if filter == 'show_invalid' or not filter %}active{% endif %}">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>🚨 Kırık Linkler</span>
+            </a>
+            
+            <a href="?filters=show_valid" class="linkcheck-filter-btn {% if filter == 'show_valid' %}active{% endif %}">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>✅ Sağlam Linkler</span>
+            </a>
+            
+            <a href="?filters=show_unchecked" class="linkcheck-filter-btn {% if filter == 'show_unchecked' %}active{% endif %}">
+                <i class="fa-solid fa-clock"></i>
+                <span>⏳ Taranmamış</span>
+            </a>
+            
+            <a href="?filters=ignored" class="linkcheck-filter-btn {% if filter == 'ignored' %}active{% endif %}">
+                <i class="fa-solid fa-eye-slash"></i>
+                <span>🚫 Görmezden Gelinenler (<span id="ignored_count">{{ ignored_count }}</span>)</span>
+            </a>
+        </div>
+
+        <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                <i class="fa-solid fa-robot text-indigo-500"></i>
+                <span>Otomatik Tarama: Her Gece 04:30</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- CONTENT GROUPS -->
+    {% if content_types_list %}
+        {% for content_type in content_types_list %}
+            <div class="mb-8">
+                <!-- Group Header -->
+                <div class="flex items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200 dark:border-slate-800">
+                    <div class="flex items-center gap-2">
+                        <span class="w-7 h-7 rounded-lg bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-sm">
+                            <i class="fa-solid fa-folder-open"></i>
+                        </span>
+                        <h2 class="text-sm md:text-base font-bold text-slate-900 dark:text-white" style="margin: 0;">
+                            {{ content_type.content_type|get_verbose_name_plural }}
+                        </h2>
+                    </div>
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        {{ content_type.object_list|length }} Kayıt
+                    </span>
+                </div>
+
+                <!-- Group Objects -->
+                <div class="space-y-4">
+                    {% for object in content_type.object_list %}
+                        {% with card_id="card-"|add:content_type.content_type.model|add:"-"|add:object.object.id|stringformat:"s" %}
+                        <div id="{{ card_id }}" class="p-4 rounded-xl border border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-slate-900/40 hover:border-slate-300 dark:hover:border-slate-700 transition">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3 pb-3 border-b border-slate-200/70 dark:border-slate-800/60">
+                                <div>
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <span class="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                                            İlgili Spor24 İçeriği #{{ object.object.id }}
+                                        </span>
+                                        <span class="text-xs text-slate-400">
+                                            ({{ object.link_list|length }} kırık bağlantı içeriyor)
+                                        </span>
+                                    </div>
+                                    <h3 class="font-extrabold text-sm md:text-base text-slate-900 dark:text-white tracking-tight leading-snug" style="margin: 0;">
+                                        {{ object.object.baslik|default:object.object }}
+                                    </h3>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                    {% if object.object.get_absolute_url %}
+                                    <a href="{{ object.object.get_absolute_url }}" target="_blank" class="btn-view-site" title="Haberi sitede görüntüle">
+                                        <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i> Sitede Gör
+                                    </a>
+                                    {% endif %}
+
+                                    {% if object.admin_url %}
+                                    <a href="{{ object.admin_url }}" target="_blank" class="btn-edit-article" title="Admin panelinde düzenle">
+                                        <i class="fa-solid fa-pen-to-square text-[10px]"></i> Düzenle ↗
+                                    </a>
+                                    {% endif %}
+
+                                    <!-- DIRECT DELETE BUTTON FOR THIS NEWS -->
+                                    <button type="button" onclick="deleteNewsArticle('{{ content_type.content_type.model }}', {{ object.object.id }}, '{{ object.object.baslik|default:object.object|escapejs }}', '{{ card_id }}')" class="btn-delete-article" title="Bu haberi ve içindeki tüm linkleri tamamen sil">
+                                        <i class="fa-solid fa-trash-can text-[11px]"></i> Haberi Sil
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Links Table -->
+                            <div class="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-800">
+                                <table class="linkcheck-table">
+                                    <thead>
+                                        <tr>
+                                            <th style="width: 38%;">Hedef Bağlantı (Federasyon URL'si)</th>
+                                            <th style="width: 16%;">Metin / Etiket</th>
+                                            <th style="width: 12%;">Konum</th>
+                                            <th style="width: 14%;">Durum</th>
+                                            <th style="width: 20%; text-align: right;">Aksiyonlar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for link in object.link_list %}
+                                            {% with row_id="link"|add:link.id|stringformat:"s" %}
+                                            <tr id="{{ row_id }}">
+                                                <td class="font-mono text-xs">
+                                                    <a href="{{ link.url }}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 dark:text-indigo-400 hover:underline break-all inline-flex items-baseline gap-1" title="Dış bağlantıyı yeni sekmede test et">
+                                                        <span>{{ link.display_url }}</span>
+                                                        <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400"></i>
+                                                    </a>
+                                                    {% if link.url.redirect_to %}
+                                                    <div class="text-[11px] text-blue-500 dark:text-blue-400 mt-1 flex items-center gap-1 font-sans">
+                                                        <i class="fa-solid fa-turn-down fa-rotate-270 text-[9px]"></i>
+                                                        <span>Hedefe Yönleniyor: <strong class="break-all">{{ link.url.redirect_to }}</strong></span>
+                                                    </div>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-xs text-slate-600 dark:text-slate-400">
+                                                    {% if link.text == "empty" or not link.text %}
+                                                        <span class="text-slate-400 italic">(metin yok)</span>
+                                                    {% else %}
+                                                        <span class="font-medium text-slate-700 dark:text-slate-300">"{{ link.text }}"</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-xs text-slate-500 font-mono">
+                                                    <span class="px-1.5 py-0.5 rounded bg-slate-200/60 dark:bg-slate-800 text-[11px]">
+                                                        {{ link.field }}
+                                                    </span>
+                                                </td>
+                                                <td class="text-xs font-bold link_message">
+                                                    {% if link.url.status == False %}
+                                                        <span class="badge-status-broken" title="{{ link.url.message }}">
+                                                            <i class="fa-solid fa-circle-xmark"></i> {{ link.url.message|default:"Kırık Link" }}
+                                                        </span>
+                                                    {% elif link.url.status == True %}
+                                                        <span class="badge-status-valid" title="{{ link.url.message }}">
+                                                            <i class="fa-solid fa-circle-check"></i> {{ link.url.message|default:"Sağlam (200 OK)" }}
+                                                        </span>
+                                                    {% else %}
+                                                        <span class="badge-status-unchecked" title="{{ link.url.message }}">
+                                                            <i class="fa-solid fa-clock"></i> {{ link.url.message|default:"Taranmamış" }}
+                                                        </span>
+                                                    {% endif %}
+                                                </td>
+                                                <td class="text-right">
+                                                    <div class="flex items-center justify-end gap-1.5">
+                                                        <!-- AUTOFIX LINK (HABERİ KORU, LİNKİ AYIKLA) -->
+                                                        <button type="button" onclick="autofixLink({{ link.id }}, '{{ row_id }}')" class="btn-action-autofix" title="Haberin içeriğini korur, sadece bu ölü bağlantıyı metinden söker">
+                                                            <i class="fa-solid fa-wand-magic-sparkles"></i> Linki Ayıkla
+                                                        </button>
+
+                                                        <!-- RECHECK -->
+                                                        <form class="recheck inline" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% endif %}recheck={{ link.id }}">
+                                                            <button type="submit" class="btn-action-recheck" title="Bağlantıyı Yeniden Canlı Test Et">
+                                                                <i class="fa-solid fa-rotate"></i>
+                                                            </button>
+                                                        </form>
+
+                                                        <!-- IGNORE / UNIGNORE -->
+                                                        {% if link.url.external %}
+                                                            {% if not link.ignore %}
+                                                            <form class="ignore inline" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% endif %}ignore={{ link.id }}">
+                                                                <button type="submit" class="btn-action-ignore" title="Bu linki görmezden gel ve gizle">
+                                                                    <i class="fa-solid fa-eye-slash"></i>
+                                                                </button>
+                                                            </form>
+                                                            {% else %}
+                                                            <form class="unignore inline" action="{{ request.META.PATH_INFO }}?{% if request.META.QUERY_STRING %}{{ request.META.QUERY_STRING }}&{% endif %}unignore={{ link.id }}">
+                                                                <button type="submit" class="btn-action-unignore" title="Yeniden takibe al">
+                                                                    <i class="fa-solid fa-eye"></i>
+                                                                </button>
+                                                            </form>
+                                                            {% endif %}
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endwith %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        {% endwith %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    {% else %}
+        <!-- Empty State -->
+        <div class="py-16 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center text-3xl mb-3">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h3 class="text-base font-bold text-slate-800 dark:text-slate-200 mb-1">
+                Tebrikler! Bu Filtrede Herhangi Bir Bağlantı Hatası Bulunmuyor.
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                Tüm bağlantılarınız sağlıklı çalışıyor. Diğer filtreleri inceleyebilir ya da gece yapılacak otomatik taramayı bekleyebilirsiniz.
+            </p>
+            <div class="mt-4">
+                <a href="?filters=show_valid" class="btn-view-site">
+                    <i class="fa-solid fa-list-check"></i> Sağlam Linkleri Görüntüle
+                </a>
+            </div>
+        </div>
+    {% endif %}
+
+    {% csrf_token %}
+    {% if content_types_list %}
+        {% include "linkcheck/paginator.html" %}
+    {% endif %}
+{% endblock %}

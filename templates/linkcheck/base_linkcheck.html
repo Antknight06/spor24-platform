@@ -1,0 +1,371 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+
+{% block title %}Bağlantı Sağlık & Kırık Link Denetim Merkezi | {{ site_title|default:_('Spor24 Yönetim') }}{% endblock %}
+
+{% block branding %}
+    {% include "unfold/helpers/site_branding.html" %}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+<style>
+/* Spor24 Executive Linkcheck Styling */
+.linkcheck-wrapper {
+    margin-bottom: 4rem;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.linkcheck-hero {
+    background: linear-gradient(135deg, #0F172A 0%, #1E1B4B 50%, #0F172A 100%);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    padding: 1.5rem 1.75rem;
+    color: #ffffff;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    margin-bottom: 1.5rem;
+}
+
+.linkcheck-badge-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    background: rgba(225, 29, 72, 0.15);
+    border: 1px solid rgba(225, 29, 72, 0.35);
+    color: #FDA4AF;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+/* Card */
+.linkcheck-card {
+    background: #ffffff;
+    border: 1px solid #E2E8F0;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+}
+html.dark .linkcheck-card {
+    background: #0B0F19 !important;
+    border-color: #1E293B !important;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4) !important;
+}
+
+/* Nav Filter Bar */
+.linkcheck-nav-bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 0.85rem;
+    background: #F8FAFC;
+    border: 1px solid #E2E8F0;
+    border-radius: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+html.dark .linkcheck-nav-bar {
+    background: #0F172A !important;
+    border-color: #1E293B !important;
+}
+
+.linkcheck-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.85rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+}
+.linkcheck-filter-btn.active {
+    background: #E11D48 !important;
+    color: #ffffff !important;
+    border-color: #BE123C !important;
+    box-shadow: 0 2px 8px rgba(225, 29, 72, 0.35);
+}
+.linkcheck-filter-btn:not(.active) {
+    color: #64748B;
+    background: rgba(0, 0, 0, 0.03);
+    border-color: #E2E8F0;
+}
+html.dark .linkcheck-filter-btn:not(.active) {
+    color: #94A3B8;
+    background: rgba(255, 255, 255, 0.04);
+    border-color: #1E293B;
+}
+.linkcheck-filter-btn:not(.active):hover {
+    background: #E2E8F0;
+    color: #0F172A;
+}
+html.dark .linkcheck-filter-btn:not(.active):hover {
+    background: #1E293B;
+    color: #F8FAFC;
+}
+
+/* Guide Banner */
+.linkcheck-guide-box {
+    background: rgba(59, 130, 246, 0.05);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.8125rem;
+    color: #334155;
+}
+html.dark .linkcheck-guide-box {
+    background: rgba(59, 130, 246, 0.08);
+    border-color: rgba(59, 130, 246, 0.25);
+    color: #94A3B8;
+}
+
+/* Table */
+.linkcheck-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    font-size: 0.8125rem;
+    margin-top: 0.5rem;
+}
+.linkcheck-table th, .linkcheck-table td {
+    padding: 0.7rem 0.85rem;
+    border-bottom: 1px solid #F1F5F9;
+    vertical-align: middle;
+}
+html.dark .linkcheck-table th, html.dark .linkcheck-table td {
+    border-bottom-color: #1E293B;
+}
+.linkcheck-table th {
+    background: #F8FAFC;
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+    color: #64748B;
+}
+html.dark .linkcheck-table th {
+    background: #0F172A;
+    color: #94A3B8;
+}
+.linkcheck-table tr:hover td {
+    background: #F8FAFC;
+}
+html.dark .linkcheck-table tr:hover td {
+    background: #141C2E;
+}
+
+/* Status Badges */
+.badge-status-broken {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(225, 29, 72, 0.12);
+    color: #E11D48;
+    border: 1px solid rgba(225, 29, 72, 0.3);
+}
+html.dark .badge-status-broken {
+    background: rgba(225, 29, 72, 0.18);
+    color: #FDA4AF;
+    border-color: rgba(225, 29, 72, 0.4);
+}
+
+.badge-status-valid {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.12);
+    color: #059669;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+html.dark .badge-status-valid {
+    background: rgba(16, 185, 129, 0.18);
+    color: #6EE7B7;
+    border-color: rgba(16, 185, 129, 0.4);
+}
+
+.badge-status-unchecked {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(148, 163, 184, 0.12);
+    color: #64748B;
+    border: 1px solid rgba(148, 163, 184, 0.25);
+}
+html.dark .badge-status-unchecked {
+    background: rgba(148, 163, 184, 0.18);
+    color: #94A3B8;
+    border-color: rgba(148, 163, 184, 0.3);
+}
+
+.badge-status-redirect {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(59, 130, 246, 0.12);
+    color: #2563EB;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+html.dark .badge-status-redirect {
+    background: rgba(59, 130, 246, 0.18);
+    color: #93C5FD;
+    border-color: rgba(59, 130, 246, 0.35);
+}
+
+/* Action Buttons */
+.btn-action-recheck {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3B82F6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-action-recheck:hover {
+    background: #3B82F6;
+    color: #FFFFFF;
+}
+
+.btn-action-ignore {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(148, 163, 184, 0.1);
+    color: #64748B;
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+html.dark .btn-action-ignore {
+    color: #94A3B8;
+}
+.btn-action-ignore:hover {
+    background: #64748B;
+    color: #FFFFFF;
+}
+
+.btn-action-unignore {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.55rem;
+    border-radius: 0.375rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(16, 185, 129, 0.1);
+    color: #10B981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.btn-action-unignore:hover {
+    background: #10B981;
+    color: #FFFFFF;
+}
+
+.btn-edit-article {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(245, 158, 11, 0.12);
+    color: #D97706;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+html.dark .btn-edit-article {
+    color: #FBBF24;
+}
+.btn-edit-article:hover {
+    background: #F59E0B;
+    color: #FFFFFF !important;
+}
+
+.btn-view-site {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    background: rgba(59, 130, 246, 0.08);
+    color: #3B82F6;
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    text-decoration: none;
+    transition: all 0.15s ease;
+}
+.btn-view-site:hover {
+    background: #3B82F6;
+    color: #FFFFFF !important;
+}
+</style>
+
+<div class="linkcheck-wrapper space-y-6">
+    <!-- HEADER HERO BANNER -->
+    <div class="linkcheck-hero">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="linkcheck-badge-tag mb-2">
+                    <i class="fa fa-shield-halved"></i>
+                    <span>SEO & Bağlantı Sağlık Radarı</span>
+                </div>
+                <h1 class="text-xl md:text-2xl font-black tracking-tight" style="margin: 0;">
+                    Bağlantı Sağlık & Kırık Link Denetim Merkezi
+                </h1>
+                <p class="mt-1 text-xs md:text-sm text-slate-300" style="margin-bottom: 0;">
+                    Sitedeki tüm haber metinleri, federasyon kaynakları ve görseller taranır. 404 veren sayfaları tespit edip temizleyerek Google arama sıralamanızı koruyun.
+                </p>
+            </div>
+            <div class="flex items-center gap-2">
+                <a href="{% url 'admin:index' %}" class="px-3 py-2 rounded-lg text-xs font-bold text-slate-200 hover:text-white bg-white/10 hover:bg-white/20 transition flex items-center gap-1.5 border border-white/10">
+                    <i class="fa fa-arrow-left"></i> Yönetim Masası
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN CARD -->
+    <div class="linkcheck-card">
+        {% block innercontent %}
+        {% endblock %}
+    </div>
+</div>
+{% endblock %}

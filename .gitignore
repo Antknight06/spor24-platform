@@ -1,0 +1,14 @@
+*.pyc
+__pycache__/
+*.sqlite3
+*.log
+.env
+media/
+venv/
+.DS_Store
+
+# Backup and secret files
+*.bak
+*.bak*
+*.backup
+*.old

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <link rel="canonical" href="https://www.spor24.net{{ request.path }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Karate Antrenörleri - Spor24</title>
+
+    <meta name="google-adsense-account" content="ca-pub-4099153035746180">
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZ1LBQNQPN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-SZ1LBQNQPN');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4099153035746180" crossorigin="anonymous"></script>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body { background-color: #f8f9fa; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .navbar-brand { font-weight: 800; letter-spacing: -1px; font-size: 1.5rem; }
+        
+        #svg-container svg { width: 100%; height: auto; max-height: 650px; filter: drop-shadow(0 5px 15px rgba(0,0,0,0.1)); }
+        #svg-container path { cursor: pointer; stroke: #fff; stroke-width: 1px; transition: all 0.2s ease-in-out; }
+        #svg-container path:hover { stroke: #333; stroke-width: 2px; opacity: 0.9; z-index: 999; transform: scale(1.01); }
+
+        #map-tooltip {
+            position: absolute; display: none; background: rgba(0, 0, 0, 0.9); color: #fff;
+            padding: 10px 15px; border-radius: 8px; font-size: 14px; pointer-events: none;
+            z-index: 10000; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-light bg-white shadow-sm mb-5 py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+        <a class="navbar-brand" href="/">
+            <img src="/static/img/spor24_logo4.png" alt="SPOR24" style="height: 70px; width: auto;">
+        </a>
+        <a href="/" class="btn btn-outline-dark btn-lg px-4 fw-bold" style="border-width: 2px;">
+            <i class="fas fa-home me-2"></i> Ana Sayfa
+        </a>
+    </div>
+</nav>
+
+<div class="container mb-5">
+    
+    <h2 class="text-center mb-4 fw-bold" style="color: #444;">
+        <i class="fas fa-map-marked-alt text-danger"></i> Türkiye Karate Antrenörleri
+    </h2>
+
+    <div class="card mb-4 shadow border-0 overflow-hidden">
+        <div class="card-body p-0 position-relative bg-white">
+            <div id="map-tooltip">Yükleniyor...</div>
+            <div id="svg-container" class="p-3 text-center">
+                {% include "haberler/turkey_map_svg.html" %}
+            </div>
+            <div class="card-footer bg-light border-0 text-center py-3">
+                <div class="d-flex justify-content-center align-items-center gap-3">
+                    <small class="fw-bold text-muted">YOĞUNLUK:</small>
+                    <span class="badge rounded-pill text-dark border" style="background-color: #fff5f5">0 Kişi</span>
+                    <div style="width: 150px; height: 8px; background: linear-gradient(90deg, #fff5f5, #ffcccc, #ff0000, #8b0000); border-radius: 4px;"></div>
+                    <span class="badge rounded-pill text-white border" style="background-color: #8b0000">En Çok</span>
+                </div>
+                <small class="text-muted d-block mt-2">Şehirleri filtrelemek için harita üzerine tıklayabilirsiniz.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4 shadow-sm border-0">
+        <div class="card-body bg-white rounded">
+            <form method="get" class="row g-3 align-items-end" id="filterForm">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold small text-secondary">İsim ile Ara</label>
+                    <input type="text" name="q" class="form-control" placeholder="Ad Soyad..." value="{{ request.GET.q }}">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-secondary">Şehir</label>
+                    <select name="sehir" class="form-select" id="citySelect">
+                        <option value="">Tüm Şehirler</option>
+                        {% for sehir in tum_sehirler %}
+                        <option value="{{ sehir }}" {% if request.GET.sehir == sehir %}selected{% endif %}>{{ sehir }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold small text-secondary">Kademe</label>
+                    <select name="kademe" class="form-select">
+                        <option value="">Tüm Kademeler</option>
+                        {% for kademe in tum_kademeler %}
+                        <option value="{{ kademe }}" {% if request.GET.kademe == kademe %}selected{% endif %}>{{ kademe }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i> Ara</button>
+                        {% if request.GET.q or request.GET.sehir or request.GET.kademe %}
+                            <a href="{{ request.path }}#sonuclar" class="btn btn-outline-danger btn-sm">Temizle</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="card shadow-sm border-0" id="sonuclar">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="fas fa-list"></i> Antrenör Listesi</h6>
+            <span class="badge bg-light text-dark">{{ page_obj.paginator.count }} Kişi</span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Ad Soyad</th>
+                        <th>Şehir</th>
+                        <th>Kademe</th>
+                        <th class="text-end pe-4">Detay</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for antrenor in page_obj %}
+                    <tr>
+                        <td class="ps-4 fw-bold text-muted">{{ antrenor.sira_no }}</td>
+                        <td class="fw-bold" style="color: #444;">{{ antrenor.adi_soyadi }}</td>
+                        <td><span class="badge bg-secondary">{{ antrenor.bolge }}</span></td>
+                        <td class="text-secondary">{{ antrenor.kariyer }}</td>
+                        <td class="text-end pe-4">
+                            <button type="button" class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modal{{ antrenor.id }}">
+                                İncele
+                            </button>
+                            <div class="modal fade" id="modal{{ antrenor.id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header bg-dark text-white">
+                                            <h5 class="modal-title fw-bold">Antrenör Profili</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col-md-4 text-center mb-3">
+                                                    {% if antrenor.fotograf %}
+                                                        <img src="{{ antrenor.fotograf.url }}" class="img-fluid rounded shadow-sm border" style="max-height: 200px; width: 100%; object-fit: cover;" alt="{{ antrenor.adi_soyadi }}">
+                                                    {% else %}
+                                                        <div class="bg-light d-flex align-items-center justify-content-center rounded border" style="height: 200px; width: 100%;">
+                                                            <div class="text-center text-muted">
+                                                                <i class="fas fa-user fa-4x mb-2 opacity-25"></i>
+                                                                <p class="small mb-0">Fotoğraf Yok</p>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-8 text-start">
+                                                    <h4 class="fw-bold text-dark mb-3">{{ antrenor.adi_soyadi }}</h4>
+                                                    <div class="card bg-light border-0 p-3 mb-3">
+                                                        <ul class="list-unstyled mb-0">
+                                                            <li class="mb-2"><i class="fas fa-map-marker-alt text-danger me-2" style="width:20px"></i> <strong>Şehir:</strong> {{ antrenor.bolge }}</li>
+                                                            <li class="mb-2"><i class="fas fa-medal text-warning me-2" style="width:20px"></i> <strong>Kademe:</strong> {{ antrenor.kariyer }}</li>
+                                                            <li class="mb-2"><i class="fas fa-user-tag text-primary me-2" style="width:20px"></i> <strong>Kuşak:</strong> {{ antrenor.kusak }}</li>
+                                                            <li class="mb-2"><i class="far fa-calendar-alt text-success me-2" style="width:20px"></i> <strong>Vize:</strong> {{ antrenor.vize_yili }}</li>
+                                                            <li><i class="far fa-clock text-muted me-2" style="width:20px"></i> <strong>Belge Tarihi:</strong> {{ antrenor.verildigi_tarih }}</li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row mt-2">
+                                                <div class="col-12 text-start">
+                                                    <h6 class="fw-bold text-secondary border-bottom pb-2"><i class="fas fa-info-circle me-2"></i> Hakkında / Biyografi</h6>
+                                                    <p class="text-muted">
+                                                        {% if antrenor.biyografi %}
+                                                            {{ antrenor.biyografi|linebreaks }}
+                                                        {% else %}
+                                                            <em>Bu antrenör için henüz biyografi bilgisi eklenmemiştir.</em>
+                                                        {% endif %}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="5" class="text-center py-5 text-muted">Kayıt bulunamadı.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-center mt-4">
+        <nav>
+            <ul class="pagination">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}&q={{ request.GET.q }}&sehir={{ request.GET.sehir }}&kademe={{ request.GET.kademe }}#sonuclar">Önceki</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link">Sayfa {{ page_obj.number }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}&q={{ request.GET.q }}&sehir={{ request.GET.sehir }}&kademe={{ request.GET.kademe }}#sonuclar">Sonraki</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var data = {{ harita_json|safe }};
+        var tooltip = document.getElementById("map-tooltip");
+        var citySelect = document.getElementById("citySelect");
+        var form = document.getElementById("filterForm");
+
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('q') || urlParams.has('sehir') || urlParams.has('kademe')) {
+            var hedef = document.getElementById("sonuclar");
+            if (hedef) {
+                hedef.scrollIntoView({ behavior: 'instant', block: 'start' });
+            }
+        }
+
+        var cityCorrections = {
+            "ISTANBUL": "İSTANBUL", "IZMIR": "İZMİR", "ADIYAMAN": "ADIYAMAN", "AFYON": "AFYONKARAHİSAR",
+            "AGRI": "AĞRI", "AYDIN": "AYDIN", "BALIKESIR": "BALIKESİR", "BILECIK": "BİLECİK",
+            "BINGOL": "BİNGÖL", "BITLIS": "BİTLİS", "CANKIRI": "ÇANKIRI", "CORUM": "ÇORUM",
+            "DENIZLI": "DENİZLİ", "DIYARBAKIR": "DİYARBAKIR", "DUZCE": "DÜZCE", "EDIRNE": "EDİRNE",
+            "ELAZIG": "ELAZIĞ", "ESKISEHIR": "ESKİŞEHİR", "GAZIANTEP": "GAZİANTEP", "GUMUSHANE": "GÜMÜŞHANE",
+            "HAKKARI": "HAKKARİ", "IGDIR": "IĞDIR", "ISPARTA": "ISPARTA", "KAHRAMANMARAS": "KAHRAMANMARAŞ",
+            "KARABUK": "KARABÜK", "KIRIKKALE": "KIRIKKALE", "KIRKLARELI": "KIRKLARELİ", "KIRSEHIR": "KIRŞEHİR",
+            "KOCAELI": "KOCAELİ", "KUTAHYA": "KÜTAHYA", "MARDIN": "MARDİN", "MUGLA": "MUĞLA", "MUS": "MUŞ",
+            "NEVSEHIR": "NEVŞEHİR", "NIGDE": "NİĞDE", "OSMANIYE": "OSMANİYE", "SANLIURFA": "ŞANLIURFA",
+            "SIIRT": "SİİRT", "SINOP": "SİNOP", "SIRNAK": "ŞIRNAK", "TEKIRDAG": "TEKİRDAĞ",
+            "TUNCELI": "TUNCELİ", "USAK": "UŞAK", "VAN": "VAN", "YALOVA": "YALOVA", "YOZGAT": "YOZGAT",
+            "ZONGULDAK": "ZONGULDAK"
+        };
+
+        var counts = Object.values(data);
+        var maxCount = counts.length > 0 ? Math.max(...counts) : 1;
+
+        function getColor(count) {
+            if (!count || count === 0) return "#f8f9fa"; 
+            var ratio = count / maxCount;
+            var adjustedRatio = Math.pow(ratio, 0.4); 
+            var lightness = 95 - (adjustedRatio * 65); 
+            return `hsl(0, 80%, ${lightness}%)`;
+        }
+
+        var paths = document.querySelectorAll("#svg-container svg path");
+
+        paths.forEach(function(path) {
+            var rawName = path.getAttribute("title") || path.getAttribute("name") || path.id || "";
+            var checkName = rawName.toUpperCase();
+
+            if (checkName.includes("REGION") || checkName.includes("BOLGE") || checkName.includes("BÖLGE")) {
+                path.style.display = "none";
+                path.style.pointerEvents = "none";
+                return; 
+            }
+
+            if (rawName) {
+                var cityName = checkName.replace('İ','I').toUpperCase().trim();
+                var dbName = cityCorrections[cityName] || rawName.toLocaleUpperCase('tr-TR').trim();
+                var count = data[dbName] || 0;
+
+                path.style.fill = getColor(count);
+
+                path.addEventListener("mousemove", function(e) {
+                    tooltip.style.display = "block";
+                    tooltip.innerHTML = `<strong>${dbName}</strong><br><span class="badge bg-danger">${count} Antrenör</span>`;
+                    tooltip.style.left = (e.pageX + 15) + "px";
+                    tooltip.style.top = (e.pageY + 15) + "px";
+                });
+
+                path.addEventListener("mouseleave", function() {
+                    tooltip.style.display = "none";
+                });
+
+                path.addEventListener("click", function() {
+                    var found = false;
+                    for (var i = 0; i < citySelect.options.length; i++) {
+                        if (citySelect.options[i].text.toLocaleUpperCase('tr-TR') === dbName) {
+                            citySelect.selectedIndex = i;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) {
+                        form.action = window.location.pathname + "#sonuclar";
+                        form.submit();
+                    } else {
+                        alert(dbName + " şehri için kayıtlı antrenör bulunmuyor.");
+                    }
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

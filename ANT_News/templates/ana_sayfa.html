@@ -1,0 +1,992 @@
+{% load date_filters static %}
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <link rel="canonical" href="https://www.spor24.net{{ request.path }}">
+    <meta charset="UTF-8">
+    <meta name="google-adsense-account" content="ca-pub-4099153035746180">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPOR24 - Yeni Nesil Haber Platformu</title>
+    <link rel="shortcut icon" type="image/png" href="{% static 'img/logo_5.png' %}?v=1">
+    <link rel="icon" type="image/png" href="{% static 'img/logo_5.png' %}?v=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SZ1LBQNQPN"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-SZ1LBQNQPN');
+    </script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-4099153035746180"
+     crossorigin="anonymous"></script>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #e74c3c;
+            --accent-color: #3498db;
+            --text-color: #2c3e50;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .top-bar {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.025rem 0;
+            font-size: 0.9rem;
+        }
+
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 0.5rem 0;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+            font-size: 1.8rem;
+            color: var(--secondary-color) !important;
+        }
+
+        .main-nav {
+            padding: 1rem 0;
+            background: var(--light-gray);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .nav-link {
+            color: var(--text-color) !important;
+            font-weight: 500;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--secondary-color) !important;
+        }
+
+        .category-sidebar {
+            background: white;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .category-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .category-item {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: var(--text-color);
+            text-decoration: none;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease;
+        }
+
+        .category-item:hover {
+            background: var(--light-gray);
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .category-item:last-child {
+            border-bottom: none;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+
+        .carousel-item {
+            transition: transform 0.6s ease-in-out;
+        }
+
+
+       /* Slider Ok Tuşlarını Köşelere Yapıştırma */
+        .carousel-control-prev, .carousel-control-next {
+            z-index: 1000 !important;
+            width: 50px !important; /* Yüzde yerine sabit genişlik daha iyidir */
+            background-color: rgba(0,0,0,0.3) !important; /* Biraz daha koyu olsun */
+        }
+
+        /* Sol Ok - Tamamen Sola */
+        .carousel-control-prev {
+            left: 0 !important; 
+        }
+
+        /* Sağ Ok - Tamamen Sağa */
+        .carousel-control-next {
+            right: 0 !important;
+        }
+
+        .carousel-indicators button {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            background-color: transparent;
+        }
+
+        .carousel-indicators button.active {
+            background-color: white;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 5%;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+        }
+
+        .hero-content h1 {
+            font-size: 2rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            padding: 3rem 0;
+            position: relative;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .carousel-item {
+            cursor: pointer;
+            position: relative;
+        }
+
+        .carousel-item .btn, .carousel-item .category-tag {
+            position: relative;
+            z-index: 10;
+        }
+
+        .breaking-news {
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.5rem;
+            font-weight: bold;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.8; }
+            100% { opacity: 1; }
+        }
+
+        .news-card {
+            border: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 2rem;
+            height: 100%;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .news-card .btn, .news-card .category-tag, .news-card .news-title {
+            position: relative;
+            z-index: 10;
+        }
+
+        .news-card img {
+            height: 200px;
+            object-fit: contain; /* 'cover' yerine 'contain' */
+            width: 100%;
+            background-color: #f0f0f0; /* Boşluklar (letterbox) için açık gri arka plan */
+        }
+
+        .main-news img {
+            height: 300px;
+            object-fit: cover;
+        }
+
+        .news-meta {
+            color: var(--accent-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .news-title {
+            font-weight: bold;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+
+        .news-title:hover {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .news-summary {
+            color: #666;
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .category-tag {
+            background: var(--accent-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+
+        .category-tag:hover {
+            background: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+        }
+
+        .sidebar {
+            background: var(--light-gray);
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+        }
+
+        .sidebar h4 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .trending-item {
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .trending-item:last-child {
+            border-bottom: none;
+        }
+
+        .trending-number {
+            background: var(--secondary-color) !important;
+            color: white !important;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.8rem;
+            margin-right: 0.75rem;
+            min-width: 25px;
+            flex-shrink: 0;
+        }
+
+        /* Ensure all trending numbers look the same regardless of position */
+        .trending-item:nth-child(1) .trending-number,
+        .trending-item:nth-child(2) .trending-number,
+        .trending-item:nth-child(3) .trending-number,
+        .trending-item:nth-child(4) .trending-number,
+        .trending-item:nth-child(5) .trending-number {
+            background: var(--secondary-color) !important;
+            color: white !important;
+        }
+
+        .footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+
+        .footer a {
+            color: white;
+            text-decoration: none;
+        }
+
+        .footer a:hover {
+            color: var(--accent-color);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            position: relative;
+            padding-left: 15px;
+        }
+
+        .section-title:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .hero-content h1 {
+                font-size: 2rem;
+            }
+            
+            .navbar-nav {
+                text-align: center;
+            }
+            
+            .news-card img {
+                height: 180px;
+            }
+
+            .category-sidebar {
+                margin-bottom: 2rem;
+            }
+
+            .top-bar {
+                text-align: center;
+            }
+        }
+          /* Top Bar'daki tarih ve saat metninin rengini değiştir */
+        .top-bar .col-md-6:first-child, 
+        .top-bar .col-md-6:first-child i, 
+        .top-bar .col-md-6:first-child span {
+            color: #ccc !important; /* Açık gri */
+        }
+        /* SON DÜZELTME: Top Bar'a orijinal rengini doğrudan uygula */
+        body > .top-bar { 
+            background-color: #2c3e50 !important; /* Orijinal Koyu Mavi/Gri */
+        }
+        /* SON DÜZELTME BİTİŞ */
+       /* Dark Mode Ayarları */
+        [data-theme="dark"] {
+            --primary-color: #ecf0f1;
+            --secondary-color: #e74c3c;
+            --text-color: #ecf0f1;
+            --bg-color: #1a252f;
+            --card-bg: #2c3e50;
+            --border-color: #444;
+            --light-gray: #2c3e50;
+        }
+        [data-theme="dark"] body { background-color: var(--bg-color) !important; color: var(--text-color) !important; }
+        [data-theme="dark"] .navbar, [data-theme="dark"] .footer, [data-theme="dark"] .card, [data-theme="dark"] .list-group-item {
+            background-color: var(--card-bg) !important; color: var(--text-color) !important; border-color: var(--border-color) !important;
+        }
+        [data-theme="dark"] .nav-link, [data-theme="dark"] h1, [data-theme="dark"] h2, [data-theme="dark"] h3, [data-theme="dark"] h4, [data-theme="dark"] h5 {
+            color: var(--text-color) !important;
+        }
+        /* Slider Arka Planını Düzelt */
+        [data-theme="dark"] .hero-section {
+            /* Daha koyu ve şık bir gradient */
+            background: linear-gradient(135deg, #1a252f, #2c3e50) !important;
+        }
+
+        /* Kategori Sidebarını Düzelt */
+        [data-theme="dark"] .category-sidebar {
+            background-color: #2c3e50 !important;
+            border-color: #444 !important;
+        }
+
+        /* Kategori Başlığını Düzelt */
+        [data-theme="dark"] .category-header {
+            background-color: #34495e !important;
+            color: #ecf0f1 !important;
+            border-bottom: 1px solid #444;
+        }
+
+        /* Kategori Linklerini Düzelt */
+        [data-theme="dark"] .category-item {
+            color: #ecf0f1 !important;
+            border-bottom: 1px solid #444 !important;
+            background-color: #2c3e50 !important; /* Varsayılan arka plan */
+        }
+
+        [data-theme="dark"] .category-item:hover {
+            background-color: #1a252f !important; /* Hover arka planı */
+            color: #3498db !important; /* Hover yazı rengi */
+        }
+        /* Dark Mode Arama Kutusu ve Butonlar */
+        [data-theme="dark"] .form-control {
+            background-color: #34495e !important; /* Kutu Arka Planı */
+            color: #ecf0f1 !important;            /* Yazı Rengi */
+            border-color: #444 !important;        /* Kenarlık */
+        }
+
+        /* "Ara..." yazısının rengi (Placeholder) */
+        [data-theme="dark"] .form-control::placeholder {
+            color: #bdc3c7 !important;
+            opacity: 1;
+        }
+
+        /* Arama ve Admin Butonları */
+        [data-theme="dark"] .btn-outline-secondary {
+            color: #ecf0f1 !important;
+            border-color: #444 !important;
+            background-color: transparent !important;
+        }
+
+        [data-theme="dark"] .btn-outline-secondary:hover {
+            background-color: #34495e !important;
+            border-color: #ecf0f1 !important;
+        }
+        /* Dark Mode Tarih ve Yardımcı Metin Düzeltmesi */
+        [data-theme="dark"] .text-muted {
+            color: #bdc3c7 !important; /* Açık Gri */
+        }
+       /* --- Dark Mode Haber Kartı Düzenlemesi (Şeffaf) --- */
+        [data-theme="dark"] .news-card {
+            /* Arka planı, dış rengi (%100 opak #1a252f) gösterecek şekilde yarı şeffaf siyah yap */
+            background-color: rgba(0, 0, 0, 0.2) !important; 
+            
+            /* Modern buzlu cam efekti */
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            
+            /* Kart sınırlarını belirginleştirmek için çok hafif beyaz çizgi */
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            
+            /* Kart gölgesini kaldır (düz görünüm için) veya azalt */
+            box-shadow: none !important;
+        }
+
+        /* Kartın içindeki body kısmının da şeffaf olduğundan emin ol */
+        [data-theme="dark"] .news-card .card-body {
+            background-color: transparent !important;
+        }
+        /* -------------------------------------------------- */
+       /* --- Dark Mode Resim Arka Planı Düzeltmesi --- */
+        [data-theme="dark"] .news-card img,
+        [data-theme="dark"] .card-img-top {
+            /* Resimlerin arkasındaki açık gri rengi (#f0f0f0), koyu arka plan rengiyle değiştir */
+            background-color: #1a252f !important; 
+            
+            /* İstersen resmin kendisine de hafif şeffaflık verip tam gömülmesini sağlayabilirsin (İsteğe bağlı) */
+             opacity: 0.9;
+        }
+        /* --------------------------------------------- */
+       /* --- Dark Mode Başlık Parlaklığını Giderme --- */
+        [data-theme="dark"] .section-title {
+            /* Tam beyaz yerine, göz yormayan gümüş/gri tonu */
+            color: #bdc3c7 !important; 
+            
+            /* Alternatif olarak opaklık da düşürebilirsin: */
+            /* color: rgba(255, 255, 255, 0.75) !important; */
+        }
+        /* --------------------------------------------- */
+    </style>
+</head>
+<body>
+    <div class="top-bar" style="padding: 0.1rem 0; line-height: 1.1;">
+        <div class="container">
+            <div class="row align-items-center">
+
+                <div class="col-md-6">
+                    
+                    <span style="display: inline-flex; align-items: center; color: #ccc;">
+                        <i class="fas fa-calendar-alt fa-fw"></i> 
+                        <span id="current-date" class="ms-1"></span> 
+                    </span>
+                    
+                    <br> 
+
+                    <span class="mt-1" style="display: inline-flex; align-items: center; color: #ccc;"> 
+                        <i class="fas fa-clock fa-fw"></i> 
+                        <span id="current-time" class="ms-1"></span> 
+                    </span>
+
+                </div>
+
+                <div class="col-md-6 text-end">
+                    
+                    {% if hava_durumu %}
+                        <span class="weather-info" style="color: white; display: inline-block; vertical-align: middle;">
+                            <img src="http://openweathermap.org/img/w/{{ hava_durumu.icon }}.png" alt="{{ hava_durumu.description }}" style="height: 20px; width: 20px; vertical-align: middle;">
+                            {{ hava_durumu.city }}: {{ hava_durumu.temp }}°C ({{ hava_durumu.description }})
+                        </span>
+                    {% else %}
+                        <span style="color: white; display: inline-block; vertical-align: middle;">
+                           <i class="fas fa-thermometer-half me-1"></i> --°C
+                        </span>
+                    {% endif %}
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+                    
+                             
+    <!-- Breaking News -->
+    <div class="breaking-news">
+        <i class="fas fa-bolt me-2"></i>
+        SON DAKİKA: En güncel yakın dövüş sanatları haberleri için takipte kalın!
+    </div>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg">
+        <div class="container">
+                        <a class="navbar-brand" href="/" style="display: flex; align-items: center; text-decoration: none;">
+            
+            <img src="{% static 'img/spor24_logo4.png' %}" alt="Spor 24 Net Logo" style="height: 85px; margin-right: 10px;">
+            
+            <span>
+                <span style="color: #82E0AA;">SPOR</span><span style="color: #85C1E9;">24.net</span>    </span>
+
+        </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Anasayfa
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'haberler:video_sayfasi' %}">
+                            <i class="fas fa-video me-1"></i>Video
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'haberler:kose-yazilari-listesi' %}">
+                            <i class="fas fa-pen-fancy me-1"></i>Köşe Yazıları
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'haberler:quiz_list' %}">
+                            <i class="fas fa-trophy me-1"></i>Yarışmalar
+                        </a>
+                    </li>
+                    <li class="nav-item ms-2">
+                        <button class="btn btn-outline-secondary rounded-circle" id="darkModeToggle" type="button" style="width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; border-color: #dee2e6;">
+                            <i class="fas fa-moon"></i>
+                        </button>
+                    </li>
+                </ul>
+                
+                <!-- Search Form -->
+                <form class="d-flex me-3" role="search" method="GET" action="{% url 'haberler:haber_arama' %}">
+                    <input class="form-control me-2" type="search" name="q" placeholder="Ara..." aria-label="Search" style="width: 200px;">
+                    <button class="btn btn-outline-secondary" type="submit">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+                
+                <!-- User Authentication Section -->
+                {% if user.is_authenticated %}
+                    <!-- Logout button for authenticated users -->
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user me-1"></i>{{ user.get_username }}
+                        </button>
+                        <ul class="dropdown-menu">
+                            {% if user.is_superuser %}
+                                <li><a class="dropdown-item" href="{% url 'haberler:admin_dashboard' %}"><i class="fas fa-shield-alt me-2"></i>Admin Paneli</a></li>
+                            {% elif user.is_staff %}
+                                <li><a class="dropdown-item" href="{% url 'haberler:yetkili_dashboard' %}"><i class="fas fa-user-shield me-2"></i>Yetkili Paneli</a></li>
+                            {% else %}
+                                <li><a class="dropdown-item" href="{% url 'haberler:abone_dashboard' %}"><i class="fas fa-tachometer-alt me-2"></i>Abone Paneli</a></li>
+                            {% endif %}
+                  
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'haberler:custom_logout' %}"><i class="fas fa-sign-out-alt me-2"></i>Çıkış Yap</a></li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <!-- User Type Selection with Custom Buttons -->
+                    <div class="d-flex">
+                        
+                        <div class="dropdown me-2">
+                            <button class="btn btn-success dropdown-toggle" type="button" id="yetkiliDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-tie me-1"></i>Yetkili
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'haberler:custom_login' %}?user_type=yetkili"><i class="fas fa-sign-in-alt me-2"></i>Giriş Yap</a></li>
+                                <li><a class="dropdown-item" href="{% url 'haberler:register' %}?user_type=yetkili"><i class="fas fa-user-plus me-2"></i>Kayıt Ol</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-info dropdown-toggle" type="button" id="aboneDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user me-1"></i>Abone
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'haberler:custom_login' %}?user_type=abone"><i class="fas fa-sign-in-alt me-2"></i>Giriş Yap</a></li>
+                                <li><a class="dropdown-item" href="{% url 'haberler:register' %}?user_type=abone"><i class="fas fa-user-plus me-2"></i>Kayıt Ol</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section with Carousel -->
+    <section class="hero-section">
+        <div class="container">
+            <div id="mainNewsCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="8000">
+                <!-- Carousel Indicators -->
+                <div class="carousel-indicators">
+                    {% for haber in one_cikan_haberler %}
+                    <button type="button" data-bs-target="#mainNewsCarousel" data-bs-slide-to="{{ forloop.counter0 }}" class="{% if forloop.first %}active{% endif %}" aria-current="{% if forloop.first %}true{% endif %}" aria-label="Slide {{ forloop.counter }}"></button>
+                    {% endfor %}
+                </div>
+                
+                <!-- Carousel Inner -->
+                <div class="carousel-inner">
+                    {% for haber in one_cikan_haberler %}
+                    {% if haber.slug %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}" data-href="{% url 'haberler:haber_detay' haber.slug %}">
+                    {% else %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    {% endif %}
+                        <div class="row align-items-center">
+                            <div class="col-lg-6">
+                                <div class="hero-content">
+                                    <span class="category-tag mb-3 d-inline-block">{{ haber.kategori.ad }}</span>
+                                    <h1>{{ haber.baslik }}</h1>
+                                    <p class="lead">{{ haber.ozet|truncatewords:20 }}</p>
+                                    <div class="d-flex align-items-center mb-3">
+                                        <span class="badge bg-light text-dark me-2">
+                                            <i class="fas fa-eye me-1"></i>{{ haber.goruntulenme_sayisi }} görüntülenme
+                                        </span>
+                                        <span class="text-light">
+                                            <i class="fas fa-clock me-1"></i>{{ haber.olusturma_tarihi|timesince }} önce
+                                        </span>
+                                    </div>
+                                    {% if haber.slug %}
+                                    <a href="{% url 'haberler:haber_detay' haber.slug %}" class="btn btn-light btn-lg">Devamını Oku</a>
+                                    {% else %}
+                                    <button class="btn btn-light btn-lg" disabled>Devamını Oku</button>
+                                    {% endif %}
+                                    <!-- Subscriber registration button -->
+                                    <a href="{% url 'haberler:register' %}?user_type=abone" class="btn btn-info btn-lg ms-2">
+                                        <i class="fas fa-envelope me-2"></i>Abone Ol
+                                    </a>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                {% if haber.resim %}
+                                <img src="{{ haber.resim.url }}" class="img-fluid rounded" alt="{{ haber.baslik }}" style="height: 350px; object-fit: contain; width: 100%; background-color: #343a40;">
+                                {% else %}
+                                <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 350px;">
+                                    <i class="fas fa-image text-white fa-3x"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <!-- Carousel Controls -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#mainNewsCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mainNewsCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="row">
+            <!-- Sidebar with Categories -->
+            <div class="col-lg-3 order-lg-2">
+                <!-- Categories Sidebar -->
+                <div class="category-sidebar mb-4">
+                    <div class="category-header">
+                        <i class="fas fa-list me-2"></i>Kategoriler
+                    </div>
+                    {% for kategori in kategoriler %}
+                    <a href="{% url 'haberler:kategori_haberler' kategori.slug %}" class="category-item">
+                        <i class="fas fa-chevron-right me-2"></i>{{ kategori.ad }}
+                    </a>
+                    {% endfor %}
+                </div>
+
+                <!-- Trending News -->
+                <div class="sidebar">
+                    <h4><i class="fas fa-fire me-2"></i>Trending Haberler</h4>
+                    {% for haber in anasayfa_haberleri %}
+                    <div class="trending-item">
+                        <div class="d-flex">
+                            <span class="trending-number">{{ forloop.counter }}</span>
+                            <div>
+                                {% if haber.slug %}
+                                <a href="{% url 'haberler:haber_detay' haber.slug %}" class="news-title d-block">{{ haber.baslik }}</a>
+                                {% else %}
+                                <span class="news-title d-block">{{ haber.baslik }}</span>
+                                {% endif %}
+                                <small class="text-muted">{{ haber.olusturma_tarihi|smart_date }}</small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Newsletter -->
+                <div class="sidebar">
+                    <h4><i class="fas fa-envelope me-2"></i>Bülten</h4>
+                    <p>En son haberleri e-postanızda almak için abone olun.</p>
+                    <a href="{% url 'haberler:register' %}?user_type=abone" class="btn btn-primary w-100">
+                        <i class="fas fa-envelope me-2"></i>Abone Ol
+                    </a>
+                </div>
+            </div>
+
+            <!-- Main News Column -->
+            <div class="col-lg-9 order-lg-1">
+                <h2 class="section-title">Son Haberler</h2>
+                
+                <!-- Featured News -->
+                <div class="row">
+                    {% for haber in son_haberler|slice:":4" %}
+                    <div class="col-md-6 mb-4">
+                        {% if haber.slug %}
+                        <div class="card news-card" data-href="{% url 'haberler:haber_detay' haber.slug %}">
+                        {% else %}
+                        <div class="card news-card">
+                        {% endif %}
+                            {% if haber.resim %}
+                            <img src="{{ haber.resim.url }}" class="card-img-top" alt="{{ haber.baslik }}">
+                            {% else %}
+                            <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" style="height: 200px;">
+                                <i class="fas fa-image text-white fa-3x"></i>
+                            </div>
+                            {% endif %}
+                            <div class="card-body">
+                                <div class="news-meta">
+                                    <span class="category-tag">{{ haber.kategori.ad }}</span>
+                                    <span class="ms-2"><i class="fas fa-clock me-1"></i>{{ haber.olusturma_tarihi|smart_date }}</span>
+                                    <span class="ms-2"><i class="fas fa-eye me-1"></i>{{ haber.goruntulenme_sayisi }} görüntülenme</span>
+                                </div>
+                                {% if haber.slug %}
+                                <h5><a href="{% url 'haberler:haber_detay' haber.slug %}" class="news-title">{{ haber.baslik }}</a></h5>
+                                {% else %}
+                                <h5><span class="news-title">{{ haber.baslik }}</span></h5>
+                                {% endif %}
+                                <p class="news-summary">{{ haber.ozet|truncatewords:15 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- More News List -->
+                <div class="row">
+                    <h3 class="section-title">Diğer Haberler</h3>
+                    {% for haber in son_haberler|slice:"4:" %}
+                    <div class="col-12 mb-3">
+                        {% if haber.slug %}
+                        <div class="row news-card border rounded p-3" data-href="{% url 'haberler:haber_detay' haber.slug %}" style="cursor: pointer; transition: all 0.3s ease;">
+                        {% else %}
+                        <div class="row border rounded p-3">
+                        {% endif %}
+                            <div class="col-md-4">
+                                {% if haber.resim %}
+                                <img src="{{ haber.resim.url }}" class="img-fluid rounded" alt="{{ haber.baslik }}" style="height: 120px; object-fit: cover; width: 100%;">
+                                {% else %}
+                                <div class="bg-secondary d-flex align-items-center justify-content-center rounded" style="height: 120px;">
+                                    <i class="fas fa-image text-white fa-2x"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-8">
+                                <div class="news-meta">
+                                    <span class="category-tag">{{ haber.kategori.ad }}</span>
+                                    <span class="ms-2"><i class="fas fa-clock me-1"></i>{{ haber.olusturma_tarihi|smart_date }}</span>
+                                    <span class="ms-2"><i class="fas fa-eye me-1"></i>{{ haber.goruntulenme_sayisi }} görüntülenme</span>
+                                </div>
+                                {% if haber.slug %}
+                                <h5><a href="{% url 'haberler:haber_detay' haber.slug %}" class="news-title">{{ haber.baslik }}</a></h5>
+                                {% else %}
+                                <h5><span class="news-title">{{ haber.baslik }}</span></h5>
+                                {% endif %}
+                                <p class="news-summary">{{ haber.ozet|truncatewords:20 }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                                            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+                        <img src="{% static 'img/spor24_logo4.png' %}" alt="Spor 24 Net Logo" style="height: 65px; margin-right: 10px;">
+                        
+                        <h5 style="margin: 0; font-size: 1.5rem; font-weight: bold; color: white;">
+                            SPOR24.net
+                        </h5>
+                    </div>
+                    <p>Türkiye'nin en güncel karate ve dövüş sanatları haber kaynağı. Objektif ve güvenilir habercilik anlayışımızla sizlere hizmet veriyoruz.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Hızlı Linkler</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'haberler:hakkimizda' %}">Hakkımızda</a></li>
+                        <li><a href="{% url 'haberler:iletisim' %}">İletişim</a></li>
+                        <li><a href="{% url 'haberler:gizlilik_politikasi' %}">Gizlilik Politikası</a></li>
+                        <li><a href="{% url 'haberler:kullanim_sartlari' %}">Kullanım Şartları</a></li>
+                        <li><a href="{% url 'haberler:kunye' %}">Künye</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Sosyal Medya</h5>
+                    <div class="d-flex">
+                        <a href="https://www.facebook.com/Antknight" class="me-3"><i class="fab fa-facebook fa-2x"></i></a>
+                        <a href="https://x.com/Kenan__Ant" class="me-3"><i class="fab fa-twitter fa-2x"></i></a>
+                        <a href="https://www.instagram.com/ant_tv_medya" class="me-3"><i class="fab fa-instagram fa-2x"></i></a>
+                        <a href="https://www.youtube.com/@anttv7435"><i class="fab fa-youtube fa-2x"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="text-center">
+                <p>&copy; 2025  Spor24 Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Current date and time display
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Date formatting
+            const options = { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            };
+            const dateStr = now.toLocaleDateString('tr-TR', options);
+            document.getElementById('current-date').textContent = dateStr;
+            
+            // Time formatting
+            const timeStr = now.toLocaleTimeString('tr-TR', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+            document.getElementById('current-time').textContent = timeStr;
+        }
+        
+        // Update immediately and then every minute
+        updateDateTime();
+        setInterval(updateDateTime, 60000);
+
+        // Make news cards clickable
+        document.addEventListener('DOMContentLoaded', function() {
+            const newsCards = document.querySelectorAll('[data-href]');
+            
+            newsCards.forEach(function(card) {
+                card.addEventListener('click', function(e) {
+                    // Don't trigger if clicked on a button, link, or carousel control
+                    if (e.target.closest('.btn') || 
+                        e.target.closest('a') || 
+                        e.target.closest('.category-tag') ||
+                        e.target.closest('.carousel-control-prev') ||
+                        e.target.closest('.carousel-control-next') ||
+                        e.target.closest('.carousel-indicators')) {
+                        return;
+                    }
+                    
+                    const href = this.getAttribute('data-href');
+                    if (href) {
+                        window.location.href = href;
+                    }
+                });
+                
+                // Add hover effect for non-card elements
+                if (!card.classList.contains('carousel-item')) {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-2px)';
+                        this.style.boxShadow = '0 6px 20px rgba(0,0,0,0.15)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        this.style.transform = '';
+                        this.style.boxShadow = '';
+                    });
+                }
+            });
+        });
+               // Dark Mode Mantığı
+        const toggleButton = document.getElementById('darkModeToggle');
+        const icon = toggleButton.querySelector('i');
+        const htmlElement = document.documentElement;
+
+        // Sayfa yüklendiğinde tercihi kontrol et
+        if (localStorage.getItem('theme') === 'dark') {
+            htmlElement.setAttribute('data-theme', 'dark');
+            icon.classList.remove('fa-moon');
+            icon.classList.add('fa-sun');
+        }
+
+        // Butona tıklanınca değiştir
+        toggleButton.addEventListener('click', () => {
+            if (htmlElement.getAttribute('data-theme') === 'dark') {
+                // Aydınlık moda geç
+                htmlElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+            } else {
+                // Karanlık moda geç
+                htmlElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,190 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <title>{{ kategori.ad }} Haberleri | SPOR24.NET</title>
+    <link rel="icon" type="image/x-icon" href="{% static 'img/logo_5.png' %}" />
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="{% static 'v3/css/styles.css' %}" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        body {
+            background-color: #121212;
+            color: #f5f5f5;
+            font-family: 'Outfit', sans-serif;
+        }
+        .navbar-brand {
+            font-weight: 900;
+            font-style: italic;
+            font-size: 2rem;
+        }
+        .category-header {
+            background: linear-gradient(135deg, #1e1e1e 0%, #2a080c 100%);
+            border-bottom: 3px solid #c8102e;
+            padding: 40px 0;
+            margin-bottom: 30px;
+        }
+        .category-title {
+            font-weight: 900;
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .news-card {
+            background-color: #1e1e1e;
+            border: 1px solid #2d2d2d;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .news-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(200, 16, 46, 0.2);
+            border-color: #c8102e;
+        }
+        .news-card-img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        .news-card-body {
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+        .news-card-title {
+            font-weight: 700;
+            font-size: 1.15rem;
+            line-height: 1.4;
+            color: #ffffff;
+            text-decoration: none;
+            margin-bottom: 12px;
+        }
+        .news-card-title:hover {
+            color: #c8102e;
+        }
+        .news-card-excerpt {
+            color: #aaaaaa;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+            flex-grow: 1;
+        }
+        .news-card-meta {
+            font-size: 0.8rem;
+            color: #888888;
+            border-top: 1px solid #2d2d2d;
+            padding-top: 10px;
+        }
+        .btn-archive {
+            background-color: #c8102e;
+            color: #fff;
+            font-weight: 700;
+            border-radius: 20px;
+            padding: 8px 20px;
+            text-decoration: none;
+            display: inline-block;
+
+        }
+        .btn-archive:hover {
+            background-color: #a00c24;
+            color: #fff;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-black border-bottom border-secondary">
+        <div class="container">
+            <a class="navbar-brand text-white fw-bold italic" href="/">
+                SPOR<span class="text-danger">24</span>.NET
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link text-white fw-bold" href="/">Ana Sayfa</a></li>
+                    {% for cat in kategoriler %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if cat.id == kategori.id %}text-danger fw-bold{% else %}text-light{% endif %}" href="/kategori/{{ cat.slug }}/">
+                            {{ cat.ad }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                <a href="/admin/login/" class="btn btn-outline-danger btn-sm rounded-pill px-3">Yazar / Admin Girişi</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Category Header -->
+    <div class="category-header text-center">
+        <div class="container">
+            <h1 class="category-title text-white">🏆 {{ kategori.ad }} HABERLERİ</h1>
+            <p class="text-secondary mb-0">En güncel {{ kategori.ad }} gelişmeleri, maç sonuçları ve analizler</p>
+        </div>
+    </div>
+
+    <!-- Category News List -->
+    <div class="container pb-5">
+        <div class="row g-4">
+            {% for haber in page_obj %}
+            <div class="col-lg-4 col-md-6">
+                <div class="news-card">
+                    {% if haber.resim %}
+                    <img src="{{ haber.resim.url }}" alt="{{ haber.baslik }}" class="news-card-img" />
+                    {% else %}
+                    <img src="{% static 'img/no-image.jpg' %}" alt="{{ haber.baslik }}" class="news-card-img" />
+                    {% endif %}
+                    <div class="news-card-body">
+                        <a href="/haberler/{{ haber.slug }}/" class="news-card-title">{{ haber.baslik }}</a>
+                        <p class="news-card-excerpt">{{ haber.ozet|truncatewords:20 }}</p>
+                        <div class="news-card-meta d-flex justify-content-between align-items-center">
+                            <span><i class="far fa-calendar-alt me-1"></i> {{ haber.olusturma_tarihi|date:"d F Y" }}</span>
+                            <span><i class="far fa-eye me-1"></i> {{ haber.goruntulenme_sayisi }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12 text-center py-5">
+                <h4 class="text-secondary">Bu kategoride henüz yayınlanmış haber bulunmamaktadır.</h4>
+                <a href="/" class="btn btn-archive mt-3"><i class="fas fa-arrow-left me-2"></i> Ana Sayfaya Dön</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-5">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.previous_page_number }}">Önceki</a></li>
+                {% endif %}
+                <li class="page-item disabled"><span class="page-link bg-danger text-white border-danger">Sayfa {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span></li>
+                {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link bg-dark text-white border-secondary" href="?page={{ page_obj.next_page_number }}">Sonraki</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-black text-secondary py-4 border-top border-secondary mt-5">
+        <div class="container text-center">
+            <p class="mb-0">© 2026 SPOR24.NET - Tüm Hakları Saklıdır.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

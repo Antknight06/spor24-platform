@@ -1,0 +1,129 @@
+{% extends 'modern_base.html' %}
+{% load static %}
+
+{% block title %}Spor24 - Yeni Nesil Spor Haberleri{% endblock %}
+
+{% block content %}
+<div class="container-fluid mainHeadlineFrame view-md-20">
+    <div class="container">
+        <div class="row section">
+            <!-- 1. SOL BLOK: Ana Slider (Order 1) -->
+            <div class="col order-md-1 view-10 view-sm-20 view-md-15 view-lg-20 align-md-left custom-width custom-left">
+                {% include 'includes/slider_modern.html' %}
+            </div>
+
+            <!-- 2. SAĞ BLOK: Yan Manşetler (Order 2) -->
+            <div class="col align-md-right order-md-2 custom-width custom-right">
+                <div class="row section">
+                    <div class="col-12">
+                        <!-- Yan Slider (Type 04) -->
+                        <div class="sliderWrapper view-10 view-sm-20 view-lg-10">
+                            <div class="headlineModul type04 swiper-container">
+                                <div class="swiper-wrapper">
+                                    {% for haber in yan_manset_haberler %}
+                                    <div class="swiper-slide">
+                                        <a class="img" href="{% url 'haberler:haber_detay' haber.slug %}">
+                                            <picture>
+                                                <img alt="{{ haber.baslik }}" decoding="async" height="452"
+                                                    loading="lazy" src="{{ haber.resim.url }}" width="452" />
+                                            </picture>
+                                        </a>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="swiper-pagination"></div>
+                                <div class="swiper-button-next"><i class="flaticon-next"></i></div>
+                                <div class="swiper-button-prev"><i class="flaticon-back"></i></div>
+                            </div>
+                        </div>
+                        <div class="seperator headline display-none display-md-block display-lg-none view-10"></div>
+                    </div>
+
+                    <!-- Yan Slider Altındaki Statik Alanlar (Opsiyonel) -->
+                    <!-- Buraya istenirse başka modüller eklenebilir -->
+                </div>
+            </div>
+
+            <!-- 3. ORTA ALAN: Reklam (Order 3 - Pas geçiyoruz) -->
+            <div class="col-12 align-md-left order-md-3">
+                <!-- Reklam Alanı -->
+            </div>
+
+            <!-- 4. ALT ALAN: Haber Grid (Order 4) -->
+            <div class="col-12 align-md-left order-md-4">
+                <div class="row">
+                    {% for haber in grid_haberler %}
+                    <!-- Grid Item -->
+                    <div class="col-12 col-md view-10 view-sm-20 view-md-10 view-lg-20">
+                        <figure class="news-box custom-md-over hoverZoomEff">
+                            <a aria-label="{{ haber.baslik }}" class="link"
+                                href="{% url 'haberler:haber_detay' haber.slug %}" target="_self">
+                                <span class="wrap custom-1x1">
+                                    <picture class="img">
+                                        <img alt="{{ haber.baslik }}" decoding="async" loading="lazy"
+                                            src="{{ haber.resim.url }}" />
+                                    </picture>
+                                </span>
+                            </a>
+                            <figcaption>
+                                <a aria-label="{{ haber.baslik }}" class="link"
+                                    href="{% url 'haberler:haber_detay' haber.slug %}" target="_self">
+                                    <span class="txt font-14 font-sm-18 font-md-14 font-lg-16 font-xxl-18">
+                                        <strong class="title clamping view-10 font-family-medium" data-clamp="3"
+                                            data-clamp-md="2">
+                                            {{ haber.baslik }}
+                                        </strong>
+                                    </span>
+                                </a>
+                            </figcaption>
+                        </figure>
+                        <!-- Ayırıcı -->
+                        <div class="seperator headline display-none display-md-block display-lg-none view-10"></div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- 5. LİSTE ALANI (Order 5) -->
+            <div class="col-12 align-md-left order-md-5">
+                <!-- Team List vb. -->
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Slider Başlatma Scriptleri -->
+<script src="{% static 'fotomac/headline-modul-type3D.js' %}"></script>
+<script src="{% static 'fotomac/headline-modul-type04.js' %}"></script>
+<script>
+    // Manuel Swiper Init (Eğer JS dosyaları otomatik yapmıyorsa)
+    document.addEventListener('DOMContentLoaded', function () {
+        if (typeof Swiper !== 'undefined') {
+            var swiper3D = new Swiper('.headlineModul.type3D', {
+                // Konfigürasyon dosyadan gelebilir, buraya gerekirse ekleyin
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+            });
+            var swiper04 = new Swiper('.headlineModul.type04', {
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+            });
+        }
+    });
+</script>
+{% endblock %}
