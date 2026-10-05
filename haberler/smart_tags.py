@@ -7,6 +7,12 @@ import re
 import hashlib
 from urllib.parse import quote
 
+def turkish_lower(text):
+    """Türkçe İ / I harflerini bozmadan küçük harfe dönüştürür."""
+    if not text:
+        return ""
+    return text.replace('İ', 'i').replace('I', 'ı').lower()
+
 # 1. Branş Listesi & Sözlük
 SPOR_BRANSLARI = {
     'karate': 'Karate',
@@ -56,7 +62,7 @@ SPOR_BRANSLARI = {
     'eskrim': 'Eskrim'
 }
 
-# 2. Önemli Şehirler & Lokasyonlar
+# 2. Önemli Şehirler, Ülkeler & Lokasyonlar
 SEHIRLER = {
     'ankara': 'Ankara',
     'istanbul': 'İstanbul',
@@ -88,6 +94,25 @@ SEHIRLER = {
     'duzce': 'Düzce',
     'düzce': 'Düzce',
     'bolu': 'Bolu',
+    'letonya': 'Letonya',
+    'riga': 'Riga',
+    'polonya': 'Polonya',
+    'macaristan': 'Macaristan',
+    'hirvatistan': 'Hırvatistan',
+    'hırvatistan': 'Hırvatistan',
+    'gurcistan': 'Gürcistan',
+    'gürcistan': 'Gürcistan',
+    'azerbaycan': 'Azerbaycan',
+    'italya': 'İtalya',
+    'ispanya': 'İspanya',
+    'almanya': 'Almanya',
+    'fransa': 'Fransa',
+    'ingiltere': 'İngiltere',
+    'japonya': 'Japonya',
+    'ozbekistan': 'Özbekistan',
+    'özbekistan': 'Özbekistan',
+    'kazakistan': 'Kazakistan',
+    'rusya': 'Rusya',
     'madrid': 'Madrid',
     'salzburg': 'Salzburg',
     'misir': 'Mısır',
@@ -95,11 +120,12 @@ SEHIRLER = {
     'sirbistan': 'Sırbistan',
     'sırbistan': 'Sırbistan',
     'belgrad': 'Belgrad',
-    'erzurum': 'Erzurum',
     'paris': 'Paris',
     'tokyo': 'Tokyo',
     'baku': 'Bakü',
-    'bakü': 'Bakü'
+    'bakü': 'Bakü',
+    'atina': 'Atina',
+    'roma': 'Roma'
 }
 
 # 3. Kategori / Etkinlik Terimleri
@@ -108,14 +134,10 @@ ORGANIZASYONLAR = [
     (r'\bu16\b', 'U16'),
     (r'\bu18\b', 'U18'),
     (r'\bu21\b', 'U21'),
-    (r'milli\s*takım|millî\s*takım', 'MilliTakım'),
-    (r'dan\s*e[gğ]itim|dan\s*s[ıi]nav', 'DanSınavı'),
-    (r'antren[oö]r', 'Antrenörlük'),
-    (r'hakem', 'Hakemlik'),
-    (r'geli[sş]im\s*seminer', 'GelişimSemineri'),
-    (r'alt\s*yap[ıi]|altyap[ıi]', 'Altyapı'),
-    (r'd[uü]nya\s*[sş]ampiyon', 'DünyaŞampiyonası'),
+    (r'milli\s*takım|millî\s*takım|milli\s*sporcu|millî\s*sporcu|milli\s*karateci|millî\s*karateci', 'MilliTakım'),
     (r'avrupa\s*[sş]ampiyon', 'AvrupaŞampiyonası'),
+    (r'd[uü]nya\s*[sş]ampiyon', 'DünyaŞampiyonası'),
+    (r'madalya|bronz|g[uü]m[uü][sş]|alt[ıi]n|k[uü]rs[uü]', 'Madalya'),
     (r't[uü]rkiye\s*[sş]ampiyon', 'TürkiyeŞampiyonası'),
     (r'balkan\s*[sş]ampiyon', 'BalkanŞampiyonası'),
     (r'series\s*a', 'SeriesA'),
@@ -123,7 +145,11 @@ ORGANIZASYONLAR = [
     (r'k[ıi][sş]\s*oyunlar', 'KışOyunları'),
     (r'fisu', 'FISU'),
     (r'olimpiyat', 'Olimpiyat'),
-    (r'madalya|bronz|g[uü]m[uü][sş]|alt[ıi]n', 'Madalya'),
+    (r'dan\s*e[gğ]itim|dan\s*s[ıi]nav', 'DanSınavı'),
+    (r'antren[oö]rl[uü]k|antren[oö]r\s*kurs', 'Antrenörlük'),
+    (r'hakemlik|hakem\s*kurs', 'Hakemlik'),
+    (r'geli[sş]im\s*seminer', 'GelişimSemineri'),
+    (r'alt\s*yap[ıi]|altyap[ıi]', 'Altyapı'),
     (r'kampt[ıi]|haz[ıi]rl[ıi]k\s*kamp', 'MilliKamp')
 ]
 
@@ -134,20 +160,42 @@ ONEMLI_ISIMLER = [
     (r'ali\s*ar[ıi]k', 'AliArık'),
     (r'zilan\s*ertem', 'ZilanErtem'),
     (r'sinem\s*oru[cç]', 'SinemOruç'),
-    (r'muhammet\s*kemal\s*g[uü]l[sş]en|g[uü]l[sş]en\s*ailesi', 'GülşenAilesi')
+    (r'muhammet\s*kemal\s*g[uü]l[sş]en|g[uü]l[sş]en\s*ailesi', 'GülşenAilesi'),
+    (r'kadir\s*efe\s*g[uü]l[sş]en', 'KadirEfeGülşen'),
+    (r'ismail\s*efe\s*polat', 'İsmailEfePolat'),
+    (r'z[uü]beyir\s*karahan', 'ZübeyirKarahan'),
+    (r'iklim\s*[sş]evval\s*duman', 'İklimŞevvalDuman')
 ]
 
 
 def generate_smart_tags(haber):
     """
     Bir haber nesnesinden veya sözlüğünden akıllı taglar üretir.
+    Başlık ve spot öncelikli, semantik eşleme yapar.
     En az 3, en fazla 7 benzersiz hashtag döndürür.
     """
     if not haber:
         return ["#Spor24", "#Haber"]
 
-    baslik = getattr(haber, 'baslik', '') or (haber.get('title') if isinstance(haber, dict) else '') or ''
-    icerik = getattr(haber, 'icerik', '') or (haber.get('content') if isinstance(haber, dict) else '') or ''
+    baslik = (
+        getattr(haber, 'ozgun_baslik', None) or 
+        getattr(haber, 'baslik', '') or 
+        (haber.get('title') if isinstance(haber, dict) else '') or ''
+    )
+    raw_baslik = getattr(haber, 'baslik', '') if hasattr(haber, 'baslik') else ''
+    
+    ozet = (
+        getattr(haber, 'ozgun_ozet', None) or
+        getattr(haber, 'ozet', '') or
+        (haber.get('summary') if isinstance(haber, dict) else '') or ''
+    )
+    
+    icerik = (
+        getattr(haber, 'ozgun_icerik', None) or 
+        getattr(haber, 'icerik', '') or 
+        (haber.get('content') if isinstance(haber, dict) else '') or ''
+    )
+    
     kat_ad = ''
     if hasattr(haber, 'kategori') and haber.kategori:
         kat_ad = haber.kategori.ad
@@ -158,52 +206,72 @@ def generate_smart_tags(haber):
     if hasattr(haber, 'federasyon_website') and haber.federasyon_website:
         fed_ad = haber.federasyon_website.ad
 
-    full_text = f"{baslik} {kat_ad} {fed_ad} {icerik[:500]}".lower()
+    # 1. Başlık ve spot metni (Yüksek öncelik)
+    headline_text = turkish_lower(f"{baslik} {raw_baslik} {ozet}")
+    
+    # 2. Gövde ve federasyon dahil tam metin
+    full_text = turkish_lower(f"{baslik} {raw_baslik} {kat_ad} {fed_ad} {ozet} {icerik[:2000]}")
 
-    tags = []
+    priority_tags = []
+    normal_tags = []
 
-    # 1. Kategori / Branş Tagı
+    # 1. Kategori / Branş Tagı (Öncelikli)
     if kat_ad:
         clean_kat = re.sub(r'[^a-zA-Z0-9çğıöşüÇĞİÖŞÜ]', '', kat_ad)
         if clean_kat:
-            tags.append(f"#{clean_kat}")
+            priority_tags.append(f"#{clean_kat}")
 
-    # Branş sözlüğünden tara
+    # 2. Branş Sözlüğü (Başlıkta geçiyorsa öncelikli)
     for keyword, tag_name in SPOR_BRANSLARI.items():
-        if keyword in full_text:
-            tag = f"#{tag_name}"
-            if tag not in tags:
-                tags.append(tag)
-            if len(tags) >= 2:
-                break
+        tag = f"#{tag_name}"
+        if keyword in headline_text:
+            if tag not in priority_tags:
+                priority_tags.append(tag)
+        elif keyword in full_text:
+            if tag not in normal_tags and tag not in priority_tags:
+                normal_tags.append(tag)
 
-    # 2. Organizasyon ve Kategori Terimleri
-    for pattern, tag_name in ORGANIZASYONLAR:
-        if re.search(pattern, full_text, re.IGNORECASE):
-            tag = f"#{tag_name}"
-            if tag not in tags:
-                tags.append(tag)
-
-    # 3. Şehirler / Lokasyonlar
+    # 3. Lokasyonlar (Şehirler / Ülkeler)
     for city_key, city_name in SEHIRLER.items():
-        if re.search(r'\b' + city_key + r'\b', full_text, re.IGNORECASE):
-            tag = f"#{city_name}"
-            if tag not in tags:
-                tags.append(tag)
+        tag = f"#{city_name}"
+        if re.search(r'\b' + city_key + r'\b', headline_text, re.IGNORECASE):
+            if tag not in priority_tags:
+                priority_tags.append(tag)
+        elif re.search(r'\b' + city_key + r'\b', full_text, re.IGNORECASE):
+            if tag not in normal_tags and tag not in priority_tags:
+                normal_tags.append(tag)
 
-    # 4. Kişiler / Sporcular
+    # 4. Turnuva, Madalya ve Organizasyon Terimleri
+    for pattern, tag_name in ORGANIZASYONLAR:
+        tag = f"#{tag_name}"
+        if re.search(pattern, headline_text, re.IGNORECASE):
+            if tag not in priority_tags:
+                priority_tags.append(tag)
+        elif re.search(pattern, full_text, re.IGNORECASE):
+            if tag not in normal_tags and tag not in priority_tags:
+                normal_tags.append(tag)
+
+    # 5. Kişiler & Sporcular
     for pattern, person_name in ONEMLI_ISIMLER:
-        if re.search(pattern, full_text, re.IGNORECASE):
-            tag = f"#{person_name}"
-            if tag not in tags:
-                tags.append(tag)
+        tag = f"#{person_name}"
+        if re.search(pattern, headline_text, re.IGNORECASE):
+            if tag not in priority_tags:
+                priority_tags.append(tag)
+        elif re.search(pattern, full_text, re.IGNORECASE):
+            if tag not in normal_tags and tag not in priority_tags:
+                normal_tags.append(tag)
 
-    # 5. Kurumsal Fallback
-    if '#Spor24' not in tags:
-        tags.append('#Spor24')
+    # Listeleri birleştir: Başlık/kategori etiketleri önde
+    all_tags = []
+    for t in priority_tags + normal_tags:
+        if t not in all_tags:
+            all_tags.append(t)
 
-    # Maksimum 6 en iyi tag
-    return tags[:6]
+    # Kurumsal Marka Tagı
+    if '#Spor24' not in all_tags:
+        all_tags.append('#Spor24')
+
+    return all_tags[:7]
 
 
 def get_airtag_id(haber):

@@ -240,15 +240,13 @@ class FederasyonWebsiteAdmin(ModelAdmin):
 
     def get_urls(self):
         from django.urls import path
-        from django.views.decorators.csrf import csrf_exempt
         urls = super().get_urls()
         custom_urls = [
-            path('toggle-aktif/', csrf_exempt(self.admin_site.admin_view(self.toggle_aktif)), name='haberler_federasyonwebsite_toggle_aktif'),
-            path('toggle-all-aktif/', csrf_exempt(self.admin_site.admin_view(self.toggle_all_aktif)), name='haberler_federasyonwebsite_toggle_all_aktif'),
+            path('toggle-aktif/', self.admin_site.admin_view(self.toggle_aktif), name='haberler_federasyonwebsite_toggle_aktif'),
+            path('toggle-all-aktif/', self.admin_site.admin_view(self.toggle_all_aktif), name='haberler_federasyonwebsite_toggle_all_aktif'),
         ]
         return custom_urls + urls
 
-    @csrf_exempt
     def toggle_aktif(self, request):
         from django.http import JsonResponse
         import json
@@ -264,7 +262,6 @@ class FederasyonWebsiteAdmin(ModelAdmin):
                 return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
         return JsonResponse({'status': 'invalid method'}, status=405)
 
-    @csrf_exempt
     def toggle_all_aktif(self, request):
         from django.http import JsonResponse
         import json
@@ -863,6 +860,7 @@ class BekleyenHaberAdmin(ModelAdmin):
         from django.shortcuts import get_object_or_404
         from .models import BekleyenHaber, Kategori
         from .ai_news_engine import ozgunlestir_haber
+        from .smart_tags import generate_smart_tags, get_airtag_id, get_airtag_shortlink
         
         bekleyen = get_object_or_404(BekleyenHaber, id=object_id)
         
@@ -872,11 +870,18 @@ class BekleyenHaberAdmin(ModelAdmin):
             bekleyen.refresh_from_db()
             
         kategoriler = Kategori.objects.all().order_by('ad')
+        smart_tags = generate_smart_tags(bekleyen)
+        airtag_id = get_airtag_id(bekleyen)
+        airtag_shortlink = get_airtag_shortlink(bekleyen, 'wa_durum')
+
         context = dict(
             self.admin_site.each_context(request),
             title=f"Haber Stüdyosu - {bekleyen.id}",
             bekleyen=bekleyen,
             kategoriler=kategoriler,
+            smart_tags=smart_tags,
+            airtag_id=airtag_id,
+            airtag_shortlink=airtag_shortlink,
         )
         return render(request, 'admin/haber_studyo.html', context)
 
@@ -913,9 +918,14 @@ class BekleyenHaberAdmin(ModelAdmin):
                 haber.save()
 
                 live_url = f"/haber/{haber.slug}/"
+                from django.utils.html import escape, format_html
                 self.message_user(
                     request,
-                    mark_safe(f"🎉 <strong>Tebrikler!</strong> Haber canlı yayına alındı: <a href='{live_url}' target='_blank' style='color:#fff; text-decoration:underline; font-weight:bold;'>{haber.baslik} (Siteyi Gör ↗)</a>"),
+                    format_html(
+                        "🎉 <strong>Tebrikler!</strong> Haber canlı yayına alındı: <a href='{}' target='_blank' style='color:#fff; text-decoration:underline; font-weight:bold;'>{} (Siteyi Gör ↗)</a>",
+                        live_url,
+                        haber.baslik
+                    ),
                     level=messages.SUCCESS
                 )
                 return redirect('admin:haberler_bekleyenhaber_changelist')
