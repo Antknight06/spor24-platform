@@ -64,6 +64,8 @@ def api_whatsapp_channel_share(request, news_id):
         else:
             mode = "card"
             
+        airtag_link = f"https://spor24.net/c/{haber.id}?tag=wa_channel"
+        
         if mode == "image" and has_image:
             mime, _ = mimetypes.guess_type(image_path)
             mime = mime or "image/jpeg"
@@ -71,7 +73,7 @@ def api_whatsapp_channel_share(request, news_id):
             with open(image_path, "rb") as f:
                 b64_data = base64.b64encode(f.read()).decode("utf-8")
                 
-            caption = f"🏆 {title}\n\n{ozet}\n\nDetaylar için 👇\n🔗 {url}"
+            caption = f"🏆 {title}\n\n{ozet}\n\nDetaylar için 👇\n🔗 {airtag_link}"
             payload = {
                 "Phone": phone_target,
                 "Image": f"data:{mime};base64,{b64_data}",
@@ -80,7 +82,7 @@ def api_whatsapp_channel_share(request, news_id):
             api_url = "http://localhost:8085/chat/send/image"
         else:
             # Görseli olmayan veya özellikle kart istenen durumlarda metin + link preview
-            body_text = f"🏆 {title}\n\n{ozet}\n\nDetaylar için 👇\n{url}"
+            body_text = f"🏆 {title}\n\n{ozet}\n\nDetaylar için 👇\n{airtag_link}"
             payload = {
                 "Phone": phone_target,
                 "Body": body_text,
@@ -88,25 +90,53 @@ def api_whatsapp_channel_share(request, news_id):
             }
             api_url = "http://localhost:8085/chat/send/text"
             
-        req = urllib.request.Request(
-            api_url,
-            data=json.dumps(payload).encode("utf-8"),
-            headers={
-                "Content-Type": "application/json",
-                "token": "Spor24MasterToken2026!"
-            },
-            method="POST"
-        )
-        resp = urllib.request.urlopen(req, timeout=15)
-        res_data = json.loads(resp.read().decode("utf-8"))
-        return JsonResponse({
-            "success": True,
-            "message": f"{target_name} hedefine başarıyla gönderildi.",
-            "target": phone_target,
-            "target_name": target_name,
-            "news_id": haber.id,
-            "mode": mode,
-            "data": res_data
-        })
+        tokens_to_try = [
+            "Spor24MasterToken2026!",
+            "AysunKarateWuzapiToken2026!"
+        ]
+        
+        last_error = None
+        res_data = None
+        
+        for w_token in tokens_to_try:
+            try:
+                req = urllib.request.Request(
+                    api_url,
+                    data=json.dumps(payload).encode("utf-8"),
+                    headers={
+                        "Content-Type": "application/json",
+                        "token": w_token
+                    },
+                    method="POST"
+                )
+                resp = urllib.request.urlopen(req, timeout=15)
+                res_data = json.loads(resp.read().decode("utf-8"))
+                last_error = None
+                break
+            except urllib.error.HTTPError as http_err:
+                try:
+                    err_body = http_err.read().decode("utf-8")
+                    err_json = json.loads(err_body)
+                    last_error = err_json.get("error") or http_err.reason
+                except:
+                    last_error = str(http_err)
+            except Exception as ex:
+                last_error = str(ex)
+
+        if res_data is not None:
+            return JsonResponse({
+                "success": True,
+                "message": f"{target_name} hedefine başarıyla gönderildi.",
+                "target": phone_target,
+                "target_name": target_name,
+                "news_id": haber.id,
+                "mode": mode,
+                "data": res_data
+            })
+        else:
+            return JsonResponse({
+                "success": False,
+                "error": f"WhatsApp Bağlantı Uyarısı: {last_error or 'Oturum bağlı değil'}"
+            }, status=500)
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)}, status=500)
