@@ -6,11 +6,12 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Haber, Kategori, UserProfile, Favori, Yorum,KarateAntrenor, KarateKulup, Kunye
+from .models import Haber, Kategori, UserProfile, Favori, Yorum, KarateAntrenor, KarateKulup, KarateSehir, Kunye
 from django.core.paginator import Paginator
 from django.db.models import Q
 from datetime import datetime, timedelta
 from django.utils import timezone
+from .smart_tags import generate_smart_tags, get_airtag_id, get_airtag_shortlink
 import random
 import requests
 from django.core.cache import cache
@@ -114,9 +115,15 @@ def anasayfa(request):
 
         for n in slider_news:
             n.resim_url = resolve_news_image(n)
+            cat_name = (n.kategori.ad if n.kategori else 'GÜNCEL').upper()
+            n.cat_name = cat_name
+            n.color_class = category_colors.get(cat_name, 'color-cinnabar')
 
         for n in featured_news:
             n.resim_url = resolve_news_image(n)
+            cat_name = (n.kategori.ad if n.kategori else 'GÜNCEL').upper()
+            n.cat_name = cat_name
+            n.color_class = category_colors.get(cat_name, 'color-cinnabar')
 
         context = {
             'slider_news': slider_news,
@@ -124,9 +131,7 @@ def anasayfa(request):
             'initial_news': initial_news,
         }
         resp = render(request, 'v3/index.html', context)
-        resp['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
-        resp['Pragma'] = 'no-cache'
-        resp['Expires'] = '0'
+        resp['Cache-Control'] = 'public, max-age=30, s-maxage=60'
         return resp
     except Exception as e:
         logger.error(f"Error in anasayfa view: {e}")
@@ -494,6 +499,7 @@ def api_news_detail(request, news_id):
 
         data = {
             'id': n.id,
+            'slug': n.slug,
             'title': n.baslik,
             'content': n.icerik,
             'image': img_url,
@@ -504,6 +510,10 @@ def api_news_detail(request, news_id):
             'is_columnist': n.kose_yazisi,
             'author_name': n.yazar.get_full_name() if (n.yazar and n.yazar.get_full_name()) else (n.yazar_adi or 'Spor24 Editör'),
             'author_image': author_img,
+            'smart_tags': generate_smart_tags(n),
+            'airtag_id': get_airtag_id(n),
+            'airtag_shortlink': get_airtag_shortlink(n, 'direct'),
+            'airtag_wa_share': get_airtag_shortlink(n, 'wa_share'),
         }
         return JsonResponse(data)
     except Exception as e:
@@ -520,6 +530,10 @@ def v3_post(request):
             from django.utils.html import strip_tags
             text_source = haber.ozet or haber.icerik or haber.baslik
             haber.clean_ozet = ' '.join(strip_tags(text_source).split())[:200]
+            haber.smart_tags = generate_smart_tags(haber)
+            haber.airtag_id = get_airtag_id(haber)
+            haber.airtag_shortlink = get_airtag_shortlink(haber, 'direct')
+            haber.airtag_wa_share = get_airtag_shortlink(haber, 'wa_share')
         except Exception:
             pass
     return render(request, 'v3/post.html', {'haber': haber})
@@ -676,6 +690,12 @@ def haber_detay(request, slug):
     from django.utils.html import strip_tags
     text_source = haber.ozet or haber.icerik or haber.baslik
     haber.clean_ozet = ' '.join(strip_tags(text_source).split())[:200]
+    
+    # 🏷️ Akıllı Takip Tagları & 📡 AirTag Entegrasyonu
+    haber.smart_tags = generate_smart_tags(haber)
+    haber.airtag_id = get_airtag_id(haber)
+    haber.airtag_shortlink = get_airtag_shortlink(haber, 'direct')
+    haber.airtag_wa_share = get_airtag_shortlink(haber, 'wa_share')
     
     context = {
         'haber': haber,
@@ -966,55 +986,50 @@ def kunye(request):
 
 # Karate Bölümü İçin Fonksiyonlar
 def karate_antrenorler(request):
+    from django.db.models import Count
     # 1. HARİTA VERİSİ (Şehirlere göre sayıları al)
-    # Veritabanında şehir 'bolge' sütununda tutuluyor.
-    sehir_verileri = KarateAntrenor.objects.values('bolge').annotate(toplam=Count('id')).order_by('bolge')
+    sehir_verileri = KarateAntrenor.objects.values('sehir__ad').annotate(toplam=Count('id')).order_by('sehir__ad')
 
     # Harita boyama için JSON verisi hazırla
     harita_dict = {}
     for veri in sehir_verileri:
-        if veri['bolge']:
-            # Şehir adını büyük harfe çevirip boşlukları temizleyelim ki eşleşme kolay olsun
-            sehir_adi = veri['bolge'].strip().upper()
+        if veri['sehir__ad']:
+            sehir_adi = veri['sehir__ad'].strip().upper()
             harita_dict[sehir_adi] = veri['toplam']
     
     harita_json = json.dumps(harita_dict, ensure_ascii=False)
 
     # 2. FİLTRELEME MANTIĞI
     # Varsayılan sıralama: Şehir ve İsim
-    antrenor_listesi = KarateAntrenor.objects.all().order_by('bolge', 'adi_soyadi')
+    antrenor_listesi = KarateAntrenor.objects.select_related('sehir').all().order_by('sehir__ad', 'ad_soyad')
 
     # A) İsim Arama (HTML'deki name='q')
     arama_kelimesi = request.GET.get('q')
     if arama_kelimesi:
-        antrenor_listesi = antrenor_listesi.filter(adi_soyadi__icontains=arama_kelimesi)
+        antrenor_listesi = antrenor_listesi.filter(ad_soyad__icontains=arama_kelimesi)
 
     # B) Şehir Filtresi (HTML'deki name='sehir')
     secilen_sehir = request.GET.get('sehir')
     if secilen_sehir and secilen_sehir != "Tüm Şehirler":
-        antrenor_listesi = antrenor_listesi.filter(bolge=secilen_sehir)
+        antrenor_listesi = antrenor_listesi.filter(sehir__ad=secilen_sehir)
 
     # C) Kademe Filtresi (HTML'deki name='kademe')
     secilen_kademe = request.GET.get('kademe')
     if secilen_kademe and secilen_kademe != "Tüm Kademeler":
-        antrenor_listesi = antrenor_listesi.filter(kariyer=secilen_kademe)
+        antrenor_listesi = antrenor_listesi.filter(kademe=secilen_kademe)
 
     # 3. DROPDOWN MENÜLERİNİ DOLDUR
-    
-    # A) Şehirleri veritabanından çek (Sıralamayı veritabanında değil Python'da yapacağız)
-    sehirler_listesi = list(KarateAntrenor.objects.values_list('bolge', flat=True).distinct())
-    
-    # Türkçe Sıralama Fonksiyonu
+    sehirler_listesi = list(KarateSehir.objects.values_list('ad', flat=True).order_by('ad'))
+    if not sehirler_listesi:
+        sehirler_listesi = list(KarateAntrenor.objects.exclude(sehir__isnull=True).values_list('sehir__ad', flat=True).distinct())
+
     def tr_sirala(text):
         if not text: return ""
-        # Türkçe karakterleri, sıralamada denk geldikleri Latin harflerine çeviriyoruz
-        # Böylece Ç->C, İ->I, Ş->S grubuna girer ve 'Z'den sonraya atılmaz.
         ceviri = str.maketrans("ÇĞİÖŞÜ", "CGIOSU")
         return text.translate(ceviri)
 
-    # Listeyi temizle (Boşlukları at) ve Türkçe sıraya sok
     tum_sehirler = sorted([s for s in sehirler_listesi if s], key=tr_sirala)
-    tum_kademeler = KarateAntrenor.objects.values_list('kariyer', flat=True).distinct().order_by('kariyer')
+    tum_kademeler = KarateAntrenor.objects.exclude(kademe__isnull=True).exclude(kademe='').values_list('kademe', flat=True).distinct().order_by('kademe')
 
     # 4. SAYFALAMA (Her sayfada 50 kişi)
     paginator = Paginator(antrenor_listesi, 50)
@@ -1025,7 +1040,7 @@ def karate_antrenorler(request):
         'page_obj': page_obj,
         'tum_sehirler': tum_sehirler,
         'tum_kademeler': tum_kademeler,
-        'harita_json': harita_json, # Harita renklendirme için sayıları gönderiyoruz
+        'harita_json': harita_json,
     }
 
     return render(request, 'haberler/karate_antrenorler.html', context)
@@ -1033,16 +1048,27 @@ def karate_antrenorler(request):
 def karate_kulupler(request):
     # Kulüpleri listele
     secilen_sehir = request.GET.get('sehir')
-    if secilen_sehir:
-        kulup_listesi = KarateKulup.objects.filter(sehir__ad__iexact=secilen_sehir).order_by('ad')
-    else:
-        kulup_listesi = KarateKulup.objects.all().order_by('sehir__ad', 'ad')
+    q = request.GET.get('q')
+    
+    kulup_listesi = KarateKulup.objects.select_related('sehir').all()
+    if secilen_sehir and secilen_sehir != "Tüm Şehirler":
+        kulup_listesi = kulup_listesi.filter(sehir__ad__iexact=secilen_sehir)
+    if q:
+        kulup_listesi = kulup_listesi.filter(ad__icontains=q)
+        
+    kulup_listesi = kulup_listesi.order_by('sehir__ad', 'ad')
     
     paginator = Paginator(kulup_listesi, 50)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     
-    return render(request, 'haberler/karate_kulupler.html', {'page_obj': page_obj})
+    tum_sehirler = list(KarateSehir.objects.values_list('ad', flat=True).order_by('ad'))
+    
+    return render(request, 'haberler/karate_kulupler.html', {
+        'page_obj': page_obj,
+        'tum_sehirler': tum_sehirler,
+        'secilen_sehir': secilen_sehir
+    })
 def karate_formlari(request):
     return render(request, 'karate_formlari.html')
 
@@ -1718,6 +1744,166 @@ def yetkili_giris(request):
         'error_message': error_message
     }
     return render(request, 'v3/yetkili_giris.html', context)
+
+
+def api_columnists(request):
+    """
+    API endpoint serving real columnists and column articles for the mobile app (ColumnistsScreen.tsx)
+    and web frontends.
+    """
+    from django.db.models import Count, Q
+    from django.utils import timezone
+    import datetime
+
+    excluded_usernames = [
+        'newsbot', 'socialbot', 'karatebot', 'kose_yazari', 'federation_importer', 
+        'karate_importer', 'karate_full_importer', 'multi_federation_importer', 
+        'boks_importer', 'wushu_duyuru_importer', 'wushu_importer', 'boxing_importer', 
+        'mma_scraper', 'gures_scraper', 'mmafederasyonu', 'yetkili', 'Yetkili User', 
+        'abone'
+    ]
+
+    base_domain = "https://spor24.net"
+
+    # 1. Fetch real columnists
+    authors_qs = User.objects.filter(
+        Q(is_staff=True) | Q(is_superuser=True) | Q(userprofile__user_type='yetkili') | Q(haber__kose_yazisi=True)
+    ).exclude(username__in=excluded_usernames).distinct().annotate(
+        yazi_sayisi=Count('haber', filter=Q(haber__kose_yazisi=True, haber__yayinlandi=True)),
+        haber_sayisi=Count('haber', filter=Q(haber__kose_yazisi=False, haber__yayinlandi=True))
+    ).order_by('-yazi_sayisi', '-haber_sayisi')
+
+    authors_data = []
+    seen_names = set()
+    cutoff_7d = timezone.now() - datetime.timedelta(days=7)
+
+    for u in authors_qs:
+        name = u.get_full_name().strip()
+        if not name:
+            if '@' in u.username:
+                name = u.username.split('@')[0].capitalize()
+            else:
+                name = u.username
+
+        if name in seen_names or name.lower() in ['test user', 'pasif user']:
+            continue
+        seen_names.add(name)
+
+        # Avatar resolution
+        avatar_url = ""
+        if hasattr(u, 'userprofile') and u.userprofile:
+            prof = u.userprofile
+            if hasattr(prof, 'profil_resmi') and prof.profil_resmi:
+                try:
+                    avatar_url = prof.profil_resmi.url
+                except Exception:
+                    avatar_url = str(prof.profil_resmi)
+            elif hasattr(prof, 'avatar') and prof.avatar:
+                try:
+                    avatar_url = prof.avatar.url
+                except Exception:
+                    avatar_url = str(prof.avatar)
+
+        if not avatar_url:
+            latest_h = Haber.objects.filter(yazar=u).exclude(resim='').exclude(resim__isnull=True).order_by('-olusturma_tarihi').first()
+            if latest_h and latest_h.resim:
+                try:
+                    avatar_url = latest_h.resim.url
+                except Exception:
+                    avatar_url = str(latest_h.resim)
+
+        if avatar_url and not avatar_url.startswith('http'):
+            avatar_url = base_domain + ('' if avatar_url.startswith('/') else '/') + avatar_url
+        if not avatar_url:
+            avatar_url = base_domain + '/static/v3/img/author-default.jpg'
+
+        role = "Kıdemli Spor Yazarı & Analist"
+        if hasattr(u, 'userprofile') and getattr(u.userprofile, 'unvan', None):
+            role = u.userprofile.unvan
+
+        has_new = Haber.objects.filter(yazar=u, yayinlandi=True, olusturma_tarihi__gte=cutoff_7d).exists()
+
+        authors_data.append({
+            'id': str(u.id),
+            'name': name,
+            'role': role,
+            'avatar_url': avatar_url,
+            'has_new_article': has_new,
+            'total_articles': u.yazi_sayisi + u.haber_sayisi,
+            'is_following': False
+        })
+
+    # 2. Fetch real column articles
+    articles_qs = Haber.objects.filter(
+        kose_yazisi=True,
+        yayinlandi=True
+    ).select_related('kategori', 'yazar').order_by('-olusturma_tarihi')[:30]
+
+    # If few dedicated column articles, fallback to editorial articles
+    if articles_qs.count() < 4:
+        articles_qs = Haber.objects.filter(
+            yayinlandi=True
+        ).exclude(yazar__username__in=['newsbot', 'socialbot', 'karatebot']).select_related('kategori', 'yazar').order_by('-olusturma_tarihi')[:30]
+
+    articles_data = []
+    now = timezone.now()
+
+    for idx, art in enumerate(articles_qs):
+        art_author_name = art.yazar.get_full_name().strip() if art.yazar else 'SPOR24 Editörü'
+        if not art_author_name or art_author_name == 'admin':
+            art_author_name = 'Kenan Demirel' if 'kenan' in (art.yazar.username if art.yazar else '').lower() else (art.yazar.username if art.yazar else 'SPOR24 Editörü')
+
+        # Match with authors_data if available
+        matched_author = next((a for a in authors_data if a['name'] == art_author_name or a['id'] == str(art.yazar_id)), None)
+        if not matched_author:
+            matched_author = {
+                'id': str(art.yazar_id or idx + 1),
+                'name': art_author_name,
+                'role': 'SPOR24 Analisti',
+                'avatar_url': base_domain + '/static/v3/img/author-default.jpg',
+                'has_new_article': True,
+                'total_articles': 1,
+                'is_following': False
+            }
+
+        # Date formatting
+        diff = now - art.olusturma_tarihi
+        if diff.days == 0:
+            pub_str = "Bugün"
+        elif diff.days == 1:
+            pub_str = "Dün"
+        elif diff.days < 7:
+            pub_str = f"{diff.days} gün önce"
+        else:
+            pub_str = art.olusturma_tarihi.strftime('%d.%m.%Y')
+
+        word_count = len((art.icerik or '').split())
+        read_min = max(2, word_count // 140)
+
+        articles_data.append({
+            'id': str(art.id),
+            'title': art.baslik,
+            'summary': art.ozet or (art.baslik[:180] + '...'),
+            'author': matched_author,
+            'category': (art.kategori.ad if art.kategori else 'SPOR ANALİZ').upper(),
+            'read_time': f"{read_min} dk",
+            'view_count': art.goruntulenme_sayisi or 0,
+            'published_at': pub_str,
+            'is_featured': (idx == 0),
+            'is_sealed': True,
+            'seal_node': 'SPOR24-NODE-01'
+        })
+
+    featured_data = articles_data[0] if articles_data else None
+
+    resp = JsonResponse({
+        'authors': authors_data,
+        'featured': featured_data,
+        'articles': articles_data
+    })
+    resp['Cache-Control'] = 'public, max-age=60, s-maxage=120'
+    return resp
+
 
 
 

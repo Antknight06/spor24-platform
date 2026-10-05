@@ -988,6 +988,14 @@
                 <div style="font-size:18px; font-weight:800; color:var(--blue);" id="intelDarkSocial">%99.5</div>
                 <div style="font-size:11px; color:var(--text-muted); margin-top:4px;">Kanal ve doğrudan link tıklamaları</div>
             </div>
+
+            <div class="table-card" style="padding: 16px 20px; border-left: 4px solid #8b5cf6;">
+                <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.5px; color:var(--text-muted); margin-bottom:4px;">
+                    <i class="fa fa-stopwatch me-1" style="color:#8b5cf6;"></i> Ortalama Okuma & Kalma Süresi
+                </div>
+                <div style="font-size:18px; font-weight:800; color:#8b5cf6;" id="intelAvgDuration">--</div>
+                <div style="font-size:11px; color:var(--text-muted); margin-top:4px;" id="intelDurationDesc">%0 Derin Okur (>1 Dk)</div>
+            </div>
         </section>
 
         <!-- 2-Column Split: Top News vs Categories -->
@@ -1570,6 +1578,15 @@
                     const dsEl = document.getElementById('intelDarkSocial');
                     if (dsEl && intel.traffic_dark_social_pct !== undefined) {
                         dsEl.textContent = `%${intel.traffic_dark_social_pct}`;
+                    }
+
+                    const durEl = document.getElementById('intelAvgDuration');
+                    if (durEl && intel.avg_duration_label) {
+                        durEl.textContent = intel.avg_duration_label;
+                    }
+                    const durDesc = document.getElementById('intelDurationDesc');
+                    if (durDesc && intel.deep_reader_rate !== undefined) {
+                        durDesc.textContent = `%${intel.deep_reader_rate} Derin Okur (>1 Dk) • %${intel.bounce_rate} Tekil Çıkış`;
                     }
                 }
 

@@ -35,12 +35,48 @@
       gtag('config', 'G-DDHC74QWC4');
     </script>
 
+    <!-- OneSignal Push Notification SDK (Motor 3) -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      OneSignalDeferred.push(async function(OneSignal) {
+        await OneSignal.init({
+          appId: "c389999f-6a12-442b-851b-029f925f75ac",
+          serviceWorkerParam: { scope: "/" },
+          serviceWorkerPath: "/OneSignalSDKWorker.js",
+          allowLocalhostAsSecureOrigin: true,
+          promptOptions: {
+            slidedown: {
+              prompts: [
+                {
+                  type: "push",
+                  autoPrompt: true,
+                  text: {
+                    actionMessage: "SPOR24 Son Dakika: Önemli spor gelişmelerini ve federasyon haberlerini anında almak ister misiniz?",
+                    acceptButton: "İzin Ver",
+                    cancelButton: "Daha Sonra"
+                  },
+                  delay: {
+                    pageViews: 1,
+                    timeDelay: 3
+                  }
+                }
+              ]
+            }
+          }
+        });
+      });
+    </script>
+
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="referrer" content="strict-origin-when-cross-origin" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+    <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
     <title>{% if haber %}{{ haber.baslik }} | SPOR24.NET{% else %}Haber Detayı | SPOR24.NET{% endif %}</title>
     {% if haber %}
-    <link rel="canonical" href="https://spor24.net/post.html?id={{ haber.id }}" />
+    <link rel="canonical" href="https://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}" />
     <meta name="description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
 
     <!-- Open Graph / Facebook / WhatsApp / Telegram / LinkedIn -->
@@ -48,7 +84,7 @@
     <meta property="og:type" content="article" />
     <meta property="og:title" content="{{ haber.baslik }}" />
     <meta property="og:description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
-    <meta property="og:url" content="https://spor24.net/post.html?id={{ haber.id }}" />
+    <meta property="og:url" content="https://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}" />
     <meta property="og:image" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
     <meta property="og:image:secure_url" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
     <meta property="og:image:type" content="image/jpeg" />
@@ -64,7 +100,7 @@
     <meta name="twitter:title" content="{{ haber.baslik }}" />
     <meta name="twitter:description" content="{{ haber.clean_ozet|default:haber.baslik|truncatechars:200 }}" />
     <meta name="twitter:image" content="{% if haber.resim %}https://spor24.net{{ haber.resim.url }}?v={{ haber.guncelleme_tarihi|date:'U'|default:'2' }}{% elif haber.kaynak_resim_url %}{{ haber.kaynak_resim_url }}{% elif haber.resim_url %}{{ haber.resim_url }}{% else %}https://spor24.net/static/img/spor24_watermark.png{% endif %}" />
-    <meta name="twitter:url" content="https://spor24.net/post.html?id={{ haber.id }}" />
+    <meta name="twitter:url" content="https://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}" />
 
     <script type="application/ld+json">
     {
@@ -72,7 +108,7 @@
       "@type": "NewsArticle",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "https://spor24.net/post.html?id={{ haber.id }}"
+        "@id": "https://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}"
       },
       "headline": "{{ haber.baslik|escapejs }}",
       "description": "{{ haber.ozet|default:haber.baslik|striptags|escapejs }}",
@@ -527,7 +563,7 @@
                             <span class="text-uppercase font-black text-muted me-1" style="font-size: 0.78rem; letter-spacing: 0.5px;">
                                 <i class="fas fa-share-nodes text-danger me-1"></i> Paylaş:
                             </span>
-                            <a id="share-wa-top" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net/post.html?id={{ haber.id }}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp'ta Paylaş">
+                            <a id="share-wa-top" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp'ta Paylaş">
                                 <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
                             </a>
                             {% if user.is_authenticated and user.is_staff %}
@@ -535,13 +571,13 @@
                                 <i class="fas fa-bullhorn"></i> <span>Kanal İçin Paylaş</span>
                             </button>
                             {% endif %}
-                            <a id="share-fb-top" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook'ta Paylaş">
+                            <a id="share-fb-top" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook'ta Paylaş">
                                 <i class="fab fa-facebook-f"></i> <span>Facebook</span>
                             </a>
-                            <a id="share-x-top" href="https://twitter.com/intent/tweet?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X'te Paylaş">
+                            <a id="share-x-top" href="https://twitter.com/intent/tweet?url=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X'te Paylaş">
                                 <i class="fa-brands fa-x-twitter"></i> <span>X</span>
                             </a>
-                            <a id="share-tg-top" href="https://t.me/share/url?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram'da Paylaş">
+                            <a id="share-tg-top" href="https://t.me/share/url?url=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram'da Paylaş">
                                 <i class="fab fa-telegram-plane"></i> <span>Telegram</span>
                             </a>
                             <button type="button" class="btn btn-share btn-instagram" onclick="shareToInstagram()" title="Instagram'da Paylaş">
@@ -562,6 +598,49 @@
                         {% if haber %}{{ haber.icerik|safe }}{% else %}<p>İçerik yükleniyor...</p>{% endif %}
                     </section>
 
+                    <!-- 🏷️ AKILLI TAKİP TAGLARI (Smart Tags) & 📡 AIRTAG KÜNYE ROZETİ -->
+                    <div class="airtag-smart-container my-4 p-3 p-md-4 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #0b0f19 0%, #1a2333 100%); border: 1px solid rgba(255,255,255,0.12); color: #fff;">
+                        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 border-bottom border-secondary border-opacity-50 pb-3 mb-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge rounded-pill px-3 py-1 font-bold text-uppercase" style="background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); letter-spacing: 0.5px; font-size: 11px;">
+                                    <i class="fa fa-tag me-1"></i> AKILLI TAKİP TAGLARI
+                                </span>
+                                <span class="text-muted small d-none d-sm-inline">Semantik Konu & Kişi Ağı</span>
+                            </div>
+                            
+                            <!-- AirTag Sinyal Rozeti -->
+                            <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.15); font-family: monospace; font-size: 12px;">
+                                <span style="width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block; box-shadow: 0 0 10px #10b981;"></span>
+                                <span class="text-secondary">AirTag:</span>
+                                <strong class="text-warning" id="airtag-id-display">{% if haber and haber.airtag_id %}{{ haber.airtag_id }}{% else %}SP24-AIRTAG{% endif %}</strong>
+                            </div>
+                        </div>
+
+                        <!-- Tag Pills List -->
+                        <div class="d-flex flex-wrap gap-2" id="smart-tags-container">
+                            {% if haber and haber.smart_tags %}
+                                {% for tag in haber.smart_tags %}
+                                <a href="/arama/?q={{ tag|urlencode }}" class="badge rounded-pill text-decoration-none px-3 py-2 font-bold tag-pill" style="background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); font-size: 12px; transition: all 0.2s ease;">
+                                    {{ tag }}
+                                </a>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted small italic">Taglar üretiliyor...</span>
+                            {% endif %}
+                        </div>
+
+                        <!-- AirTag Kısa Takip Linki -->
+                        <div class="mt-3 pt-3 border-top border-secondary border-opacity-50 d-flex flex-wrap justify-content-between align-items-center gap-2">
+                            <div class="small text-muted d-flex align-items-center gap-2">
+                                <i class="fa fa-share-nodes text-warning"></i>
+                                <span>Kısa Takip Linki: <code class="text-warning font-bold" id="airtag-link-code">{% if haber and haber.airtag_shortlink %}{{ haber.airtag_shortlink }}{% else %}https://spor24.net/c/{{ haber.id }}{% endif %}</code></span>
+                            </div>
+                            <button type="button" class="btn btn-outline-light btn-sm rounded-pill font-bold px-3" onclick="copyAirtagLink()" title="AirTag Takip Linkini Kopyala">
+                                <i class="fa fa-copy me-1"></i> Takip Linkini Kopyala
+                            </button>
+                        </div>
+                    </div>
+
                     <!-- BOTTOM SOCIAL SHARE BOX -->
                     <div class="card p-3 p-md-4 my-4 border-0 rounded-4 shadow-sm" style="background: linear-gradient(135deg, #f8f9fa 0%, #eef2f6 100%); border-left: 5px solid #c8102e !important;">
                         <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -575,7 +654,7 @@
                                 </div>
                             </div>
                             <div class="d-flex flex-wrap gap-2">
-                                <a id="share-wa-bottom" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net/post.html?id={{ haber.id }}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp">
+                                <a id="share-wa-bottom" href="whatsapp://send?text={% if haber %}{{ haber.baslik|urlencode }}%0A%0Ahttps://spor24.net{% if haber.slug %}/haberler/{{ haber.slug }}/{% else %}/post.html?id={{ haber.id }}{% endif %}{% endif %}" onclick="shareToWhatsApp(event)" class="btn btn-share btn-whatsapp" title="WhatsApp">
                                     <i class="fab fa-whatsapp"></i> <span>WhatsApp</span>
                                 </a>
                                 {% if user.is_authenticated and user.is_staff %}
@@ -583,13 +662,13 @@
                                     <i class="fas fa-bullhorn"></i> <span>Kanal İçin Paylaş</span>
                                 </button>
                                 {% endif %}
-                                <a id="share-fb-bottom" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook">
+                                <a id="share-fb-bottom" href="https://www.facebook.com/sharer/sharer.php?u=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-facebook" title="Facebook">
                                     <i class="fab fa-facebook-f"></i> <span>Facebook</span>
                                 </a>
-                                <a id="share-x-bottom" href="https://twitter.com/intent/tweet?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X">
+                                <a id="share-x-bottom" href="https://twitter.com/intent/tweet?url=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}%20%7C%20%40spor24net{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-x" title="X">
                                     <i class="fa-brands fa-x-twitter"></i> <span>X</span>
                                 </a>
-                                <a id="share-tg-bottom" href="https://t.me/share/url?url=https://spor24.net/post.html?id={% if haber %}{{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram">
+                                <a id="share-tg-bottom" href="https://t.me/share/url?url=https://spor24.net{% if haber and haber.slug %}/haberler/{{ haber.slug }}/{% elif haber %}/post.html?id={{ haber.id }}{% endif %}&text={% if haber %}{{ haber.baslik|urlencode }}{% endif %}" target="_blank" rel="noopener noreferrer" class="btn btn-share btn-telegram" title="Telegram">
                                     <i class="fab fa-telegram-plane"></i> <span>Telegram</span>
                                 </a>
                                 <button type="button" class="btn btn-share btn-instagram" onclick="shareToInstagram()" title="Instagram">
@@ -675,6 +754,32 @@
                 showToast("Bağlantı kopyalandı! Instagram hikayenizde veya mesaj olarak paylaşabilirsiniz.");
             }
         }
+
+        function copyAirtagLink() {
+            const shortCode = document.getElementById('airtag-link-code');
+            const targetUrl = window._currentAirtagLink || (shortCode ? shortCode.innerText.trim() : window.location.href);
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(targetUrl).then(() => {
+                    showToast("📡 AirTag Takip Linki Kopyalandı: " + targetUrl);
+                }).catch(() => fallbackCopy(targetUrl));
+            } else {
+                fallbackCopy(targetUrl);
+            }
+        }
+
+        // Invisible AirTag Trace on Copy (Ctrl+C)
+        document.addEventListener('copy', function(e) {
+            const sel = window.getSelection().toString();
+            if (sel && sel.trim().length > 60) {
+                const airtagLink = window._currentAirtagLink || (document.getElementById('airtag-link-code') ? document.getElementById('airtag-link-code').innerText.trim() : window.location.href);
+                const airtagId = document.getElementById('airtag-id-display') ? document.getElementById('airtag-id-display').innerText.trim() : 'SP24';
+                const extra = `\n\nKaynak: SPOR24 (AirTag Takip No: ${airtagId} - ${airtagLink})`;
+                if (e.clipboardData) {
+                    e.clipboardData.setData('text/plain', sel + extra);
+                    e.preventDefault();
+                }
+            }
+        });
 
         function showToast(message) {
             let toast = document.getElementById('spor24-toast');
@@ -807,7 +912,7 @@
             }
 
             // Sync initial share links with canonical URL
-            const canonicalUrl = `https://spor24.net/post.html?id=${newsId}`;
+            let canonicalUrl = "{% if haber and haber.slug %}https://spor24.net/haberler/{{ haber.slug }}/{% elif haber %}https://spor24.net/post.html?id={{ haber.id }}{% else %}https://spor24.net/post.html?id=" + newsId + "{% endif %}";
             if (currentNewsTitle) {
                 updateShareLinks(currentNewsTitle, canonicalUrl);
             }
@@ -829,6 +934,9 @@
                     const mainImg = document.getElementById('detail-image-main');
                     mainImg.src = img_src;
 
+                    if (item.slug) {
+                        canonicalUrl = `https://spor24.net/haberler/${item.slug}/`;
+                    }
                     // Update live share URLs
                     updateShareLinks(pageTitle, canonicalUrl);
 
@@ -867,6 +975,37 @@
                     }
 
                     document.getElementById('detail-content').innerHTML = item.content || '<p>Bu haberin içeriği bulunmamaktadır.</p>';
+
+                    // 🏷️ Render Akıllı Takip Tagları (Smart Tags)
+                    if (item.smart_tags && item.smart_tags.length) {
+                        const tagBox = document.getElementById('smart-tags-container');
+                        if (tagBox) {
+                            tagBox.innerHTML = item.smart_tags.map(t => `
+                                <a href="/arama/?q=${encodeURIComponent(t)}" class="badge rounded-pill text-decoration-none px-3 py-2 font-bold tag-pill" style="background: rgba(56,189,248,0.1); color: #38bdf8; border: 1px solid rgba(56,189,248,0.3); font-size: 12px; transition: all 0.2s ease;">
+                                    ${t}
+                                </a>
+                            `).join('');
+                        }
+                    }
+                    if (item.airtag_id) {
+                        const atEl = document.getElementById('airtag-id-display');
+                        if (atEl) atEl.innerText = item.airtag_id;
+                    }
+                    if (item.airtag_shortlink) {
+                        const linkEl = document.getElementById('airtag-link-code');
+                        if (linkEl) linkEl.innerText = item.airtag_shortlink;
+                        window._currentAirtagLink = item.airtag_shortlink;
+                    }
+                    // Update WhatsApp Buttons to use AirTag shortlink
+                    const waShareLink = item.airtag_wa_share || `https://spor24.net/c/${item.id}?tag=wa_share`;
+                    const waBtn = document.getElementById('share-wa-bottom');
+                    if (waBtn) {
+                        waBtn.href = `whatsapp://send?text=${encodeURIComponent(item.title)}%0A%0A${encodeURIComponent(waShareLink)}`;
+                    }
+                    const waTop = document.getElementById('share-wa-top');
+                    if (waTop) {
+                        waTop.href = `whatsapp://send?text=${encodeURIComponent(item.title)}%0A%0A${encodeURIComponent(waShareLink)}`;
+                    }
                 })
                 .catch(err => {
                     console.warn(`News Detail Load Error (ID ${newsId}): ${err.message}`);

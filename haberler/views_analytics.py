@@ -375,7 +375,48 @@ def api_analytics_stats(request):
     top_news_item_title = top_news[0]['title'] if (top_news and top_news[0].get('views', 0) > 0) else (top_news[0]['title'] if top_news else "Henüz Okunma Yok")
     top_news_item_views = top_news[0].get('views', 0) if top_news else 0
 
+    # 8c. Ortalama Sitede Kalma / Okuma Süresi ve Etkileşim Hesaplama
+    avg_duration_sec = 0
+    avg_duration_label = "15 sn"
+    bounce_rate = 0.0
+    deep_reader_rate = 0.0
+    try:
+        sessions = logs_qs.values('ip_hash').annotate(
+            first_seen=models.Min('created_at'),
+            last_seen=models.Max('created_at'),
+            hit_count=models.Count('id')
+        )
+        durations = []
+        bounces = 0
+        deep_readers = 0
+        for s in sessions:
+            diff = (s['last_seen'] - s['first_seen']).total_seconds()
+            if s['hit_count'] > 1 and diff > 0:
+                capped = min(diff, 1800)
+                durations.append(capped)
+                if capped >= 60:
+                    deep_readers += 1
+            else:
+                bounces += 1
+                durations.append(15)
+
+        if durations:
+            avg_duration_sec = round(sum(durations) / len(durations), 1)
+            dm, ds = divmod(int(avg_duration_sec), 60)
+            if dm > 0:
+                avg_duration_label = f"{dm} dk {ds} sn"
+            else:
+                avg_duration_label = f"{ds} sn"
+            bounce_rate = round((bounces / len(durations)) * 100, 1)
+            deep_reader_rate = round((deep_readers / len(durations)) * 100, 1)
+    except Exception as e:
+        pass
+
     editorial_intel = {
+        'avg_duration_sec': avg_duration_sec,
+        'avg_duration_label': avg_duration_label,
+        'bounce_rate': bounce_rate,
+        'deep_reader_rate': deep_reader_rate,
         'peak_hour_label': peak_hour_str,
         'peak_hour_count': peak_hour_val,
         'depth': depth,

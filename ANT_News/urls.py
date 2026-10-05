@@ -23,9 +23,16 @@ from haberler import views_engagement
 from haberler import views_analytics
 from haberler import views_linkcheck
 from haberler import views_whatsapp
+from haberler import views_airtag
 
 urlpatterns = [
+    # AirTag & Shortlink Tracking System
+    path('c/<int:news_id>/', views_airtag.airtag_redirect, name='airtag_redirect_short'),
+    path('c/<str:content_id>/', views_airtag.airtag_redirect, name='airtag_redirect_code'),
+    path('api/tags/<str:tag_name>/', views_airtag.api_tag_news, name='api_tag_news'),
+
     path('ads.txt', lambda r: HttpResponse("google.com, pub-4099153035746180, DIRECT, f08c47fec0942fa0", content_type="text/plain")),
+    path('OneSignalSDKWorker.js', lambda r: HttpResponse('importScripts("https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.sw.js");', content_type='application/javascript')),
     path('robots.txt', views_seo.custom_robots_txt, name='robots_txt'),
     path('sitemap.xml', views_seo.clean_sitemap_view, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
     path('sitemap-news.xml', views_seo.google_news_sitemap, name='google_news_sitemap'),
@@ -39,6 +46,7 @@ urlpatterns = [
     path('api/news/', views.api_news, name='api_news'),
     path('api/news/<int:news_id>/', views.api_news_detail, name='api_news_detail'),
     path('api/categories/', views.api_categories, name='api_categories'),
+    path('api/columnists/', views.api_columnists, name='api_columnists'),
     path('api/whatsapp/channel-share/<int:news_id>/', views_whatsapp.api_whatsapp_channel_share, name='api_whatsapp_channel_share_root'),
     path('api/analytics/track/', views_analytics.api_analytics_track, name='api_analytics_track'),
     path('api/analytics/stats/', views_analytics.api_analytics_stats, name='api_analytics_stats'),
