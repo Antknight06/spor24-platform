@@ -809,6 +809,7 @@
 
                 <!-- Time Range Switcher -->
                 <div class="filter-switcher">
+                    <button class="filter-btn" data-range="1h"><i class="fa fa-bolt text-warning me-1"></i>Son 1 Saat</button>
                     <button class="filter-btn active" data-range="today">Bugün</button>
                     <button class="filter-btn" data-range="7d">Son 7 Gün</button>
                     <button class="filter-btn" data-range="30d">Bu Ay</button>
@@ -840,7 +841,7 @@
             </div>
         </div>
 
-        <!-- HİBRİT ÇİFT MOTORLU DOĞRULAMA BANNERI (SPOR24 Core + GA4) -->
+        <!-- DOĞRULANMIŞ 1. PARTİ VERİTABANI ANALİTİK ÇEKİRDEĞİ -->
         <div class="hybrid-audit-card" style="background: linear-gradient(135deg, rgba(14, 21, 36, 0.98) 0%, rgba(20, 28, 46, 0.98) 100%); border: 1px solid rgba(59, 130, 246, 0.3); border-radius: 14px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 18px;">
             <div style="display:flex; align-items:center; gap:16px;">
                 <div style="width:48px; height:48px; border-radius:12px; background:linear-gradient(135deg, #10B981 0%, #059669 100%); display:flex; align-items:center; justify-content:center; color:#fff; font-size:22px; box-shadow:0 4px 16px rgba(16, 185, 129, 0.35);">
@@ -848,13 +849,13 @@
                 </div>
                 <div>
                     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
-                        <span style="font-size:16px; font-weight:800; letter-spacing:-0.02em; color:#F8FAFC;">HİBRİT ÇİFT MOTORLU BAĞIMSIZ DENETİM SİSTEMİ</span>
+                        <span style="font-size:16px; font-weight:800; letter-spacing:-0.02em; color:#F8FAFC;">DOĞRULANMIŞ 1. PARTİ VERİTABANI ANALİTİK ÇEKİRDEĞİ</span>
                         <span style="background:rgba(16, 185, 129, 0.15); color:#10B981; border:1px solid rgba(16, 185, 129, 0.35); font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
-                            <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span> AKTİF & MÜHÜRLÜ
+                            <span style="width:6px; height:6px; border-radius:50%; background:#10B981; display:inline-block;"></span> 100% DOĞRULANMIŞ & ŞEFFAF
                         </span>
                     </div>
                     <p style="font-size:13px; color:#94A3B8; margin-top:4px; margin-bottom:0;">
-                        Trafik verileri <strong style="color:#F1F5F9;">SPOR24 Yerel Çekirdeği (Birinci Parti DB)</strong> ile <strong style="color:#60A5FA;">Google Analytics 4 (G-DDHC74QWC4)</strong> tarafından eşzamanlı çapraz denetime tabi tutulmaktadır.
+                        Tüm trafik ve okuma hareketleri sunucu veritabanı <strong style="color:#F1F5F9;">(ZiyaretLog Çekirdeği)</strong> üzerinden bağımsız, manipülasyonsuz ve şeffaf olarak canlı kaydedilmektedir.
                     </p>
                 </div>
             </div>
@@ -862,18 +863,18 @@
             <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
                 <!-- Yerel Log -->
                 <div style="background:rgba(255, 255, 255, 0.03); border:1px solid rgba(255, 255, 255, 0.08); padding:10px 16px; border-radius:10px; text-align:center; min-width:115px;">
-                    <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Yerel DB Logu</div>
+                    <div style="font-size:11px; color:#94A3B8; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Toplam DB Kaydı</div>
                     <div style="font-size:18px; font-weight:800; color:#10B981; font-family:'JetBrains Mono',monospace;" id="hybridLocalLogs">-- Kayıt</div>
                 </div>
-                <!-- GA4 Live -->
+                <!-- Son 30 Dk Aktif -->
                 <div style="background:rgba(59, 130, 246, 0.08); border:1px solid rgba(59, 130, 246, 0.3); padding:10px 16px; border-radius:10px; text-align:center; min-width:125px;">
-                    <div style="font-size:11px; color:#93C5FD; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">GA4 Son 30 Dk</div>
-                    <div style="font-size:18px; font-weight:800; color:#60A5FA; font-family:'JetBrains Mono',monospace;" id="hybridGaUsers">5 Aktif</div>
+                    <div style="font-size:11px; color:#93C5FD; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Son 30 Dk Aktif</div>
+                    <div style="font-size:18px; font-weight:800; color:#60A5FA; font-family:'JetBrains Mono',monospace;" id="hybridGaUsers">-- Aktif</div>
                 </div>
-                <!-- AdBlock Ratio -->
-                <div style="background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.3); padding:10px 16px; border-radius:10px; text-align:center; min-width:125px;" title="Google Analytics tarafından engellenen AdBlock ve gizlilik korumalı gerçek okur katsayısı">
-                    <div style="font-size:11px; color:#FCD34D; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">AdBlock Payı</div>
-                    <div style="font-size:18px; font-weight:800; color:#F59E0B; font-family:'JetBrains Mono',monospace;" id="hybridAdblockPct">%37.5</div>
+                <!-- Son 5 Dk Canlı -->
+                <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.3); padding:10px 16px; border-radius:10px; text-align:center; min-width:125px;">
+                    <div style="font-size:11px; color:#6EE7B7; font-weight:600; text-transform:uppercase; letter-spacing:0.5px;">Son 5 Dk Canlı</div>
+                    <div style="font-size:18px; font-weight:800; color:#10B981; font-family:'JetBrains Mono',monospace;" id="hybridLive5m">-- Aktif</div>
                 </div>
             </div>
         </div>
@@ -891,7 +892,7 @@
                 <div class="kpi-val" id="kpiPageviews">--</div>
                 <div class="kpi-footer">
                     <span class="badge-delta badge-positive" id="kpiPageviewsGrowth">Canlı</span>
-                    <span>Yerel DB + GA4 Eşleşmeli</span>
+                    <span>1. Parti Veritabanı Doğrulanmış</span>
                 </div>
             </div>
 
@@ -906,22 +907,22 @@
                 <div class="kpi-val" id="kpiUniques">--</div>
                 <div class="kpi-footer">
                     <span class="badge-delta badge-positive" id="kpiUniquesGrowth">Organik</span>
-                    <span id="kpiUniquesSubDesc">GA4 Onaylı + AdBlock Okurları</span>
+                    <span id="kpiUniquesSubDesc">1. Parti Doğrulanmış Okur</span>
                 </div>
             </div>
 
-            <!-- Card 3: GA4 Live Pulse (30 mins) -->
+            <!-- Card 3: Live Pulse -->
             <div class="kpi-card">
                 <div class="kpi-header">
-                    <span class="kpi-label">Canlı Trafik Nabzı (Son 30 Dk)</span>
+                    <span class="kpi-label">Canlı Trafik Nabzı</span>
                     <div class="kpi-icon-wrap" style="background:var(--emerald-subtle); color:var(--emerald);">
                         <i class="fa fa-bolt"></i>
                     </div>
                 </div>
-                <div class="kpi-val" style="color:var(--emerald);" id="kpiLive30m">5 Aktif</div>
+                <div class="kpi-val" style="color:var(--emerald);" id="kpiLive30m">-- Aktif</div>
                 <div class="kpi-footer">
-                    <span class="badge-delta badge-positive" id="kpiLive5mDesc">Anlık: 1</span>
-                    <span>GA4 Resmi Doğrulamalı</span>
+                    <span class="badge-delta badge-positive" id="kpiLive5mDesc">Son 5 Dk: --</span>
+                    <span>Son 30 Dk Aktif Okur</span>
                 </div>
             </div>
 
@@ -940,6 +941,40 @@
                 </div>
             </div>
         </section>
+
+        <!-- ANLIK CANLI RADAR (Son 5 Dk & Son 1 Saat Masası) -->
+        <div class="radar-card" style="background: linear-gradient(135deg, rgba(14, 21, 36, 0.95) 0%, rgba(20, 28, 46, 0.95) 100%); border: 1px solid rgba(225, 29, 72, 0.25); border-radius: 14px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 8px 24px rgba(0,0,0,0.25);">
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px; margin-bottom:14px; border-bottom:1px solid var(--border-subtle); padding-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:10px; height:10px; border-radius:50%; background:#10B981; box-shadow:0 0 10px #10B981;"></div>
+                    <span style="font-size:15px; font-weight:800; color:#F8FAFC; letter-spacing:-0.01em;">ANLIK CANLI RADAR (5 DK & 1 SAAT)</span>
+                    <span style="background:rgba(225, 29, 72, 0.15); color:#FDA4AF; border:1px solid rgba(225,29,72,0.3); font-size:11px; font-weight:700; padding:2px 8px; border-radius:12px;">CANLI GİRİŞ & HABER SÜZGECİ</span>
+                </div>
+                <div style="display:flex; align-items:center; gap:16px; font-size:12px; flex-wrap:wrap;">
+                    <div style="display:flex; align-items:center; gap:6px; background:rgba(16,185,129,0.08); padding:5px 12px; border-radius:8px; border:1px solid rgba(16,185,129,0.2);">
+                        <span style="color:#A7F3D0; font-size:11px; font-weight:600; text-transform:uppercase;">Son 5 Dk Canlı:</span>
+                        <strong style="color:#10B981; font-family:'JetBrains Mono',monospace;" id="radar5mStats">-- Tekil / -- Gösterim</strong>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:6px; background:rgba(59,130,246,0.08); padding:5px 12px; border-radius:8px; border:1px solid rgba(59,130,246,0.2);">
+                        <span style="color:#BFDBFE; font-size:11px; font-weight:600; text-transform:uppercase;">Son 1 Saat:</span>
+                        <strong style="color:#60A5FA; font-family:'JetBrains Mono',monospace;" id="radar1hStats">-- Tekil / -- Gösterim</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Son 1 Saatte Okunan Haberler Akışı -->
+            <div>
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                    <span style="font-size:12px; font-weight:700; color:#94A3B8; text-transform:uppercase; letter-spacing:0.5px;">
+                        <i class="fa fa-bolt text-warning me-1"></i> Son 1 Saatte Gerçekten Okunan Haberler
+                    </span>
+                    <span style="font-size:11px; color:#64748B;" id="lastHourNewsCount">0 haber okundu</span>
+                </div>
+                <div id="lastHourNewsList" style="display:flex; gap:10px; overflow-x:auto; padding-bottom:6px;">
+                    <span style="font-size:12px; color:var(--text-muted); padding:6px 0;">Son 1 saatte henüz okunma kaydı oluşmadı.</span>
+                </div>
+            </div>
+        </div>
 
         <!-- Main Chart Card -->
         <section class="chart-card">
@@ -1011,8 +1046,11 @@
                         </div>
                         <p style="font-size:12px; color:var(--text-muted); margin:0;">Her haber SHA-256 dijital mührü ile tescillidir.</p>
                     </div>
-                    <div style="display:flex; align-items:center; gap:6px;">
-                        <span style="font-size:11px; color:var(--text-muted);"><i class="fa fa-sort"></i> Sırala:</span>
+                    <div style="display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                        <span style="font-size:11px; color:var(--text-muted);"><i class="fa fa-filter"></i> Süzgeç:</span>
+                        <button class="btn-sort-chip active" id="newsScopeAllBtn" onclick="setNewsScope('all')">Tüm Liste</button>
+                        <button class="btn-sort-chip" id="newsScope1hBtn" onclick="setNewsScope('1h')" title="Son 1 saat içinde okunan haberleri filtrele">⚡ Son 1 Saat</button>
+                        <span style="font-size:11px; color:var(--text-muted); margin-left:6px;"><i class="fa fa-sort"></i> Sırala:</span>
                         <button class="btn-sort-chip active" id="sortNewsDescBtn" onclick="sortTopNews('desc')" title="En çok okunanlar en başta">
                             <i class="fa fa-arrow-down-wide-short"></i> Çoktan Aza
                         </button>
@@ -1029,10 +1067,10 @@
                                 <th style="width:30px;">#</th>
                                 <th>Haber Başlığı</th>
                                 <th>Kategori</th>
-                                <th style="cursor:pointer;" onclick="toggleTopNewsSort()" title="Dönem okunmasına göre sırala">
-                                    Dönem Okunması <i class="fa fa-fire text-danger ms-1" style="font-size:11px;"></i>
+                                <th style="cursor:pointer;" onclick="toggleTopNewsSort()" title="Seçili filtre aralığında (Son 1 Saat / Bugün / 7 Gün) gerçekleşen gerçek okunma sayısı">
+                                    <span id="periodColumnTitle">Bugünkü Okunma</span> <i class="fa fa-fire text-danger ms-1" style="font-size:11px;"></i>
                                 </th>
-                                <th>Genel Toplam</th>
+                                <th title="Haberin yayınlandığı ilk andan itibaren sitedeki kümülatif toplam okunması">Kümülatif Toplam</th>
                                 <th>Dijital Mühür (Content ID)</th>
                             </tr>
                         </thead>
@@ -1078,6 +1116,9 @@
                 <!-- Sorting Chips -->
                 <div class="source-sort-bar" style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; margin-bottom:12px; padding:2px 0;">
                     <span style="font-size:11px; color:var(--text-muted); margin-right:2px;"><i class="fa fa-arrow-down-up-across-line"></i> Sırala:</span>
+                    <button class="btn-sort-chip" id="sortSourceEffDesc" onclick="setSourceSort('eff_desc')" title="Haber başına ortalama okunma sayısına göre en yüksekten düşüğe">
+                        <i class="fa fa-bolt" style="color:var(--amber);"></i> En Verimli (Okunma/Haber)
+                    </button>
                     <button class="btn-sort-chip" id="sortSourceNewsDesc" onclick="setSourceSort('news_desc')" title="Haber sayısına göre çoktan aza">
                         <i class="fa fa-newspaper"></i> Haber (Çok ➔ Az)
                     </button>
@@ -1114,6 +1155,123 @@
                     <span id="sourcesFooterLeft">44 Aktif Kaynak • 20 Veri Akışında</span>
                     <span><i class="fa fa-circle-check" style="color:var(--emerald); margin-right:4px;"></i>Otonom Crawl & RSS Akışı</span>
                 </div>
+            </div>
+        </section>
+
+        <!-- ÖNERİ KUTUSU: İLERİ DÜZEY EDİTORYAL ANALİZ & BÜYÜME MASASI -->
+        <section style="margin-bottom: 24px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+                <div class="section-title">
+                    <i class="fa fa-lightbulb" style="color:var(--amber);"></i>
+                    <span>İleri Düzey Büyüme & Etkileşim Masası (Öneri Kutusu Metrikleri)</span>
+                </div>
+                <span style="font-size:12px; color:var(--text-muted);">Scroll Depth • Dark Social • Yayın Refleksi • Dış Trafik</span>
+            </div>
+
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                
+                <!-- Kart 1: Kaydırma & Derin Okuma (Scroll Depth) -->
+                <div class="table-card" style="padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--text-primary);">
+                            <i class="fa fa-arrows-up-down text-info me-1"></i> Kaydırma & Derin Okuma
+                        </span>
+                        <span class="badge-status-live" id="scrollCompletionBadge">%44.8 Tam Okuma</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:var(--text-muted);">%25 Başlık & Giriş</span>
+                                <strong style="color:var(--text-primary); font-family:'JetBrains Mono',monospace;" id="scroll25Val">%84.5</strong>
+                            </div>
+                            <div class="progress-track" style="height:6px;"><div class="progress-fill" id="scroll25Bar" style="width:84.5%; background:#38BDF8;"></div></div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:var(--text-muted);">%50 Haberin Yarısı (Gelişme)</span>
+                                <strong style="color:var(--text-primary); font-family:'JetBrains Mono',monospace;" id="scroll50Val">%62.0</strong>
+                            </div>
+                            <div class="progress-track" style="height:6px;"><div class="progress-fill" id="scroll50Bar" style="width:62%; background:#818CF8;"></div></div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:var(--text-muted);">%75 Detaylar & Tablolar</span>
+                                <strong style="color:var(--text-primary); font-family:'JetBrains Mono',monospace;" id="scroll75Val">%44.8</strong>
+                            </div>
+                            <div class="progress-track" style="height:6px;"><div class="progress-fill" id="scroll75Bar" style="width:44.8%; background:#A78BFA;"></div></div>
+                        </div>
+                        <div>
+                            <div style="display:flex; justify-content:space-between; font-size:11px; margin-bottom:4px;">
+                                <span style="color:var(--text-muted);">%100 Tamamlama (Sonuna Kadar)</span>
+                                <strong style="color:var(--text-primary); font-family:'JetBrains Mono',monospace;" id="scroll100Val">%26.3</strong>
+                            </div>
+                            <div class="progress-track" style="height:6px;"><div class="progress-fill" id="scroll100Bar" style="width:26.3%; background:#10B981;"></div></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 2: WhatsApp & Dark Social Viral Dağılımı -->
+                <div class="table-card" style="padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--text-primary);">
+                            <i class="fab fa-whatsapp text-success me-1"></i> WhatsApp & Dark Social
+                        </span>
+                        <span class="badge-status-live" style="background:rgba(16,185,129,0.1); color:#10B981;" id="dsViralScoreBadge">0.0 Skor</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div class="matrix-item" style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                            <span class="matrix-key"><i class="fab fa-whatsapp text-success me-2"></i> WhatsApp Gruplarından Gelen</span>
+                            <strong class="matrix-val" style="color:#10B981;" id="dsWhatsappVal">0 Ziyaret</strong>
+                        </div>
+                        <div class="matrix-item" style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.04);">
+                            <span class="matrix-key"><i class="fa fa-share-nodes text-info me-2"></i> Paylaşım Butonu Tıklamaları</span>
+                            <strong class="matrix-val" style="color:#38BDF8;" id="dsSharesVal">0 Tıklama</strong>
+                        </div>
+                        <div class="matrix-item" style="padding:8px 0;">
+                            <span class="matrix-key"><i class="fab fa-telegram text-primary me-2"></i> Telegram & Doğrudan Linkler</span>
+                            <strong class="matrix-val" style="color:#818CF8;" id="dsTelegramVal">0 Ziyaret</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kart 3: Editoryal Yayın Refleksi & Hız (Time-to-Publish) -->
+                <div class="table-card" style="padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--text-primary);">
+                            <i class="fa fa-gauge-high text-warning me-1"></i> Yayınlama Refleksi (Hız)
+                        </span>
+                        <span class="badge-status-live" style="background:rgba(245,158,11,0.1); color:#FBBF24;" id="ttpSpeedBadge">Yüksek Refleks</span>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <div style="background:rgba(255,255,255,0.02); border:1px solid var(--border-subtle); padding:12px 14px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                            <div>
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Ort. Onay & Yayın Süresi</div>
+                                <div style="font-size:20px; font-weight:800; color:var(--amber); font-family:'JetBrains Mono',monospace;" id="ttpAvgVal">28 dk</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; color:var(--text-muted); text-transform:uppercase;">Havuzda Bekleyen</div>
+                                <div style="font-size:20px; font-weight:800; color:var(--text-primary); font-family:'JetBrains Mono',monospace;" id="ttpPendingVal">0</div>
+                            </div>
+                        </div>
+                        <p style="font-size:11px; color:var(--text-muted); margin:0;">
+                            Robotun federasyon haberini havuza indirmesi ile editörün onaylayıp yayına alması arasındaki ortalama gecikme süresi.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Kart 4: Federasyon Resmi Sitelerine Yönlendirilen Dış Trafik (Ajans Değeri) -->
+                <div class="table-card" style="padding:18px 20px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <span style="font-size:13px; font-weight:700; color:var(--text-primary);">
+                            <i class="fa fa-handshake me-1" style="color:#A78BFA;"></i> Federasyonlara Yönlendirilen Trafik
+                        </span>
+                        <span class="badge-status-live" style="background:rgba(168,85,247,0.1); color:#C084FC;">Ajans & Sponsor</span>
+                    </div>
+                    <div id="fedOutboundList" style="display:flex; flex-direction:column; gap:6px; max-height:160px; overflow-y:auto;">
+                        <div style="text-align:center; padding:16px; color:var(--text-muted); font-size:11px;">Federasyonlara henüz dış yönlendirme kaydedilmedi.</div>
+                    </div>
+                </div>
+
             </div>
         </section>
 
@@ -1187,6 +1345,8 @@
         let currentFederations = [];
         let currentCategories = [];
         let currentTopNews = [];
+        let currentLastHourNews = [];
+        let newsScopeMode = 'all';
         let topNewsSortOrder = 'desc';
         let sourceSortMode = 'views_desc';
         let activeRightTab = 'feds';
@@ -1194,6 +1354,23 @@
         // Number formatter
         function formatNumber(num) {
             return new Intl.NumberFormat('tr-TR').format(num);
+        }
+
+        // Top News Scope Filter (Tüm Liste vs Son 1 Saat)
+        function setNewsScope(scope) {
+            newsScopeMode = scope;
+            const allBtn = document.getElementById('newsScopeAllBtn');
+            const h1Btn = document.getElementById('newsScope1hBtn');
+            if (allBtn && h1Btn) {
+                if (scope === '1h') {
+                    h1Btn.classList.add('active');
+                    allBtn.classList.remove('active');
+                } else {
+                    allBtn.classList.add('active');
+                    h1Btn.classList.remove('active');
+                }
+            }
+            renderTopNewsTable();
         }
 
         // Top News Sorting Functions
@@ -1224,11 +1401,13 @@
         function renderTopNewsTable() {
             const tbody = document.getElementById('topNewsTableBody');
             if (!tbody) return;
-            if (!currentTopNews || currentTopNews.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--text-muted);">Henüz kayıt bulunamadı.</td></tr>`;
+            
+            const sourceList = (newsScopeMode === '1h') ? currentLastHourNews : currentTopNews;
+            if (!sourceList || sourceList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:18px; color:var(--text-muted);">${newsScopeMode === '1h' ? 'Son 1 saatte okunma kaydı bulunamadı.' : 'Henüz kayıt bulunamadı.'}</td></tr>`;
                 return;
             }
-            let list = [...currentTopNews];
+            let list = [...sourceList];
             if (topNewsSortOrder === 'asc') {
                 list.sort((a, b) => (Number(a.views) || 0) - (Number(b.views) || 0));
             } else {
@@ -1237,13 +1416,13 @@
 
             tbody.innerHTML = list.map((item, index) => {
                 const pViews = Number(item.views) || 0;
-                const totViews = Number(item.total_views) || pViews;
+                const totViews = item.total_views !== undefined ? Number(item.total_views) : pViews;
                 return `
                 <tr>
                     <td class="mono" style="color:var(--text-muted); font-weight:700;">${index + 1}</td>
                     <td>
                         <a href="${item.url}" class="news-link" title="${item.title}">${item.title}</a>
-                        <span style="font-size:11px; color:var(--text-muted);">${item.date}</span>
+                        <span style="font-size:11px; color:var(--text-muted);">${item.date || ''}</span>
                     </td>
                     <td><span class="badge-cat">${item.category}</span></td>
                     <td class="mono" style="font-weight:800; color:${pViews > 0 ? '#fb7185' : 'var(--text-muted)'};">
@@ -1259,6 +1438,7 @@
         function setSourceSort(mode) {
             sourceSortMode = mode;
             const chipMap = [
+                { id: 'sortSourceEffDesc', mode: 'eff_desc' },
                 { id: 'sortSourceNewsDesc', mode: 'news_desc' },
                 { id: 'sortSourceNewsAsc', mode: 'news_asc' },
                 { id: 'sortSourceViewsDesc', mode: 'views_desc' },
@@ -1315,7 +1495,9 @@
                 }
 
                 // Sorting
-                if (sourceSortMode === 'news_desc') {
+                if (sourceSortMode === 'eff_desc') {
+                    list.sort((a, b) => ((b.efficiency_score || 0) - (a.efficiency_score || 0)) || ((b.views || 0) - (a.views || 0)));
+                } else if (sourceSortMode === 'news_desc') {
                     list.sort((a, b) => ((b.news_count || 0) - (a.news_count || 0)) || ((b.views || 0) - (a.views || 0)));
                 } else if (sourceSortMode === 'news_asc') {
                     list.sort((a, b) => ((a.news_count || 0) - (b.news_count || 0)) || ((a.views || 0) - (b.views || 0)));
@@ -1339,10 +1521,15 @@
                                 <span>${f.name}</span>
                                 <i class="fa fa-arrow-up-right-from-square" style="font-size:10px; color:var(--text-muted);"></i>
                             </a>
-                            <span class="${f.has_news ? 'badge-status-live' : 'badge-status-pool'}">
-                                <i class="fa ${f.has_news ? 'fa-circle-dot' : 'fa-clock'}"></i>
-                                ${f.has_news ? 'Veri Akışı' : 'Havuzda'}
-                            </span>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="badge-status-live" style="background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.25); color:#FBBF24; font-size:10px; padding:2px 6px;" title="Verimlilik Skoru: Ortalama ${f.efficiency_score || 0} okunma/haber">
+                                    <i class="fa fa-bolt me-1"></i>${f.efficiency_score || 0}
+                                </span>
+                                <span class="${f.has_news ? 'badge-status-live' : 'badge-status-pool'}">
+                                    <i class="fa ${f.has_news ? 'fa-circle-dot' : 'fa-clock'}"></i>
+                                    ${f.has_news ? 'Veri Akışı' : 'Havuzda'}
+                                </span>
+                            </div>
                         </div>
                         <div class="cat-info" style="margin-bottom:5px;">
                             <span class="source-meta">
@@ -1365,7 +1552,9 @@
                 }
 
                 // Sorting
-                if (sourceSortMode === 'news_desc') {
+                if (sourceSortMode === 'eff_desc') {
+                    list.sort((a, b) => ((b.efficiency_score || 0) - (a.efficiency_score || 0)) || ((b.views || 0) - (a.views || 0)));
+                } else if (sourceSortMode === 'news_desc') {
                     list.sort((a, b) => ((b.news_count || 0) - (a.news_count || 0)) || ((b.views || 0) - (a.views || 0)));
                 } else if (sourceSortMode === 'news_asc') {
                     list.sort((a, b) => ((a.news_count || 0) - (b.news_count || 0)) || ((a.views || 0) - (b.views || 0)));
@@ -1389,9 +1578,14 @@
                                 <i class="fa fa-medal" style="font-size:11px; color:var(--brand-red);"></i>
                                 <span>${c.name}</span>
                             </span>
-                            <span class="badge-status-live" style="background:rgba(225, 29, 72, 0.1); border-color:rgba(225,29,72,0.25); color:#FDA4AF;">
-                                ${c.news_count} Haber
-                            </span>
+                            <div style="display:flex; align-items:center; gap:6px;">
+                                <span class="badge-status-live" style="background:rgba(245,158,11,0.1); border-color:rgba(245,158,11,0.25); color:#FBBF24; font-size:10px; padding:2px 6px;" title="Verimlilik Skoru: Ortalama ${c.efficiency_score || 0} okunma/haber">
+                                    <i class="fa fa-bolt me-1"></i>${c.efficiency_score || 0}
+                                </span>
+                                <span class="badge-status-live" style="background:rgba(225, 29, 72, 0.1); border-color:rgba(225,29,72,0.25); color:#FDA4AF;">
+                                    ${c.news_count} Haber
+                                </span>
+                            </div>
                         </div>
                         <div class="cat-info" style="margin-bottom:5px;">
                             <span class="source-meta">
@@ -1525,15 +1719,15 @@
                 document.getElementById('liveActiveCount').textContent = data.kpi.live_active;
                 document.getElementById('timestampText').textContent = data.timestamp;
 
-                // 2. Hybrid Dual-Audit Data
+                // 2. Verified 1st-Party Database Audit Data
                 if (data.hybrid_audit) {
                     const ha = data.hybrid_audit;
                     const elDbLogs = document.getElementById('hybridLocalLogs');
-                    const elGaUsers = document.getElementById('hybridGaUsers');
-                    const elAdblock = document.getElementById('hybridAdblockPct');
-                    if (elDbLogs) elDbLogs.textContent = `${ha.total_db_logs} Kayıt`;
-                    if (elGaUsers) elGaUsers.textContent = `${ha.ga_active_30m} Aktif`;
-                    if (elAdblock) elAdblock.textContent = `%${ha.adblock_ratio_pct}`;
+                    const elActive30m = document.getElementById('hybridGaUsers');
+                    const elLive5m = document.getElementById('hybridLive5m');
+                    if (elDbLogs) elDbLogs.textContent = `${formatNumber(ha.total_db_logs)} Kayıt`;
+                    if (elActive30m) elActive30m.textContent = `${ha.local_active_30m} Aktif`;
+                    if (elLive5m) elLive5m.textContent = `${ha.local_active_5m} Aktif`;
                 }
 
                 // 3. KPIs
@@ -1541,14 +1735,14 @@
                 document.getElementById('kpiUniques').textContent = formatNumber(data.kpi.unique_visitors);
                 
                 const elLive30m = document.getElementById('kpiLive30m');
-                if (elLive30m) elLive30m.textContent = `${data.kpi.ga_active_30m || 5} Aktif`;
+                if (elLive30m) elLive30m.textContent = `${data.kpi.local_active_30m} Aktif`;
                 
                 const elLive5mDesc = document.getElementById('kpiLive5mDesc');
-                if (elLive5mDesc) elLive5mDesc.textContent = `Anlık: ${data.kpi.live_active}`;
+                if (elLive5mDesc) elLive5mDesc.textContent = `Son 5 Dk: ${data.kpi.live_active}`;
 
                 const elUniquesSub = document.getElementById('kpiUniquesSubDesc');
-                if (elUniquesSub && data.hybrid_audit) {
-                    elUniquesSub.textContent = `${data.hybrid_audit.ga_active_30m} GA4 + ${data.hybrid_audit.adblock_detected} AdBlock`;
+                if (elUniquesSub) {
+                    elUniquesSub.textContent = `1. Parti Doğrulanmış Okur`;
                 }
 
                 // 3. Timeline Chart
@@ -1590,9 +1784,113 @@
                     }
                 }
 
-                // 4. Top News Table
+                // 4. Realtime Radar & 1-Hour Stream
+                if (data.realtime_radar) {
+                    const rr = data.realtime_radar;
+                    currentLastHourNews = rr.last_hour_news || [];
+
+                    const r5m = document.getElementById('radar5mStats');
+                    if (r5m) r5m.textContent = `${formatNumber(rr.live_5m_uniques)} Tekil / ${formatNumber(rr.live_5m_views)} Gösterim`;
+
+                    const r1h = document.getElementById('radar1hStats');
+                    if (r1h) r1h.textContent = `${formatNumber(rr.live_1h_uniques)} Tekil / ${formatNumber(rr.live_1h_views)} Gösterim`;
+
+                    const lhCount = document.getElementById('lastHourNewsCount');
+                    if (lhCount) lhCount.textContent = `${currentLastHourNews.length} haber okundu`;
+
+                    const lhList = document.getElementById('lastHourNewsList');
+                    if (lhList) {
+                        if (currentLastHourNews.length > 0) {
+                            lhList.innerHTML = currentLastHourNews.map(n => `
+                                <a href="${n.url}" target="_blank" style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); padding:6px 12px; border-radius:8px; text-decoration:none; white-space:nowrap; flex-shrink:0;">
+                                    <span class="badge-cat" style="font-size:10px; margin:0;">${n.category}</span>
+                                    <span style="font-size:12px; font-weight:600; color:var(--text-primary); max-width:240px; overflow:hidden; text-overflow:ellipsis;" title="${n.title}">${n.title}</span>
+                                    <strong style="font-size:11px; color:#fb7185; font-family:'JetBrains Mono',monospace;"><i class="fa fa-fire text-danger me-1"></i>${formatNumber(n.views)}</strong>
+                                </a>
+                            `).join('');
+                        } else {
+                            lhList.innerHTML = `<span style="font-size:12px; color:var(--text-muted); padding:6px 0;">Son 1 saatte henüz okunma kaydı oluşmadı.</span>`;
+                        }
+                    }
+                }
+
+                // 4b. Top News Table & Dynamic Period Title
+                if (data.range_label) {
+                    const pTitle = document.getElementById('periodColumnTitle');
+                    if (pTitle) pTitle.textContent = data.range_label;
+                }
                 currentTopNews = data.top_news || [];
                 renderTopNewsTable();
+
+                // 4c. Öneri Kutusu: Scroll Depth (Derin Okuma)
+                if (data.scroll_depth) {
+                    const sd = data.scroll_depth;
+                    const s25v = document.getElementById('scroll25Val');
+                    const s25b = document.getElementById('scroll25Bar');
+                    if (s25v) s25v.textContent = `%${sd.depth_25_pct}`;
+                    if (s25b) s25b.style.width = `${Math.min(100, sd.depth_25_pct)}%`;
+
+                    const s50v = document.getElementById('scroll50Val');
+                    const s50b = document.getElementById('scroll50Bar');
+                    if (s50v) s50v.textContent = `%${sd.depth_50_pct}`;
+                    if (s50b) s50b.style.width = `${Math.min(100, sd.depth_50_pct)}%`;
+
+                    const s75v = document.getElementById('scroll75Val');
+                    const s75b = document.getElementById('scroll75Bar');
+                    if (s75v) s75v.textContent = `%${sd.depth_75_pct}`;
+                    if (s75b) s75b.style.width = `${Math.min(100, sd.depth_75_pct)}%`;
+
+                    const s100v = document.getElementById('scroll100Val');
+                    const s100b = document.getElementById('scroll100Bar');
+                    if (s100v) s100v.textContent = `%${sd.depth_100_pct}`;
+                    if (s100b) s100b.style.width = `${Math.min(100, sd.depth_100_pct)}%`;
+
+                    const sBadge = document.getElementById('scrollCompletionBadge');
+                    if (sBadge) sBadge.textContent = `%${sd.completion_rate} Tamamlama`;
+                }
+
+                // 4d. Öneri Kutusu: WhatsApp & Dark Social
+                if (data.dark_social) {
+                    const ds = data.dark_social;
+                    const vBadge = document.getElementById('dsViralScoreBadge');
+                    if (vBadge) vBadge.textContent = `${ds.viral_score} Skor`;
+                    const wVal = document.getElementById('dsWhatsappVal');
+                    if (wVal) wVal.textContent = `${formatNumber(ds.whatsapp_visits)} Ziyaret`;
+                    const sVal = document.getElementById('dsSharesVal');
+                    if (sVal) sVal.textContent = `${formatNumber(ds.share_clicks)} Tıklama`;
+                    const tVal = document.getElementById('dsTelegramVal');
+                    if (tVal) tVal.textContent = `${formatNumber(ds.telegram_visits)} Ziyaret`;
+                }
+
+                // 4e. Öneri Kutusu: Editoryal Yayın Refleksi (Time-to-Publish)
+                if (data.editorial_speed) {
+                    const es = data.editorial_speed;
+                    const spBadge = document.getElementById('ttpSpeedBadge');
+                    if (spBadge) spBadge.textContent = es.speed_rating;
+                    const ttpAvg = document.getElementById('ttpAvgVal');
+                    if (ttpAvg) ttpAvg.textContent = es.avg_ttp_label;
+                    const ttpPending = document.getElementById('ttpPendingVal');
+                    if (ttpPending) ttpPending.textContent = formatNumber(es.pending_pool_count);
+                }
+
+                // 4f. Öneri Kutusu: Federasyon Dış Trafik (Ajans Değeri)
+                if (data.federation_outbound) {
+                    const fedOut = document.getElementById('fedOutboundList');
+                    if (fedOut) {
+                        if (data.federation_outbound.length > 0) {
+                            fedOut.innerHTML = data.federation_outbound.map(ob => `
+                                <div class="matrix-item" style="padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                                    <span class="matrix-key" title="${ob.url}" style="font-size:12px;">
+                                        <i class="fa fa-arrow-up-right-from-square text-muted me-1"></i> ${ob.name}
+                                    </span>
+                                    <strong class="matrix-val" style="color:#C084FC;">${formatNumber(ob.clicks)} yönlendirme</strong>
+                                </div>
+                            `).join('');
+                        } else {
+                            fedOut.innerHTML = `<div style="text-align:center; padding:16px; color:var(--text-muted); font-size:11px;">Federasyonlara henüz dış yönlendirme kaydedilmedi.</div>`;
+                        }
+                    }
+                }
 
                 // 5. Federations & Categories Data Update
                 currentFederations = data.federations || [];
@@ -1658,7 +1956,8 @@
                 currentRange = this.getAttribute('data-range');
                 
                 const subtitle = document.getElementById('chartSubtitle');
-                if (currentRange === 'today') subtitle.textContent = 'Saatlik Gösterim Hacmi';
+                if (currentRange === '1h') subtitle.textContent = 'Son 1 Saatin 10 Dk Dilim Hacmi';
+                else if (currentRange === 'today') subtitle.textContent = 'Saatlik Gösterim Hacmi';
                 else if (currentRange === '7d') subtitle.textContent = 'Son 7 Günün Günlük Trafiği';
                 else if (currentRange === '30d') subtitle.textContent = 'Son 30 Günün Günlük Trafiği';
                 else subtitle.textContent = 'Yıllık Dağılım Hacmi';

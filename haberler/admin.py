@@ -806,8 +806,91 @@ class BekleyenYetkiliHaberiAdmin(ModelAdmin):
         """Prevent manual creation of pending yetkili news in admin"""
         return False
 
+class HaberDurumuFilter(admin.SimpleListFilter):
+    title = 'Yayın / Onay Durumu'
+    parameter_name = 'durum'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('tumu', '📋 Tümü'),
+            ('bekleyen', '⏳ Onay Bekleyenler'),
+            ('onaylanan', '✅ Onaylananlar'),
+            ('reddedilen', '❌ Reddedilenler'),
+        ]
+
+    def queryset(self, request, queryset):
+        val = self.value()
+        if val == 'bekleyen':
+            return queryset.filter(onaylandi=False, reddedildi=False)
+        elif val == 'onaylanan':
+            return queryset.filter(onaylandi=True)
+        elif val == 'reddedilen':
+            return queryset.filter(reddedildi=True)
+        elif val == 'tumu':
+            return queryset
+        return queryset
+
+class SkorAraligiFilter(admin.SimpleListFilter):
+    title = 'Haber Değeri'
+    parameter_name = 'skor_seviyesi'
+
+    def lookups(self, request, model_admin):
+        return [
+            ('yildizli', '⭐ Branşında İlk 3 (Yıldızlı)'),
+            ('cok_yuksek', '🔥 Çok Yüksek (80 - 100 Puan)'),
+            ('yuksek', '⚡ Yüksek (65 - 79 Puan)'),
+            ('orta', '💤 Orta (50 - 64 Puan)'),
+            ('dusuk', '⏳ Düşük / Ham (< 50 Puan)'),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yildizli':
+            starred_ids = model_admin.get_starred_ids()
+            return queryset.filter(id__in=starred_ids)
+        elif self.value() == 'cok_yuksek':
+            return queryset.filter(haber_degeri_skoru__gte=80)
+        elif self.value() == 'yuksek':
+            return queryset.filter(haber_degeri_skoru__gte=65, haber_degeri_skoru__lt=80)
+        elif self.value() == 'orta':
+            return queryset.filter(haber_degeri_skoru__gte=50, haber_degeri_skoru__lt=65)
+        elif self.value() == 'dusuk':
+            return queryset.filter(models.Q(haber_degeri_skoru__lt=50) | models.Q(haber_degeri_skoru__isnull=True))
+        return queryset
+
 @admin.register(BekleyenHaber)
 class BekleyenHaberAdmin(ModelAdmin):
+    ordering = ['-haber_degeri_skoru', '-olusturma_tarihi']
+
+    def get_starred_ids(self):
+        """Her federasyon/branş için skoru en yüksek ilk 3 bekleyen haberin ID'lerini döndürür"""
+        from .models import BekleyenHaber
+        from django.db.models import Window, F
+        from django.db.models.functions import RowNumber
+
+        try:
+            top_ids = BekleyenHaber.objects.filter(
+                onaylandi=False,
+                reddedildi=False,
+                haber_degeri_skoru__gt=0
+            ).annotate(
+                row_num=Window(
+                    expression=RowNumber(),
+                    partition_by=[F('federasyon_website_id')],
+                    order_by=[F('haber_degeri_skoru').desc(), F('id').desc()]
+                )
+            ).filter(row_num__lte=3).values_list('id', flat=True)
+            return set(top_ids)
+        except Exception:
+            top_ids = set()
+            fed_ids = BekleyenHaber.objects.filter(
+                onaylandi=False, reddedildi=False, haber_degeri_skoru__gt=0
+            ).values_list('federasyon_website_id', flat=True).distinct()
+            for fid in fed_ids:
+                ids = BekleyenHaber.objects.filter(
+                    federasyon_website_id=fid, onaylandi=False, reddedildi=False, haber_degeri_skoru__gt=0
+                ).order_by('-haber_degeri_skoru', '-id').values_list('id', flat=True)[:3]
+                top_ids.update(ids)
+            return top_ids
 
     def studyo_link(self, obj):
         from django.urls import reverse
@@ -822,37 +905,69 @@ class BekleyenHaberAdmin(ModelAdmin):
 
     def skor_badge(self, obj):
         score = obj.haber_degeri_skoru or 0
-        if score >= 75:
+        starred_ids = getattr(self, '_cached_starred_ids', None)
+        if starred_ids is None:
+            starred_ids = self.get_starred_ids()
+            self._cached_starred_ids = starred_ids
+            
+        is_starred = obj.id in starred_ids
+
+        if is_starred:
+            color = "#854d0e"
+            bg = "#fef08a"
+            border = "border:1px solid #eab308;"
+            icon = "⭐"
+        elif score >= 75:
             color = "#15803d"
             bg = "#dcfce7"
+            border = "border:1px solid #86efac;"
             icon = "🔥"
         elif score >= 50:
             color = "#b45309"
             bg = "#fef3c7"
+            border = "border:1px solid #fde68a;"
             icon = "⚡"
         elif score > 0:
             color = "#475569"
             bg = "#f1f5f9"
+            border = "border:1px solid #cbd5e1;"
             icon = "💤"
         else:
             color = "#64748b"
             bg = "#e2e8f0"
+            border = "border:1px solid #cbd5e1;"
             icon = "⏳"
             score = "Ham"
 
+        star_tag = ' <span style="font-size:10px; background:#eab308; color:#fff; padding:1px 5px; border-radius:8px; font-weight:800; margin-left:2px;">TOP 3</span>' if is_starred else ''
         return format_html(
-            '<span style="background:{}; color:{}; padding:4px 10px; border-radius:14px; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap;">'
-            '{} {}'
+            '<span style="background:{}; color:{}; {}; padding:4px 10px; border-radius:14px; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,0.05);">'
+            '{} {}{}'
             '</span>',
-            bg, color, icon, score
+            bg, color, border, icon, score, mark_safe(star_tag)
         )
     skor_badge.short_description = "Haber Değeri"
+    skor_badge.admin_order_field = 'haber_degeri_skoru'
 
     def baslik_temiz(self, obj):
         t = obj.ozgun_baslik if obj.ozgun_baslik else obj.baslik
         t = ' '.join(t.split())
         if len(t) > 75:
             t = t[:75] + '...'
+
+        starred_ids = getattr(self, '_cached_starred_ids', None)
+        if starred_ids is None:
+            starred_ids = self.get_starred_ids()
+            self._cached_starred_ids = starred_ids
+
+        if obj.id in starred_ids:
+            return format_html(
+                '<span title="⭐ Branşın En Yüksek Skorlu İlk 3 Haberinden Biri" style="display:inline-flex; align-items:center; gap:4px;">'
+                '<span style="color:#eab308; font-size:15px; text-shadow:0 0 4px rgba(234,179,8,0.5);">⭐</span> '
+                '<span style="font-weight:600; color:#0f172a;">{}</span>'
+                '</span>',
+                t
+            )
         return t
     baslik_temiz.short_description = "Başlık"
 
@@ -951,7 +1066,7 @@ class BekleyenHaberAdmin(ModelAdmin):
             
         return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
     list_display = ['studyo_link', 'skor_badge', 'baslik_temiz', 'federasyon_website', 'kategori', 'olusturma_tarihi', 'onay_durumu']
-    list_filter = ['federasyon_website', 'kategori', 'onaylandi', 'reddedildi', 'olusturma_tarihi']
+    list_filter = [HaberDurumuFilter, SkorAraligiFilter, 'federasyon_website', 'kategori', 'olusturma_tarihi']
     search_fields = ['baslik', 'icerik', 'kaynak_url']
     readonly_fields = ['canli_kart_onizleme', 'olusturma_tarihi', 'onay_tarihi', 'red_tarihi', 'onaylayan', 'gorsel_onizleme', 'kaynak_url']
     actions = ['approve_selected', 'reject_selected', 'delete_selected_items']
@@ -1026,19 +1141,16 @@ class BekleyenHaberAdmin(ModelAdmin):
         
         def run_scrape():
             try:
-                # 1. Google Sheets federasyon ve sosyal medya senkronizasyonu yap
-                call_command('import_sheets_news')
-                # 2. Resmi web sayfalarından haberleri çek
-                call_command('diger_federasyon_haberleri_cek', limit=5)
+                call_command('crawl_federasyonlar_ai', limit=3)
             except Exception as e:
-                print(f"Async scrape error: {e}")
+                print(f"Async Crawl4AI error: {e}")
                 
         threading.Thread(target=run_scrape).start()
         
         self.message_user(
             request, 
-            "Haber ve Federasyon tarama işlemi arka planda başlatıldı. Veriler birkaç dakika içinde güncellenecektir.", 
-            level='info'
+            "🔄 Federasyon sitelerini tarama işlemi akıllı tarayıcı (Crawl4AI) ile arka planda başlatıldı! Yeni haberler birkaç dakika içinde havuza eklenecektir.", 
+            level=messages.INFO
         )
         return redirect('admin:haberler_bekleyenhaber_changelist')
 
@@ -1101,7 +1213,7 @@ class BekleyenHaberAdmin(ModelAdmin):
         if obj.onaylandi:
             return format_html(
                 '<span style="background:#dcfce7; color:#15803d; border:1px solid #86efac; padding:4px 10px; border-radius:12px; font-weight:700; font-size:12px; display:inline-flex; align-items:center; gap:4px; white-space:nowrap; box-shadow:0 1px 2px rgba(0,0,0,0.05);">'
-                '✅ Yayında / Onaylandı'
+                '✅ Onaylandı'
                 '</span>'
             )
         elif obj.reddedildi:
@@ -1117,8 +1229,16 @@ class BekleyenHaberAdmin(ModelAdmin):
                 '</span>'
             )
     onay_durumu.short_description = "Durum"
+    onay_durumu.admin_order_field = 'onaylandi'
 
     def changelist_view(self, request, extra_context=None):
+        from django.http import HttpResponseRedirect
+        if 'tab' in request.GET:
+            qp = request.GET.copy()
+            tab_val = qp.pop('tab')[0]
+            qp['durum'] = tab_val
+            return HttpResponseRedirect(request.path + '?' + qp.urlencode())
+
         extra_context = extra_context or {}
         from .models import BekleyenHaber
         total_bekleyen = BekleyenHaber.objects.filter(onaylandi=False, reddedildi=False).count()
@@ -1132,26 +1252,40 @@ class BekleyenHaberAdmin(ModelAdmin):
             'reddedilen': total_reddedilen,
             'tumu': total_tumu
         }
-        current_tab = request.GET.get('tab', 'bekleyen')
-        if request.GET.get('onaylandi__exact') == '1':
-            current_tab = 'onaylanan'
-        elif request.GET.get('reddedildi__exact') == '1':
-            current_tab = 'reddedilen'
-        extra_context['current_tab'] = current_tab
+
+        # Aktif sekme belirleme
+        current_durum = request.GET.get('durum', 'tumu')
+        if current_durum not in ['tumu', 'bekleyen', 'onaylanan', 'reddedilen']:
+            current_durum = 'tumu'
+        extra_context['current_tab'] = current_durum
+
+        # Diğer arama/filtre/sıralama parametrelerini koruyan dinamik sekme linkleri
+        base_params = request.GET.copy()
+        base_params.pop('p', None)
+        base_params.pop('e', None)
+
+        tab_urls = {}
+        for t in ['tumu', 'bekleyen', 'onaylanan', 'reddedilen']:
+            p = base_params.copy()
+            p['durum'] = t
+            tab_urls[t] = '?' + p.urlencode()
+
+        extra_context['tab_urls'] = tab_urls
+        
+        # Yıldızlı ilk 3 haberleri cache'le
+        self._cached_starred_ids = self.get_starred_ids()
+        
         return super().changelist_view(request, extra_context=extra_context)
     
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        tab = request.GET.get('tab')
-        if tab == 'onaylanan' or request.GET.get('onaylandi__exact') == '1':
-            return qs.filter(onaylandi=True)
-        elif tab == 'reddedilen' or request.GET.get('reddedildi__exact') == '1':
-            return qs.filter(reddedildi=True)
-        elif tab == 'tumu':
-            return qs
-        elif not request.GET.get('onaylandi__exact') and not request.GET.get('reddedildi__exact'):
-            # Varsayılan: onay bekleyenler
+        durum = request.GET.get('durum')
+        if durum == 'bekleyen':
             return qs.filter(onaylandi=False, reddedildi=False)
+        elif durum == 'onaylanan':
+            return qs.filter(onaylandi=True)
+        elif durum == 'reddedilen':
+            return qs.filter(reddedildi=True)
         return qs
     
     fieldsets = (
