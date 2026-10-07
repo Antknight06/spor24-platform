@@ -1091,6 +1091,39 @@ class BekleyenHaberAdmin(ModelAdmin):
             
         return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
 
+    def foto_yenile(self, request, object_id):
+        from django.shortcuts import get_object_or_404
+        from .models import BekleyenHaber
+        from .ai_news_engine import extract_article_image_direct
+        from .services.news_scraper import NewsScrapingService
+        from .services.watermark import watermark_news_file
+        
+        bekleyen = get_object_or_404(BekleyenHaber, id=object_id)
+        if not bekleyen.kaynak_url:
+            self.message_user(request, "Haberin kaynak URL'si bulunamadı.", level=messages.ERROR)
+            return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+            
+        real_img = extract_article_image_direct(bekleyen.kaynak_url)
+        if not real_img:
+            self.message_user(request, "Kaynak web sayfasında yeni bir görsel tespit edilemedi.", level=messages.WARNING)
+            return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+            
+        try:
+            ns = NewsScrapingService()
+            downloaded = ns.download_and_process_image_fit(real_img, bekleyen.baslik, target_size=(1200, 675))
+            if downloaded:
+                bekleyen.resim.save(downloaded.name, downloaded, save=False)
+                bekleyen.kaynak_resim_url = real_img
+                bekleyen.save()
+                watermark_news_file(bekleyen.resim.path)
+                self.message_user(request, "📸 Haberin gerçek aksiyon fotoğrafı kaynak sayfadan başarıyla çekildi, 1200x675 formatlandı ve SPOR24 filigranı basıldı!", level=messages.SUCCESS)
+            else:
+                self.message_user(request, "Görsel indirilemedi.", level=messages.ERROR)
+        except Exception as e:
+            self.message_user(request, f"Görsel güncelleme hatası: {e}", level=messages.ERROR)
+            
+        return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+
     def gorsel_durumu(self, obj):
         if obj.resim:
             try:
@@ -1154,6 +1187,7 @@ class BekleyenHaberAdmin(ModelAdmin):
             path('<int:object_id>/studyo/', self.admin_site.admin_view(self.studyo_view), name='haberler_bekleyenhaber_studyo'),
             path('<int:object_id>/studyo-kaydet/', self.admin_site.admin_view(self.studyo_kaydet), name='haberler_bekleyenhaber_studyo_kaydet'),
             path('<int:object_id>/ai-calistir/', self.admin_site.admin_view(self.ai_calistir), name='haberler_bekleyenhaber_ai_calistir'),
+            path('<int:object_id>/foto-yenile/', self.admin_site.admin_view(self.foto_yenile), name='haberler_bekleyenhaber_foto_yenile'),
             path('toplu-ai-ozgunlestir/', self.admin_site.admin_view(self.toplu_ai_ozgunlestir_trigger), name='haberler_bekleyenhaber_toplu_ai'),
             path('trigger-scrape/', self.admin_site.admin_view(self.trigger_scrape), name='haberler_bekleyenhaber_trigger_scrape'),
             path('scraper-health/', self.admin_site.admin_view(self.scraper_health), name='scraper_health'),

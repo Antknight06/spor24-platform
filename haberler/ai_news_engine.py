@@ -64,7 +64,9 @@ BANNED_IMAGE_TOKENS = [
     'logo', 'icon', 'banner', 'avatar', 'spacer', 'blank', 'pixel',
     'resim_yok', 'resimyok', 'no_image', 'no-image', 'noimg',
     'placeholder', 'default_image', 'default.jpg', 'default.png',
-    'yok.jpg', 'yok.png', 'gecici', 'dummy', 'flag'
+    'yok.jpg', 'yok.png', 'gecici', 'dummy', 'flag',
+    'vodafone', 'sms1', 'axa1', 'arabica', 'uzmanposta', 'tosfed.png',
+    'kirmizi-tvf', 'siyah-beyaz-tvf', 'header', 'footer', '67300', '67369'
 ]
 
 def extract_article_image_direct(url):
