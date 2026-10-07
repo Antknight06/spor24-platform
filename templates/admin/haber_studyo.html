@@ -375,9 +375,20 @@
             <button type="submit" form="studio-form" name="action" value="save" class="btn-action btn-save">
                 💾 Taslağı Kaydet
             </button>
+            {% if not bekleyen.reddedildi and not bekleyen.onaylandi %}
+            <button type="submit" form="studio-form" name="action" value="reject" class="btn-action btn-reject" formnovalidate onclick="return confirm('Bu haberi reddetmek ve yayına almamak istediğinize emin misiniz?');">
+                ❌ Haberi Reddet
+            </button>
+            {% elif bekleyen.reddedildi %}
+            <button type="submit" form="studio-form" name="action" value="reopen" class="btn-action" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;" formnovalidate onclick="return confirm('Bu haberi yeniden onay bekleyen havuzuna almak istiyor musunuz?');">
+                ♻️ Reddi Kaldır (Tekrar Havuza Al)
+            </button>
+            {% endif %}
+            {% if not bekleyen.onaylandi %}
             <button type="submit" form="studio-form" name="action" value="publish" class="btn-action btn-publish">
                 🚀 Canlı Yayına Al
             </button>
+            {% endif %}
         </div>
     </div>
 
@@ -512,13 +523,26 @@
                         </span>
                     </div>
 
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0;">
-                        <button type="submit" name="action" value="save" class="btn-action btn-save">
-                            💾 Taslağı Kaydet
-                        </button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:15px; padding-top:15px; border-top:1px solid #e2e8f0; flex-wrap:wrap; gap:10px;">
+                        <div style="display:flex; gap:10px; align-items:center;">
+                            <button type="submit" name="action" value="save" class="btn-action btn-save">
+                                💾 Taslağı Kaydet
+                            </button>
+                            {% if not bekleyen.reddedildi and not bekleyen.onaylandi %}
+                            <button type="submit" name="action" value="reject" class="btn-action btn-reject" formnovalidate onclick="return confirm('Bu haberi reddetmek ve yayına almamak istediğinize emin misiniz?');">
+                                ❌ Haberi Reddet (Kabul Etme)
+                            </button>
+                            {% elif bekleyen.reddedildi %}
+                            <button type="submit" name="action" value="reopen" class="btn-action" style="background:#fef3c7; color:#b45309; border:1px solid #fde68a;" formnovalidate onclick="return confirm('Bu haberi yeniden onay bekleyen havuzuna almak istiyor musunuz?');">
+                                ♻️ Reddi Kaldır (Tekrar Havuza Al)
+                            </button>
+                            {% endif %}
+                        </div>
+                        {% if not bekleyen.onaylandi %}
                         <button type="submit" name="action" value="publish" class="btn-action btn-publish" style="font-size:14px; padding:12px 24px;">
                             🚀 Özgün Haliyle Canlı Yayına Al
                         </button>
+                        {% endif %}
                     </div>
                 </form>
             </div>

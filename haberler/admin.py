@@ -1006,7 +1006,32 @@ class BekleyenHaberAdmin(ModelAdmin):
         
         bekleyen = get_object_or_404(BekleyenHaber, id=object_id)
         action = request.POST.get('action', 'save')
-        
+
+        if action == 'reject':
+            try:
+                if not bekleyen.reddedildi and not bekleyen.onaylandi:
+                    bekleyen.reject(request.user)
+                    self.message_user(request, f"❌ #{bekleyen.id} numaralı haber başarıyla reddedildi ve listeden çıkarıldı.", level=messages.WARNING)
+                else:
+                    self.message_user(request, f"ℹ️ Bu haber zaten işlenmiş durumda (Durum: {'Onaylandı' if bekleyen.onaylandi else 'Reddedildi'}).", level=messages.INFO)
+                return redirect('admin:haberler_bekleyenhaber_changelist')
+            except Exception as e:
+                self.message_user(request, f"Reddetme hatası: {str(e)}", level=messages.ERROR)
+                return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+
+        elif action == 'reopen':
+            try:
+                bekleyen.reddedildi = False
+                bekleyen.red_tarihi = None
+                bekleyen.onaylandi = False
+                bekleyen.onay_tarihi = None
+                bekleyen.save()
+                self.message_user(request, f"♻️ #{bekleyen.id} numaralı haber yeniden onay bekleyen havuzuna alındı.", level=messages.SUCCESS)
+                return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+            except Exception as e:
+                self.message_user(request, f"Havuza alma hatası: {str(e)}", level=messages.ERROR)
+                return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
+
         bekleyen.ozgun_baslik = request.POST.get('ozgun_baslik', '').strip()
         bekleyen.ozgun_ozet = request.POST.get('ozgun_ozet', '').strip()
         bekleyen.ozgun_icerik = request.POST.get('ozgun_icerik', '').strip()
@@ -1274,10 +1299,10 @@ class BekleyenHaberAdmin(ModelAdmin):
             'tumu': total_tumu
         }
 
-        # Aktif sekme belirleme
-        current_durum = request.GET.get('durum', 'tumu')
+        # Aktif sekme belirleme (Varsayılan: Onay Bekleyenler)
+        current_durum = request.GET.get('durum', 'bekleyen')
         if current_durum not in ['tumu', 'bekleyen', 'onaylanan', 'reddedilen']:
-            current_durum = 'tumu'
+            current_durum = 'bekleyen'
         extra_context['current_tab'] = current_durum
 
         # Diğer arama/filtre/sıralama parametrelerini koruyan dinamik sekme linkleri
@@ -1286,7 +1311,7 @@ class BekleyenHaberAdmin(ModelAdmin):
         base_params.pop('e', None)
 
         tab_urls = {}
-        for t in ['tumu', 'bekleyen', 'onaylanan', 'reddedilen']:
+        for t in ['bekleyen', 'onaylanan', 'reddedilen', 'tumu']:
             p = base_params.copy()
             p['durum'] = t
             tab_urls[t] = '?' + p.urlencode()
@@ -1301,13 +1326,15 @@ class BekleyenHaberAdmin(ModelAdmin):
     def get_queryset(self, request):
         qs = super().get_queryset(request)
         durum = request.GET.get('durum')
-        if durum == 'bekleyen':
-            return qs.filter(onaylandi=False, reddedildi=False)
+        if durum == 'tumu':
+            return qs
         elif durum == 'onaylanan':
             return qs.filter(onaylandi=True)
         elif durum == 'reddedilen':
             return qs.filter(reddedildi=True)
-        return qs
+        else:
+            # Varsayılan olarak sadece işlem bekleyenleri göster (yayındaki veya reddedilenler karışmaz)
+            return qs.filter(onaylandi=False, reddedildi=False)
     
     fieldsets = (
         ('Haber Bilgileri & Görsel', {

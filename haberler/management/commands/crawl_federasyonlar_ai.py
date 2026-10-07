@@ -66,7 +66,8 @@ BANNED_TITLE_TOKENS = [
     'divan tutanağı', 'olağan genel kurul', 'olağanüstü genel kurul', 'seçim duyurusu',
     'delege listesi', 'rehberi', 'kılavuzu', 'eğitim köşesi', 'denklik işlemleri',
     'sponsorluk', 'satın alma', 'ihale',
-    'hakem el kitabı', 'hakem bilgi formu', 'telefon ve e-posta', 'sosyal medya hesapları'
+    'hakem el kitabı', 'hakem bilgi formu', 'telefon ve e-posta', 'sosyal medya hesapları',
+    'yağlı güreş unsurları', 'millilik belgesi', 'askerlik tehir', 'çocuk koruma', 'lig maçları', 'fikstür'
 ]
 
 BANNED_IMAGE_TOKENS = [
@@ -134,6 +135,51 @@ def extract_date_from_text(text):
 
     return None
 
+def is_duplicate_article(url: str, title: str) -> bool:
+    """
+    Gelişmiş Mükerrer Kontrolü:
+    Haberin hem 'Haber' (canlı yayında) hem de 'BekleyenHaber' (onay havuzunda)
+    mevcut olup olmadığını URL ve Başlık varyasyonlarıyla kontrol eder.
+    Zaten varsa True döner ve içeri alınmasını engeller.
+    """
+    if not title or len(title.strip()) < 5:
+        return True
+
+    title_clean = title.strip()
+
+    # 1. Tam veya normalize URL kontrolü
+    if url:
+        norm_u = url.strip().rstrip('/')
+        url_variants = [url, norm_u, norm_u + '/', norm_u.replace('https://', 'http://'), norm_u.replace('http://', 'https://')]
+        if Haber.objects.filter(kaynak_url__in=url_variants).exists():
+            return True
+        if BekleyenHaber.objects.filter(kaynak_url__in=url_variants).exists():
+            return True
+
+    # 2. Birebir Başlık kontrolü
+    if Haber.objects.filter(baslik__iexact=title_clean).exists():
+        return True
+    if BekleyenHaber.objects.filter(baslik__iexact=title_clean).exists():
+        return True
+
+    # 3. Temiz Alfanümerik Başlık Kontrolü (Noktalama ve boşluk farklarını tolere eder)
+    simple_t = re.sub(r'[^\w\s]', '', title_clean.lower())
+    simple_t = ' '.join(simple_t.split())
+    if len(simple_t) >= 15:
+        # Yayındaki son haberlerde ara
+        for ht in Haber.objects.order_by('-id')[:250].values_list('baslik', flat=True):
+            clean_ht = ' '.join(re.sub(r'[^\w\s]', '', ht.lower()).split())
+            if simple_t == clean_ht:
+                return True
+
+        # Bekleyen havuzdaki haberlerde ara
+        for pt in BekleyenHaber.objects.filter(reddedildi=False).order_by('-id')[:250].values_list('baslik', flat=True):
+            clean_pt = ' '.join(re.sub(r'[^\w\s]', '', pt.lower()).split())
+            if simple_t == clean_pt:
+                return True
+
+    return False
+
 class Command(BaseCommand):
     help = "Crawl4AI Powered Intelligent Federation News Scraper with Balanced Ingestion"
 
@@ -194,7 +240,7 @@ class Command(BaseCommand):
                 if not url or not title:
                     continue
                 
-                if BekleyenHaber.objects.filter(kaynak_url=url).exists() or Haber.objects.filter(kaynak_url=url).exists():
+                if is_duplicate_article(url, title):
                     continue
                 
                 # Image
@@ -250,27 +296,44 @@ class Command(BaseCommand):
             return 0
 
     async def crawl_federation(self, crawler, fed, limit=3):
-        # 1. Fast-path for RSS Feeds
+        # 1. Hızlı Yol: RSS / Feed Destekleyen Federasyonlar
         feed_url = fed.haberler_url.lower()
         if '.rss' in feed_url or '/feed' in feed_url or 'rss' in feed_url:
             self.crawl_rss_feed(fed, limit)
             return
 
-        self.stdout.write(f"\n🌐 [{fed.ad}] Scanning: {fed.haberler_url}")
+        self.stdout.write(f"\n🌐 [{fed.ad}] Hibrit Tarama: {fed.haberler_url}")
+
+        # =========================================================================
+        # KADEME 1 (TIER 1): Ultra Hızlı Hafif HTTP + Trafilatura + BeautifulSoup
+        # Headless tarayıcı açmadan doğrudan HTTP üzerinden 1-2 saniyede tarar
+        # =========================================================================
+        tier1_success, tier1_count = self.crawl_federation_tier1_http(fed, limit)
+        if tier1_success and tier1_count > 0:
+            self.stdout.write(self.style.SUCCESS(f"   ⚡ [Kademe 1 Başarılı] {fed.ad}: {tier1_count} haber doğrudan HTTP ile çekildi."))
+            return
+        elif tier1_success and tier1_count == 0:
+            # Sayfa tarandı, yeni link bulunamadı veya site SPA (JS Render) gerektiriyor olabilir
+            self.stdout.write(f"   ℹ️ [Kademe 1] Yeni aday bulunamadı, Kademe 2 (Headless Tarayıcı) kontrol ediliyor...")
+
+        # =========================================================================
+        # KADEME 2 (TIER 2): Crawl4AI Headless Chromium Tarayıcı Fallback
+        # Sadece JS ile render olan veya HTTP isteği engellenen sitelerde devreye girer
+        # =========================================================================
+        self.stdout.write(f"   🖥️ [Kademe 2 Fallback] Crawl4AI Headless Tarayıcı Devrede: {fed.ad}")
         try:
             run_cfg = CrawlerRunConfig(
                 cache_mode=CacheMode.BYPASS,
                 page_timeout=30000,
                 delay_before_return_html=2.0
             )
-            # Timeout safeguard per federation (maximum 45s for homepage scan)
             result = await asyncio.wait_for(crawler.arun(url=fed.haberler_url, config=run_cfg), timeout=45)
             if not result.success or (getattr(result, 'status_code', None) and result.status_code >= 400):
-                self.stdout.write(self.style.WARNING(f"   ⚠️ Failed to crawl {fed.ad}: Status {getattr(result, 'status_code', 'Unknown')}"))
+                self.stdout.write(self.style.WARNING(f"   ⚠️ Kademe 2 de başarısız oldu {fed.ad}: Status {getattr(result, 'status_code', 'Unknown')}"))
                 return
 
             candidates = self.discover_news_links(result, fed)
-            self.stdout.write(f"   🎯 Discovered {len(candidates)} high-probability news links. Processing up to {limit}...")
+            self.stdout.write(f"   🎯 [Kademe 2] {len(candidates)} haber linki keşfedildi. İşleniyor...")
 
             added_count = 0
             tested_count = 0
@@ -282,12 +345,181 @@ class Command(BaseCommand):
                 if created:
                     added_count += 1
 
-            self.stdout.write(self.style.SUCCESS(f"   ✅ Finished {fed.ad}: {added_count} new high-quality articles ingested."))
+            self.stdout.write(self.style.SUCCESS(f"   ✅ [Kademe 2 Tamamlandı] {fed.ad}: {added_count} haber eklendi."))
 
         except asyncio.TimeoutError:
-            self.stdout.write(self.style.WARNING(f"   ⏱️ Scan timed out for {fed.ad}. Moving to next federation."))
+            self.stdout.write(self.style.WARNING(f"   ⏱️ Kademe 2 zaman aşımı: {fed.ad}. Bir sonraki federasyona geçiliyor."))
         except Exception as e:
-            self.stdout.write(self.style.ERROR(f"   ❌ Error crawling {fed.ad}: {e}"))
+            self.stdout.write(self.style.ERROR(f"   ❌ Kademe 2 Hatası {fed.ad}: {e}"))
+
+    def crawl_federation_tier1_http(self, fed, limit=3):
+        """
+        KADEME 1: Headless tarayıcı açmadan doğrudan requests + BeautifulSoup ile
+        haber listesini ve makaleleri 200 milisaniyede tarar.
+        """
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'tr-TR,tr;q=0.9,en-US;q=0.8,en;q=0.7',
+        }
+        try:
+            r = requests.get(fed.haberler_url, headers=headers, timeout=12, verify=False)
+            if r.status_code >= 400 or len(r.text) < 500:
+                return False, 0
+                
+            soup = BeautifulSoup(r.text, 'html.parser')
+            base_domain = urlparse(fed.ana_url).netloc.lower()
+            candidates = []
+            seen = set()
+            
+            for a in soup.find_all('a', href=True):
+                href = a['href'].strip()
+                txt = a.get_text(strip=True)
+                title_attr = a.get('title', '').strip()
+                if not href or href.startswith('#') or href.startswith('javascript:'):
+                    continue
+                full_url = urljoin(fed.ana_url, href)
+                parsed = urlparse(full_url)
+                if base_domain not in parsed.netloc.lower():
+                    continue
+                if full_url in seen:
+                    continue
+                    
+                clean_path = parsed.path.strip('/')
+                if not clean_path or clean_path in ['haberler', 'duyurular', 'news', 'category/genel']:
+                    continue
+                    
+                path_lower = parsed.path.lower()
+                if any(token in path_lower for token in BANNED_PATH_TOKENS):
+                    continue
+                if re.search(r'/20[0-2][0-5]/', path_lower):
+                    continue
+                if is_duplicate_article(full_url, txt):
+                    continue
+                    
+                slug_words = [w for w in clean_path.split('/')[-1].split('-') if len(w) > 1]
+                has_valid_text = len(txt) >= 15 and len(txt.split()) >= 3
+                has_valid_slug = len(slug_words) >= 3 or any(k in path_lower for k in ['haber', 'duyuru', 'icerik', 'detay', 'sampiyona', 'turnuva'])
+                
+                if not has_valid_text and not has_valid_slug:
+                    continue
+                    
+                best_title = txt if has_valid_text else (title_attr if len(title_attr) >= 10 else " ".join(slug_words).capitalize())
+                t_lower = best_title.lower()
+                if any(token in t_lower for token in BANNED_TITLE_TOKENS):
+                    continue
+                if any(str(py) in t_lower or f"/{py}/" in path_lower for py in range(2010, 2026)):
+                    continue
+                    
+                seen.add(full_url)
+                candidates.append({'url': full_url, 'title': best_title})
+                
+            if not candidates:
+                return True, 0
+                
+            added = 0
+            tested = 0
+            for item in candidates:
+                if added >= limit or tested >= 8:
+                    break
+                tested += 1
+                if self.process_article_tier1_http(fed, item):
+                    added += 1
+            return True, added
+            
+        except Exception as e:
+            logger.debug(f"Tier 1 HTTP scan error for {fed.ad}: {e}")
+            return False, 0
+
+    def process_article_tier1_http(self, fed, item):
+        """
+        KADEME 1 Makale İşleyici: Haberin asıl sayfasına hafif HTTP ile bağlanır,
+        metni trafilatura ile, görseli ise og:image/data-src ile çıkarıp filigranlar.
+        """
+        url = item['url']
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+        }
+        try:
+            r = requests.get(url, headers=headers, timeout=12, verify=False)
+            if r.status_code >= 400 or len(r.text) < 400:
+                return False
+                
+            raw_html = r.text
+            extracted_text = trafilatura.extract(raw_html, include_comments=False, include_tables=False)
+            metadata = trafilatura.extract_metadata(raw_html)
+            
+            # 7 günlük tazelik kuralı
+            article_date = timezone.now()
+            cutoff_dt = timezone.now() - timedelta(days=7)
+            
+            if metadata and metadata.date:
+                try:
+                    dt_str = str(metadata.date)[:10]
+                    parsed_dt = datetime.strptime(dt_str, "%Y-%m-%d").replace(tzinfo=dt_tz.utc)
+                    if parsed_dt.year < 2026 or parsed_dt < cutoff_dt:
+                        return False
+                    article_date = parsed_dt
+                except Exception:
+                    pass
+                    
+            title = (metadata.title if metadata and metadata.title and len(metadata.title) > 10 else item['title']).strip()
+            if is_duplicate_article(url, title):
+                return False
+            title_lower = title.lower()
+            if any(token in title_lower for token in BANNED_TITLE_TOKENS):
+                return False
+                
+            content = extracted_text.strip() if extracted_text and len(extracted_text.strip()) > 80 else ""
+            if not content:
+                soup = BeautifulSoup(raw_html, 'html.parser')
+                p_tags = soup.find_all('p')
+                content = " ".join([p.get_text(strip=True) for p in p_tags if len(p.get_text(strip=True)) > 20])
+                
+            if not content or len(content) < 60:
+                return False
+                
+            # Görsel Keşfi: og:image, twitter:image, data-src
+            from haberler.ai_news_engine import extract_article_image_direct
+            best_image = extract_article_image_direct(url)
+            
+            category = Kategori.objects.filter(federasyon_website=fed).first()
+            downloaded_img = None
+            if best_image:
+                try:
+                    from haberler.services.news_scraper import NewsScrapingService
+                    ns = NewsScrapingService()
+                    downloaded_img = ns.download_and_process_image_fit(best_image, title, target_size=(1200, 675))
+                except Exception as dl_err:
+                    logger.warning(f"Tier 1 image download error for {url}: {dl_err}")
+                    
+            pending = BekleyenHaber(
+                baslik=title,
+                ozet=content[:250] if content else title,
+                icerik=content or title,
+                kaynak_url=url,
+                kaynak_resim_url=best_image,
+                federasyon_website=fed,
+                kategori=category,
+                haber_tarihi=article_date
+            )
+            if downloaded_img:
+                pending.resim.save(downloaded_img.name, downloaded_img, save=False)
+            pending.save()
+            
+            # Otomatik Yapay Zeka Özgünleştirme & Puanlama
+            try:
+                import threading
+                from haberler.ai_news_engine import ozgunlestir_haber
+                threading.Thread(target=ozgunlestir_haber, args=(pending,), daemon=True).start()
+            except Exception:
+                pass
+                
+            self.stdout.write(self.style.SUCCESS(f"      ✨ [Tier 1] INGESTED (ID: {pending.id}): {title[:55]}... [Image: {'PHOTO' if downloaded_img else 'NONE'}]"))
+            return True
+        except Exception as e:
+            logger.debug(f"Tier 1 article process error {url}: {e}")
+            return False
 
     def discover_news_links(self, result, fed):
         """Intelligently detects real news article links from Crawl4AI link graph with strict filtering"""
@@ -332,7 +564,7 @@ class Command(BaseCommand):
                 continue
 
             # 3. Already Exists Check
-            if BekleyenHaber.objects.filter(kaynak_url=full_url).exists() or Haber.objects.filter(kaynak_url=full_url).exists():
+            if is_duplicate_article(full_url, text):
                 continue
 
             # 4. Text or URL Slug Check (Allows modern image cards with empty <a> text)
@@ -403,6 +635,9 @@ class Command(BaseCommand):
                     logger.debug(f"Metadata date parse error: {d_err}")
 
             title = (metadata.title if metadata and metadata.title and len(metadata.title) > 10 else item['title']).strip()
+            if is_duplicate_article(url, title):
+                self.stdout.write(f"      🛑 Rejecting duplicate article: {title[:45]}")
+                return False
             
             # Check Extracted Title Against Banned Tokens
             title_lower = title.lower()
