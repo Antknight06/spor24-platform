@@ -60,6 +60,67 @@ def clean_json_response(raw_text):
         
         return result
 
+BANNED_IMAGE_TOKENS = [
+    'logo', 'icon', 'banner', 'avatar', 'spacer', 'blank', 'pixel',
+    'resim_yok', 'resimyok', 'no_image', 'no-image', 'noimg',
+    'placeholder', 'default_image', 'default.jpg', 'default.png',
+    'yok.jpg', 'yok.png', 'gecici', 'dummy', 'flag'
+]
+
+def extract_article_image_direct(url):
+    """
+    Directly navigates to the news URL and extracts the real high-res article photo
+    using OpenGraph, Twitter card, CMS article container img tags and lazy-load attributes.
+    """
+    if not url:
+        return None
+    try:
+        from bs4 import BeautifulSoup
+        from urllib.parse import urljoin
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36'
+        }
+        r = requests.get(url, headers=headers, timeout=12, verify=False)
+        if r.status_code >= 400 or len(r.text) < 200:
+            return None
+        soup = BeautifulSoup(r.text, 'html.parser')
+        
+        # 1. OG Image (Standard high-res news photo)
+        og = soup.find('meta', property='og:image') or soup.find('meta', property='og:image:url')
+        if og and og.get('content'):
+            og_url = og['content'].strip()
+            if not any(k in og_url.lower() for k in BANNED_IMAGE_TOKENS) and not og_url.startswith('data:'):
+                return urljoin(url, og_url)
+                
+        # 2. Twitter Image
+        tw = soup.find('meta', attrs={'name': 'twitter:image'})
+        if tw and tw.get('content'):
+            tw_url = tw['content'].strip()
+            if not any(k in tw_url.lower() for k in BANNED_IMAGE_TOKENS) and not tw_url.startswith('data:'):
+                return urljoin(url, tw_url)
+                
+        # 3. Main article container search (WordPress / CMS post classes)
+        article_containers = soup.find_all(['article', 'div'], class_=lambda c: c and any(k in c.lower() for k in ['content', 'post', 'entry', 'detail', 'haber', 'single']))
+        search_targets = article_containers if article_containers else [soup]
+        
+        for container in search_targets:
+            for img in container.find_all('img'):
+                src = img.get('src') or img.get('data-src') or img.get('data-lazy-src') or img.get('data-original')
+                if not src:
+                    srcset = img.get('srcset') or img.get('data-srcset')
+                    if srcset:
+                        src = srcset.split(',')[0].strip().split()[0]
+                if src:
+                    src = urljoin(url, src.strip())
+                    srcl = src.lower()
+                    if any(srcl.endswith(ext) or ext in srcl for ext in ['.jpg', '.jpeg', '.png', '.webp']):
+                        if not any(k in srcl for k in BANNED_IMAGE_TOKENS) and not srcl.startswith('data:'):
+                            return src
+    except Exception as e:
+        logger.debug(f"Direct image extraction error for {url}: {e}")
+    return None
+
+
 def ozgunlestir_haber(bekleyen_haber, ton='standart'):
     """
     Bekleyen haberi Google Gemini modelleri ile özgünleştirir, 
@@ -104,9 +165,15 @@ KRİTİK EDİTORYAL KURALLAR:
 5. TEMİZ HTML: Asla markdown işaretleri (**, ##, ```) HTML içine karıştırılmamalı, doğrudan tertemiz HTML üretilmeli.
 6. KURUMSAL İMZA: Metnin en altına *Haber Kaynağı: [Federasyon] | Editoryal Düzenleme: SPOR24 Haber Merkezi* notu eklenmeli.
 7. SKORLAMA (1-100):
-   - 75-100 (Yüksek Değer): Uluslararası şampiyona, olimpiyat, dünya kupası elemesi, madalya, milli takım.
-   - 50-74 (Orta Değer): Ulusal lig sonuçları, gelişim kampları, yerel turnuvalar.
+   - 75-100 (Yüksek Değer): GÜNCEL (son 7 gün içinde gerçekleşmiş) uluslararası şampiyona, olimpiyat, dünya kupası elemesi, madalya, milli takım.
+   - 50-74 (Orta Değer): GÜNCEL ulusal lig sonuçları, gelişim kampları, yerel turnuvalar.
    - 0-49 (Düşük Değer): Bürokratik kararlar, hakem vize yenileme, vefat/başsağlığı, genel kurul ilanları, ihale duyuruları.
+8. TARİH VE TAZELİK KURALI (EN KRİTİK KURAL - ASLA ÇİĞNENEMEZ):
+   Bugünün tarihi: {timezone.now().strftime('%d.%m.%Y')} (Ekim 2026).
+   SPOR24.NET canlı bir haber portalıdır; bayat ve eski haberleri ASLA manşete taşımaz!
+   Eğer haber bülteninde geçen müsabaka, turnuva veya etkinlik tarihi son 7 günden daha eskiyse (örneğin Ağustos 2026, Temmuz 2026, Eylül başı/ortası veya 2025, 2024 gibi eski yıllar):
+   - Ne kadar büyük bir turnuva veya madalya olursa olsun, 'haber_degeri_skoru'nu KESİNLİKLE 10-25 puan aralığında (ÇOK DÜŞÜK / BAYAT HABER) ver! Asla 50'nin üstünde verme!
+   - 'ai_analiz' kısmına mutlaka: '⚠️ DİKKAT: Etkinlik tarihi son 7 günün dışındadır (Bayat haber).' notunu düş.
 """
 
     fed_ad = bekleyen_haber.federasyon_website.ad if bekleyen_haber.federasyon_website else "Genel Spor"
@@ -160,6 +227,30 @@ Ham İçerik: {bekleyen_haber.icerik}
                     'ozgun_baslik', 'ozgun_ozet', 'ozgun_icerik', 
                     'haber_degeri_skoru', 'ai_analiz', 'ai_durum'
                 ])
+
+                # 9. Kenan Bey'in Kuralı: Haberi özgünleştirirken sağ üst köşeye %15 boyut, %50 opaklık SPOR24.NET filigranı basılması
+                try:
+                    from .services.watermark import watermark_news_file
+                    from .services.news_scraper import NewsScrapingService
+                    
+                    # Eğer haberin görseli yoksa kaynak linkinden anında çek ve hazırla
+                    if (not bekleyen_haber.resim or not hasattr(bekleyen_haber.resim, 'path') or not bekleyen_haber.resim.name) and bekleyen_haber.kaynak_url:
+                        img_url = bekleyen_haber.kaynak_resim_url
+                        if not img_url:
+                            img_url = extract_article_image_direct(bekleyen_haber.kaynak_url)
+                        if img_url:
+                            ns = NewsScrapingService()
+                            dl = ns.download_and_process_image_fit(img_url, bekleyen_haber.ozgun_baslik or bekleyen_haber.baslik, target_size=(1200, 675))
+                            if dl:
+                                bekleyen_haber.resim.save(dl.name, dl, save=False)
+                                bekleyen_haber.kaynak_resim_url = img_url
+                                bekleyen_haber.save(update_fields=['resim', 'kaynak_resim_url'])
+                    
+                    # Eğer görsel mevcutsa Kenan Bey'in istediği %15 boyut / %50 opaklık filigranını garantiye al
+                    if bekleyen_haber.resim and hasattr(bekleyen_haber.resim, 'path') and os.path.exists(bekleyen_haber.resim.path):
+                        watermark_news_file(bekleyen_haber.resim.path)
+                except Exception as img_wm_err:
+                    logger.warning(f"AI ozgunlestirme gorsel/watermark islemi sirasinda hata: {img_wm_err}")
 
                 logger.info(f"BekleyenHaber #{bekleyen_haber.id} [{model_name}] ile başarıyla özgünleştirildi (Skor: {bekleyen_haber.haber_degeri_skoru})")
                 return True, parsed

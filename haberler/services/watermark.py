@@ -3,19 +3,26 @@ import os
 import logging
 from PIL import Image, ImageFilter
 
+from django.conf import settings
+
 logger = logging.getLogger(__name__)
 
+# Primary production path with local fallback
 WATERMARK_PATH = '/var/www/ant_news_full/static/img/spor24_watermark.png'
+if not os.path.exists(WATERMARK_PATH):
+    local_candidate = os.path.join(settings.BASE_DIR, 'static', 'img', 'spor24_watermark.png')
+    if os.path.exists(local_candidate):
+        WATERMARK_PATH = local_candidate
 
-def apply_spor24_watermark(image: Image.Image, position: str = 'top-right', size_ratio: float = 0.125, opacity: float = 0.60) -> Image.Image:
+def apply_spor24_watermark(image: Image.Image, position: str = 'top-right', size_ratio: float = 0.15, opacity: float = 0.50) -> Image.Image:
     """
     Applies the official SPOR24.net circular badge watermark onto a news image.
-    Opacity is set to 60% (40% translucent / silik) by default to avoid clashing with sports photography.
+    Kenan Bey's standard: Top-right corner, 15% width of image, 50% opacity.
     
     :param image: PIL Image in RGB or RGBA mode.
     :param position: 'top-right' (default) or 'bottom-right'.
-    :param size_ratio: Ratio of image width that watermark diameter should occupy (default ~12.5%).
-    :param opacity: Opacity multiplier (0.60 = 60% visible, 40% translucent).
+    :param size_ratio: Ratio of image width that watermark diameter should occupy (default 15%).
+    :param opacity: Opacity multiplier (0.50 = 50% visible, 50% translucent).
     :return: Watermarked PIL Image in RGB format.
     """
     try:
@@ -71,3 +78,20 @@ def apply_spor24_watermark(image: Image.Image, position: str = 'top-right', size
     except Exception as e:
         logger.error(f"Error applying spor24 watermark: {e}")
         return image
+
+def watermark_news_file(file_path: str) -> bool:
+    """
+    Directly opens an existing news image file on disk, stamps the Spor24.net watermark
+    (top-right, 15% width, 50% opacity), and overwrites it.
+    """
+    try:
+        if not os.path.exists(file_path):
+            return False
+        with Image.open(file_path) as img:
+            watermarked = apply_spor24_watermark(img)
+            watermarked.save(file_path, format='JPEG', quality=88, optimize=True)
+        return True
+    except Exception as e:
+        logger.error(f"Error watermarking news file {file_path}: {e}")
+        return False
+

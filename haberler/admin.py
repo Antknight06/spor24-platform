@@ -1065,7 +1065,28 @@ class BekleyenHaberAdmin(ModelAdmin):
             self.message_user(request, f"Yapay zeka hatası: {res}", level=messages.ERROR)
             
         return redirect('admin:haberler_bekleyenhaber_studyo', object_id=bekleyen.id)
-    list_display = ['studyo_link', 'skor_badge', 'baslik_temiz', 'federasyon_website', 'kategori', 'olusturma_tarihi', 'onay_durumu']
+
+    def gorsel_durumu(self, obj):
+        if obj.resim:
+            try:
+                url = obj.resim.url
+                return format_html(
+                    '<a href="{}" target="_blank" style="display:inline-block; position:relative;" title="Görseli Büyüt">'
+                    '<img src="{}" style="width:48px; height:32px; object-fit:cover; border-radius:4px; border:1px solid #cbd5e1; box-shadow:0 1px 2px rgba(0,0,0,0.1);">'
+                    '<span style="position:absolute; bottom:-2px; right:-2px; width:8px; height:8px; background:#10b981; border:1.5px solid #fff; border-radius:50%;"></span>'
+                    '</a>',
+                    url, url
+                )
+            except Exception:
+                pass
+        return format_html(
+            '<span style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; padding:3px 7px; border-radius:6px; font-weight:700; font-size:11px; white-space:nowrap; display:inline-flex; align-items:center; gap:3px;">'
+            '❌ Görsel Yok'
+            '</span>'
+        )
+    gorsel_durumu.short_description = "Görsel"
+
+    list_display = ['studyo_link', 'skor_badge', 'gorsel_durumu', 'baslik_temiz', 'federasyon_website', 'kategori', 'olusturma_tarihi', 'onay_durumu']
     list_filter = [HaberDurumuFilter, SkorAraligiFilter, 'federasyon_website', 'kategori', 'olusturma_tarihi']
     search_fields = ['baslik', 'icerik', 'kaynak_url']
     readonly_fields = ['canli_kart_onizleme', 'olusturma_tarihi', 'onay_tarihi', 'red_tarihi', 'onaylayan', 'gorsel_onizleme', 'kaynak_url']
